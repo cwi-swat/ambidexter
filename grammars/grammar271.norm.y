@@ -1,0 +1,6 @@
+
+// test unfoldStronglyConnectedComponents()
+
+%% 
+
+S : 'a' ;

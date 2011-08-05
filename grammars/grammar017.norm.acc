@@ -1,0 +1,46 @@
+%token CC99, CC98, CC97, CC116, CC105, CC115, CC104, CC102, CC100;
+
+%nodefault
+
+START :  S
+;
+
+S1 :  C S
+;
+
+V4 :  CC105
+;
+
+V3 :  CC97
+|  CC98
+;
+
+V2 :  V4 S1
+|  CC115
+;
+
+V1 :  V3 N2
+;
+
+N4 :  CC99
+|  CC100
+;
+
+N3 :  CC102
+;
+
+N2 :  D N4
+;
+
+D :  CC116
+;
+
+S :  N1 V1
+|  N2 V2
+;
+
+N1 :  D N3 S1
+;
+
+C :  CC104
+;

@@ -1,0 +1,10 @@
+START : S ;
+
+E : E CC43 E ;
+ : CC97 ;
+
+S : E ;
+
+/* terminals */
+CC43 : "CC43" ;
+CC97 : "CC97" ;

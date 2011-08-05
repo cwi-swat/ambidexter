@@ -1,0 +1,447 @@
+goal : compilation_unit ;
+
+method_header : type Term_method_declarator Term_method_declarator Term_method_declarator ;
+ : Term_modifiers VOID_TK Term_method_declarator Term_method_declarator Term_method_declarator ;
+ : VOID_TK Term_method_declarator Term_method_declarator Term_method_declarator ;
+ : Term_modifiers type Term_method_declarator Term_method_declarator Term_method_declarator ;
+
+pre_increment_expression : INCR_TK unary_expression ;
+
+array_initializer : OCB_TK variable_initializers C_TK CCB_TK ;
+ : OCB_TK variable_initializers CCB_TK ;
+
+finally : FINALLY_TK block ;
+
+assignment : left_hand_side assignment_operator assignment_expression ;
+
+assignment_operator : ASSIGN_TK ;
+
+expression : assignment_expression ;
+
+left_hand_side : array_access ;
+ : name ;
+ : field_access ;
+
+postfix_expression : post_decrement_expression ;
+ : post_increment_expression ;
+ : name ;
+ : primary ;
+
+catches : catch_clause ;
+ : catches catch_clause ;
+
+abstract_method_declaration : method_header SC_TK ;
+
+statement_expression : post_decrement_expression ;
+ : post_increment_expression ;
+ : pre_decrement_expression ;
+ : pre_increment_expression ;
+ : class_instance_creation_expression ;
+ : assignment ;
+ : method_invocation ;
+
+assignment_expression : conditional_expression ;
+ : assignment ;
+
+constant_declaration : field_declaration ;
+
+variable_initializer : array_initializer ;
+ : expression ;
+
+label_decl : Term_identifier REL_CL_TK ;
+
+interface_member_declaration : abstract_method_declaration ;
+ : interface_declaration ;
+ : constant_declaration ;
+ : class_declaration ;
+
+variable_declarator_id : Term_identifier ;
+
+conditional_expression : conditional_or_expression REL_QM_TK expression REL_CL_TK conditional_expression ;
+ : conditional_or_expression ;
+
+interface_member_declarations : interface_member_declarations interface_member_declaration ;
+ : interface_member_declaration ;
+
+assert_statement : ASSERT_TK expression SC_TK ;
+ : ASSERT_TK expression REL_CL_TK expression SC_TK ;
+
+simple_name : Term_identifier ;
+
+variable_declarator : variable_declarator_id ;
+ : variable_declarator_id ASSIGN_TK variable_initializer ;
+
+conditional_or_expression : conditional_or_expression BOOL_OR_TK conditional_and_expression ;
+ : conditional_and_expression ;
+
+try_statement : TRY_TK block catches finally ;
+ : TRY_TK block finally ;
+ : TRY_TK block catches ;
+
+variable_declarators : variable_declarators C_TK variable_declarator ;
+ : variable_declarator ;
+
+throw_statement : THROW_TK expression SC_TK ;
+
+conditional_and_expression : inclusive_or_expression ;
+ : conditional_and_expression BOOL_AND_TK inclusive_or_expression ;
+
+synchronized_statement : Term_synchronized OP_TK expression CP_TK block ;
+
+inclusive_or_expression : exclusive_or_expression ;
+ : inclusive_or_expression OR_TK exclusive_or_expression ;
+
+return_statement : RETURN_TK expression SC_TK ;
+
+name : simple_name ;
+
+method_declaration : method_header method_body ;
+
+interface_body : OCB_TK interface_member_declarations CCB_TK ;
+
+exclusive_or_expression : and_expression ;
+ : exclusive_or_expression XOR_TK and_expression ;
+
+field_declaration : type variable_declarators SC_TK ;
+ : Term_modifiers type variable_declarators SC_TK ;
+
+dim_expr : OSB_TK expression CSB_TK ;
+
+and_expression : and_expression AND_TK equality_expression ;
+ : equality_expression ;
+
+block : block_begin block_statements block_end ;
+ : block_begin block_end ;
+
+do_statement : Term_do_statement_begin statement WHILE_TK OP_TK expression CP_TK SC_TK ;
+
+statement_expression_list : statement_expression_list C_TK statement_expression ;
+ : statement_expression ;
+
+switch_statement : switch_expression switch_block ;
+
+constructor_declaration : Term_constructor_header Term_constructor_header Term_constructor_header constructor_body ;
+
+argument_list : argument_list C_TK expression ;
+ : expression ;
+
+expression_statement : statement_expression SC_TK ;
+
+static_initializer : Term_static_ block ;
+
+for_init : local_variable_declaration ;
+ : statement_expression_list ;
+
+equality_expression : equality_expression EQ_TK relational_expression ;
+ : equality_expression NEQ_TK relational_expression ;
+ : relational_expression ;
+
+class_member_declaration : method_declaration ;
+ : field_declaration ;
+ : empty_statement ;
+ : interface_declaration ;
+ : class_declaration ;
+
+dim_exprs : dim_expr ;
+ : dim_exprs dim_expr ;
+
+block_end : CCB_TK ;
+
+primitive_type : VOID_TK ;
+
+for_statement_nsi : for_begin SC_TK SC_TK for_update CP_TK statement_nsi ;
+ : for_begin SC_TK expression SC_TK for_update CP_TK statement_nsi ;
+
+type : primitive_type ;
+
+class_body_declaration : block ;
+ : constructor_declaration ;
+ : static_initializer ;
+ : class_member_declaration ;
+
+block_statements : block_statements block_statement ;
+ : block_statement ;
+
+while_statement_nsi : while_expression statement_nsi ;
+
+class_body_declarations : class_body_declaration ;
+ : class_body_declarations class_body_declaration ;
+
+if_then_else_statement_nsi : IF_TK OP_TK expression CP_TK statement_nsi ELSE_TK statement_nsi ;
+
+explicit_constructor_invocation : name DOT_TK SUPER_TK OP_TK argument_list CP_TK SC_TK ;
+ : Term_this_or_super OP_TK argument_list CP_TK SC_TK ;
+
+for_update : statement_expression_list ;
+
+relational_expression : relational_expression GT_TK shift_expression ;
+ : relational_expression GTE_TK shift_expression ;
+ : relational_expression LT_TK shift_expression ;
+ : relational_expression INSTANCEOF_TK Term_reference_type ;
+ : relational_expression LTE_TK shift_expression ;
+ : shift_expression ;
+
+for_begin : Term_for_header Term_for_header for_init ;
+
+constructor_block_end : block_end ;
+
+labeled_statement_nsi : label_decl statement_nsi ;
+
+block_begin : OCB_TK ;
+
+statement_nsi : statement_without_trailing_substatement ;
+ : for_statement_nsi ;
+ : while_statement_nsi ;
+ : if_then_else_statement_nsi ;
+ : labeled_statement_nsi ;
+
+for_statement : for_begin SC_TK SC_TK for_update CP_TK statement ;
+ : for_begin SC_TK expression SC_TK for_update CP_TK statement ;
+
+shift_expression : shift_expression ZRS_TK additive_expression ;
+ : additive_expression ;
+ : shift_expression LS_TK additive_expression ;
+ : shift_expression SRS_TK additive_expression ;
+
+compilation_unit : type_declarations ;
+ : Term_package_declaration Term_package_declaration Term_package_declaration Term_import_declarations Term_import_declarations Term_import_declarations type_declarations ;
+ : Term_package_declaration Term_package_declaration Term_package_declaration type_declarations ;
+ : Term_import_declarations Term_import_declarations Term_import_declarations type_declarations ;
+
+while_statement : while_expression statement ;
+
+something_dot_new : primary DOT_TK NEW_TK ;
+
+while_expression : WHILE_TK OP_TK expression CP_TK ;
+
+if_then_else_statement : IF_TK OP_TK expression CP_TK statement_nsi ELSE_TK statement ;
+
+anonymous_class_creation : NEW_TK Term_class_type OP_TK CP_TK class_body ;
+ : NEW_TK Term_class_type OP_TK argument_list CP_TK class_body ;
+
+constructor_body : block_begin explicit_constructor_invocation block_statements constructor_block_end ;
+ : block_begin explicit_constructor_invocation constructor_block_end ;
+ : block_begin block_statements constructor_block_end ;
+
+additive_expression : additive_expression PLUS_TK multiplicative_expression ;
+ : additive_expression MINUS_TK multiplicative_expression ;
+ : multiplicative_expression ;
+
+class_body : OCB_TK class_body_declarations CCB_TK ;
+ : OCB_TK CCB_TK ;
+
+constant_expression : expression ;
+
+if_then_statement : IF_TK OP_TK expression CP_TK statement ;
+
+labeled_statement : label_decl statement ;
+
+switch_label : CASE_TK constant_expression REL_CL_TK ;
+
+statement_without_trailing_substatement : try_statement ;
+ : empty_statement ;
+ : block ;
+ : do_statement ;
+ : throw_statement ;
+ : switch_statement ;
+ : synchronized_statement ;
+ : expression_statement ;
+ : return_statement ;
+ : assert_statement ;
+
+multiplicative_expression : multiplicative_expression MULT_TK unary_expression ;
+ : multiplicative_expression DIV_TK unary_expression ;
+ : multiplicative_expression REM_TK unary_expression ;
+ : unary_expression ;
+
+empty_statement : SC_TK ;
+
+switch_block_statement_group : switch_labels block_statements ;
+
+local_variable_declaration : type variable_declarators ;
+ : final type variable_declarators ;
+
+interface_declaration : Term_modifiers INTERFACE_TK Term_identifier Term_extends_interfaces Term_extends_interfaces interface_body ;
+ : Term_modifiers INTERFACE_TK Term_identifier interface_body ;
+ : INTERFACE_TK Term_identifier interface_body ;
+ : INTERFACE_TK Term_identifier Term_extends_interfaces Term_extends_interfaces interface_body ;
+
+type_literals : primitive_type DOT_TK CLASS_TK ;
+ : VOID_TK DOT_TK CLASS_TK ;
+
+class_declaration : CLASS_TK Term_identifier class_body ;
+ : Term_modifiers CLASS_TK Term_identifier class_body ;
+
+switch_block_statement_groups : switch_block_statement_groups switch_block_statement_group ;
+ : switch_block_statement_group ;
+
+array_access : primary_no_new_array OSB_TK expression CSB_TK ;
+ : name OSB_TK expression CSB_TK ;
+
+statement : labeled_statement ;
+ : statement_without_trailing_substatement ;
+ : for_statement ;
+ : while_statement ;
+ : if_then_else_statement ;
+ : if_then_statement ;
+
+cast_expression : OP_TK name Term_dims Term_dims CP_TK unary_expression_not_plus_minus ;
+ : OP_TK expression CP_TK unary_expression_not_plus_minus ;
+ : OP_TK primitive_type CP_TK unary_expression ;
+ : OP_TK primitive_type Term_dims Term_dims CP_TK unary_expression ;
+
+switch_labels : switch_label ;
+ : switch_labels switch_label ;
+
+local_variable_declaration_statement : local_variable_declaration SC_TK ;
+
+field_access : primary DOT_TK Term_identifier ;
+
+final : Term_modifiers ;
+
+block_statement : class_declaration ;
+ : statement ;
+ : local_variable_declaration_statement ;
+
+switch_block : OCB_TK switch_block_statement_groups CCB_TK ;
+ : OCB_TK CCB_TK ;
+ : OCB_TK switch_labels CCB_TK ;
+ : OCB_TK switch_block_statement_groups switch_labels CCB_TK ;
+
+switch_expression : SWITCH_TK OP_TK expression CP_TK ;
+
+array_creation_expression : NEW_TK primitive_type dim_exprs ;
+ : NEW_TK primitive_type dim_exprs Term_dims Term_dims ;
+ : NEW_TK primitive_type Term_dims Term_dims array_initializer ;
+ : NEW_TK Term_class_or_interface_type dim_exprs Term_dims Term_dims ;
+ : NEW_TK Term_class_or_interface_type Term_dims Term_dims array_initializer ;
+ : NEW_TK Term_class_or_interface_type dim_exprs ;
+
+type_declaration : empty_statement ;
+ : interface_declaration ;
+ : class_declaration ;
+
+primary_no_new_array : class_instance_creation_expression ;
+ : field_access ;
+ : method_invocation ;
+ : OP_TK expression CP_TK ;
+ : type_literals ;
+ : array_access ;
+
+unary_expression_not_plus_minus : postfix_expression ;
+ : NOT_TK unary_expression ;
+ : NEG_TK unary_expression ;
+ : cast_expression ;
+
+primary : array_creation_expression ;
+ : primary_no_new_array ;
+
+class_instance_creation_expression : anonymous_class_creation ;
+ : something_dot_new Term_identifier OP_TK argument_list CP_TK class_body ;
+ : something_dot_new Term_identifier OP_TK CP_TK ;
+ : something_dot_new Term_identifier OP_TK argument_list CP_TK ;
+ : something_dot_new Term_identifier OP_TK CP_TK class_body ;
+ : NEW_TK Term_class_type OP_TK argument_list CP_TK ;
+
+unary_expression : trap_overflow_corner_case ;
+ : MINUS_TK trap_overflow_corner_case ;
+
+method_invocation : SUPER_TK DOT_TK Term_identifier OP_TK argument_list CP_TK ;
+ : name OP_TK argument_list CP_TK ;
+ : primary DOT_TK Term_identifier OP_TK CP_TK ;
+ : primary DOT_TK Term_identifier OP_TK argument_list CP_TK ;
+
+post_decrement_expression : postfix_expression DECR_TK ;
+
+variable_initializers : variable_initializer ;
+ : variable_initializers C_TK variable_initializer ;
+
+trap_overflow_corner_case : pre_decrement_expression ;
+ : PLUS_TK unary_expression ;
+ : unary_expression_not_plus_minus ;
+ : pre_increment_expression ;
+
+post_increment_expression : postfix_expression INCR_TK ;
+
+type_declarations : type_declarations type_declaration ;
+ : type_declaration ;
+
+method_body : SC_TK ;
+ : block ;
+
+pre_decrement_expression : DECR_TK unary_expression ;
+
+catch_clause : Term_catch_clause_parameter Term_catch_clause_parameter Term_catch_clause_parameter Term_catch_clause_parameter Term_catch_clause_parameter block ;
+
+/* terminals */
+LTE_TK : "LTE_TK" ;
+LT_TK : "LT_TK" ;
+Term_class_type : "Term_class_type" ;
+GTE_TK : "GTE_TK" ;
+GT_TK : "GT_TK" ;
+NEQ_TK : "NEQ_TK" ;
+EQ_TK : "EQ_TK" ;
+BOOL_OR_TK : "BOOL_OR_TK" ;
+BOOL_AND_TK : "BOOL_AND_TK" ;
+OR_TK : "OR_TK" ;
+XOR_TK : "XOR_TK" ;
+AND_TK : "AND_TK" ;
+ZRS_TK : "ZRS_TK" ;
+SRS_TK : "SRS_TK" ;
+LS_TK : "LS_TK" ;
+Term_dims : "Term_dims" ;
+REM_TK : "REM_TK" ;
+DIV_TK : "DIV_TK" ;
+Term_constructor_header : "Term_constructor_header" ;
+MULT_TK : "MULT_TK" ;
+MINUS_TK : "MINUS_TK" ;
+PLUS_TK : "PLUS_TK" ;
+Term_extends_interfaces : "Term_extends_interfaces" ;
+Term_this_or_super : "Term_this_or_super" ;
+Term_interfaces : "Term_interfaces" ;
+Term_super : "Term_super" ;
+Term_identifier : "Term_identifier" ;
+Term_class_or_interface_type : "Term_class_or_interface_type" ;
+Term_modifiers : "Term_modifiers" ;
+Term_for_header : "Term_for_header" ;
+DOT_TK : "DOT_TK" ;
+C_TK : "C_TK" ;
+SC_TK : "SC_TK" ;
+CSB_TK : "CSB_TK" ;
+OSB_TK : "OSB_TK" ;
+CCB_TK : "CCB_TK" ;
+Term_synchronized : "Term_synchronized" ;
+OCB_TK : "OCB_TK" ;
+CP_TK : "CP_TK" ;
+OP_TK : "OP_TK" ;
+ASSIGN_TK : "ASSIGN_TK" ;
+Term_import_declarations : "Term_import_declarations" ;
+NEG_TK : "NEG_TK" ;
+NOT_TK : "NOT_TK" ;
+REL_CL_TK : "REL_CL_TK" ;
+REL_QM_TK : "REL_QM_TK" ;
+Term_throws : "Term_throws" ;
+Term_method_declarator : "Term_method_declarator" ;
+ASSERT_TK : "ASSERT_TK" ;
+NEW_TK : "NEW_TK" ;
+Term_catch_clause_parameter : "Term_catch_clause_parameter" ;
+TRY_TK : "TRY_TK" ;
+SWITCH_TK : "SWITCH_TK" ;
+CLASS_TK : "CLASS_TK" ;
+Term_package_declaration : "Term_package_declaration" ;
+WHILE_TK : "WHILE_TK" ;
+SUPER_TK : "SUPER_TK" ;
+FINALLY_TK : "FINALLY_TK" ;
+CASE_TK : "CASE_TK" ;
+INTERFACE_TK : "INTERFACE_TK" ;
+VOID_TK : "VOID_TK" ;
+RETURN_TK : "RETURN_TK" ;
+Term_static_ : "Term_static_" ;
+INSTANCEOF_TK : "INSTANCEOF_TK" ;
+ELSE_TK : "ELSE_TK" ;
+Term_do_statement_begin : "Term_do_statement_begin" ;
+Term_reference_type : "Term_reference_type" ;
+THROW_TK : "THROW_TK" ;
+IF_TK : "IF_TK" ;
+INCR_TK : "INCR_TK" ;
+DECR_TK : "DECR_TK" ;

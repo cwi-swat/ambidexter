@@ -1,0 +1,14 @@
+START : S ;
+
+L : Ti ;
+ : Ts R ;
+
+S : R ;
+ : L Te R ;
+
+R : L ;
+
+/* terminals */
+Ts : "Ts" ;
+Ti : "Ti" ;
+Te : "Te" ;

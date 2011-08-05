@@ -1,0 +1,29 @@
+module ExampleComments
+exports
+
+context-free start-symbols
+  Modifiers
+
+context-free syntax
+  Modifier* -> Modifiers
+  "m" -> Modifier
+
+lexical syntax
+  [\ \t\12\r\n] -> LAYOUT
+  Comment -> LAYOUT
+
+context-free restrictions
+  LAYOUT? -/- [\ \t\12\n\r]
+  LAYOUT? -/- [\/].[\*]
+  LAYOUT? -/- [\/].[\/]
+
+lexical syntax
+  "/*" CommentPart* "*/" -> Comment
+  CommentChars -> CommentPart
+  Asterisk -> CommentPart
+  ~[\*\\]+ -> CommentChars
+  "*" -> Asterisk
+
+lexical restrictions
+  Asterisk     -/- [\/]
+  CommentChars -/- ~[\*\\]

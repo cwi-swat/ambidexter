@@ -1,0 +1,32 @@
+%token CC41, CC40, CC46;
+
+%nodefault
+
+START :  P
+;
+
+P :  CC40 P CC41
+|  CC40 O CC41
+;
+
+O :  L P
+|  P R
+|  S P S
+|  H
+;
+
+L :  CC46 L
+|  CC46
+;
+
+H :  CC46 H
+|  CC46 CC46 CC46
+;
+
+S :  CC46 S
+|  CC46
+;
+
+R :  CC46 R
+|  CC46
+;

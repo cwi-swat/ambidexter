@@ -1,0 +1,6 @@
+module ECMAScript
+imports
+  languages/ecmascript3/Main
+  
+exports
+  context-free start-symbols Program

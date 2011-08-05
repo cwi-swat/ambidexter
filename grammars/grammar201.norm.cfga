@@ -1,0 +1,12 @@
+START : S ;
+
+S : B ;
+ : A ;
+
+B : Ta Tb ;
+
+A : Ta Tb ;
+
+/* terminals */
+Tb : "Tb" ;
+Ta : "Ta" ;

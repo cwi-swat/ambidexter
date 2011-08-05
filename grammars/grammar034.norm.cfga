@@ -1,0 +1,17 @@
+START : S ;
+
+H : CC104 H ;
+ : CC104 ;
+ : CC104 CC116 ;
+
+S : CC116 ;
+ : CC101 ;
+ : CC104 CC101 ;
+ : CC101 H ;
+ : CC101 H S ;
+ : H ;
+
+/* terminals */
+CC116 : "CC116" ;
+CC104 : "CC104" ;
+CC101 : "CC101" ;

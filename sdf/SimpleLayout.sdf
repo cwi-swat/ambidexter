@@ -1,0 +1,15 @@
+module SimpleLayout
+
+exports
+
+context-free start-symbols
+S
+
+context-free syntax
+
+ -> S
+
+lexical syntax
+
+[\ ]* -> LAYOUT
+

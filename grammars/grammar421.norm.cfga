@@ -1,0 +1,10 @@
+START : S ;
+
+S : C C ;
+
+C : Td ;
+ : Tc C ;
+
+/* terminals */
+Td : "Td" ;
+Tc : "Tc" ;

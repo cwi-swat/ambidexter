@@ -1,0 +1,3 @@
+#!/bin/sh
+
+java -Xss8m -Xmx1500m -cp bin:lib/aterm-java.jar:lib/shared-objects.jar:lib/jjtraveler.jar nl.cwi.sen1.AmbiDexter.Main $*

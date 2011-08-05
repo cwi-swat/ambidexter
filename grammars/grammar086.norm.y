@@ -1,0 +1,41 @@
+%token CC97
+%token CC49
+%token CC98
+%token CC48
+%token CC99
+
+%%
+
+START : S 
+;
+
+S : B
+|
+A 
+;
+
+A : CC49 CC99
+|
+CC48 CC98
+|
+CC49 CC48 CC48 CC97
+|
+CC49 A CC99
+|
+CC48 A CC98
+|
+CC49 CC48 CC48 A CC97 
+;
+
+B : CC48 CC99
+|
+CC49 CC48 CC48 CC98
+|
+CC49 CC97
+|
+CC48 B CC99
+|
+CC49 CC48 CC48 B CC98
+|
+CC49 B CC97 
+;

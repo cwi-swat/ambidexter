@@ -1,0 +1,32 @@
+START : S ;
+
+P : CC102 ;
+ : CC112 ;
+
+N : CC97 ;
+ : CC104 ;
+ : P J N ;
+ : P N ;
+
+J : CC98 ;
+ : CC103 ;
+ : P J ;
+
+V : CC102 ;
+ : CC101 ;
+
+D : CC114 ;
+ : CC118 ;
+
+S : N V N D J ;
+
+/* terminals */
+CC98 : "CC98" ;
+CC97 : "CC97" ;
+CC118 : "CC118" ;
+CC104 : "CC104" ;
+CC114 : "CC114" ;
+CC103 : "CC103" ;
+CC102 : "CC102" ;
+CC101 : "CC101" ;
+CC112 : "CC112" ;

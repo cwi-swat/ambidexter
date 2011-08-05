@@ -1,0 +1,19 @@
+y_sql : y_create ;
+
+y_columndef : NAME INT ;
+ : NAME INT CC44 NAME INT ;
+
+y_create : CREATE TTABLE Term_y_table CC40 y_columndefs CC41 ;
+
+y_columndefs : y_columndef ;
+ : y_columndefs CC44 y_columndef ;
+
+/* terminals */
+INT : "INT" ;
+Term_y_table : "Term_y_table" ;
+CREATE : "CREATE" ;
+TTABLE : "TTABLE" ;
+CC44 : "," ;
+CC41 : ")" ;
+NAME : "NAME" ;
+CC40 : "(" ;

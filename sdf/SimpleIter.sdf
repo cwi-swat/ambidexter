@@ -1,0 +1,10 @@
+module SimpleIter
+
+exports
+
+context-free start-symbols
+S
+
+lexical syntax
+[\ ] -> LAYOUT
+[a]+ -> S

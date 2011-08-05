@@ -1,0 +1,29 @@
+module AllIter
+
+exports
+
+context-free start-symbols
+S
+
+context-free syntax
+
+A+ -> S
+A* -> S
+{A ","}* -> S
+{A ","}+ -> S
+{A B}* -> S
+{A B}+ -> S
+
+"A" -> A
+"B" -> B
+
+
+
+
+lexical syntax
+[\ ] -> LAYOUT
+[a]+ -> S
+[a]* -> S
+{[a] [b]}* -> S
+{[a] [b]}+ -> S
+

@@ -1,0 +1,21 @@
+%token Term_y_columns, WHERE, Term_y_boolean, FROM, SELECT, OR, BY, Term_y_order, ORDER, Term_y_table;
+
+%nodefault
+
+y_sql :  y_select
+;
+
+y_condition :  y_sub_condition
+;
+
+y_sub_condition2 :  Term_y_boolean Term_y_boolean Term_y_boolean ORDER BY Term_y_order
+|  Term_y_boolean Term_y_boolean Term_y_boolean
+;
+
+y_sub_condition :  y_sub_condition OR y_sub_condition2
+|  y_sub_condition2
+;
+
+y_select :  SELECT Term_y_columns FROM Term_y_table WHERE y_condition
+|  SELECT Term_y_columns FROM Term_y_table WHERE y_condition ORDER BY Term_y_order
+;

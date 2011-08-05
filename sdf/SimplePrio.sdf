@@ -1,0 +1,20 @@
+module SimplePrio
+
+exports
+
+context-free start-symbols
+E
+
+context-free syntax
+
+"1" -> E
+
+context-free priorities
+
+E "*" E -> E {left} 
+>
+E "+" E -> E {left}
+
+lexical syntax
+
+[\ ] -> LAYOUT

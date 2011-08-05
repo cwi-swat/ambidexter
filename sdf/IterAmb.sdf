@@ -1,0 +1,13 @@
+module IterAmb
+
+exports
+
+context-free start-symbols
+S
+
+context-free syntax
+
+A+ -> S
+A* -> S
+
+"A" -> A

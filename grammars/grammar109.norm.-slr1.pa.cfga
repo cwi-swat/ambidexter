@@ -1,0 +1,34 @@
+y_sql : y_select ;
+ : y_delete ;
+ : y_update ;
+
+y_condition : y_sub_condition ;
+
+y_delete : DELETE FROM Term_y_table WHERE y_condition ;
+
+y_sub_condition2 : Term_y_boolean Term_y_boolean Term_y_boolean ORDER BY Term_y_order ;
+ : Term_y_boolean Term_y_boolean Term_y_boolean ;
+
+y_update : UPDATE Term_y_table SET Term_y_assignments Term_y_assignments Term_y_assignments WHERE y_condition ;
+
+y_sub_condition : y_sub_condition2 ;
+ : y_sub_condition OR y_sub_condition2 ;
+
+y_select : SELECT Term_y_columns FROM Term_y_table WHERE y_condition ;
+ : SELECT Term_y_columns FROM Term_y_table WHERE y_condition ORDER BY Term_y_order ;
+
+/* terminals */
+DELETE : "DELETE" ;
+WHERE : "WHERE" ;
+Term_y_columns : "Term_y_columns" ;
+Term_y_table : "Term_y_table" ;
+FROM : "FROM" ;
+SELECT : "SELECT" ;
+Term_y_boolean : "Term_y_boolean" ;
+OR : "OR" ;
+SET : "SET" ;
+BY : "BY" ;
+UPDATE : "UPDATE" ;
+ORDER : "ORDER" ;
+Term_y_assignments : "Term_y_assignments" ;
+Term_y_order : "Term_y_order" ;

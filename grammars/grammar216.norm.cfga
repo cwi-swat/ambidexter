@@ -1,0 +1,30 @@
+S : A B ;
+
+I : Tb ;
+
+H : Ta ;
+
+G : I ;
+ : Tb ;
+
+F : H ;
+ : Ta ;
+
+E : Tb ;
+
+D : CC40 F CC44 G CC41 ;
+
+C : Ta ;
+
+B : E ;
+ : D E ;
+
+A : C ;
+ : C D ;
+
+/* terminals */
+Tb : "Tb" ;
+Ta : "Ta" ;
+CC40 : "(" ;
+CC41 : ")" ;
+CC44 : "," ;

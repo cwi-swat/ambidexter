@@ -1,0 +1,38 @@
+%token CC98, CC97, CC101, CC100;
+
+%nodefault
+
+START :  S
+;
+
+P :  R O T
+|  CC97
+;
+
+O :  CC97
+|  CC97 CC98
+;
+
+M :  CC97
+;
+
+T :  CC98
+|  CC98 CC98
+;
+
+D :  CC100
+|  CC101 CC100
+;
+
+S :  P Q
+;
+
+C :  CC97
+|  CC97 CC98
+;
+
+R :  M P
+;
+
+Q :  C CC101 D
+;

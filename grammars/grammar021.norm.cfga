@@ -1,0 +1,18 @@
+START : S ;
+
+V : T CC98 V ;
+ : T CC98 T ;
+
+U : T CC97 U ;
+ : T CC97 T ;
+
+T : CC97 T CC98 T ;
+ : CC98 T CC97 T ;
+ : ;
+
+S : U ;
+ : V ;
+
+/* terminals */
+CC98 : "CC98" ;
+CC97 : "CC97" ;

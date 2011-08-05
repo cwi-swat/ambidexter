@@ -1,0 +1,14 @@
+module SimpleOptional
+
+exports
+
+context-free start-symbols
+S
+
+context-free syntax
+
+"{" "a"? "}" -> S
+
+lexical syntax
+[\ ] -> LAYOUT
+[a]? -> S

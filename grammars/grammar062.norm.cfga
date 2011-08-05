@@ -1,0 +1,14 @@
+START : S ;
+
+L : CC32 L ;
+ : ;
+
+S : CC97 L A L CC97 ;
+
+A : A CC98 ;
+ : ;
+
+/* terminals */
+CC32 : "CC32" ;
+CC98 : "CC98" ;
+CC97 : "CC97" ;

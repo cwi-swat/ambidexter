@@ -1,0 +1,63 @@
+html : T_html fonttable T_end_html ;
+ : T_html fonttext T_end_html ;
+
+textitem : sfont text nfont ;
+ : br ;
+ : string ;
+
+br : T_BR ;
+ : T_br T_end_br ;
+
+fonttable : sfont table nfont ;
+ : table ;
+
+table : opt_space T_table rows T_end_table opt_space ;
+
+text : textitem ;
+ : text textitem ;
+
+nfont : T_end_font ;
+
+fonttext : text ;
+
+image : T_IMG ;
+ : T_img T_end_img ;
+
+opt_space : ;
+ : string ;
+
+row : T_row cells T_end_row ;
+
+rows : rows row ;
+ : row ;
+
+sfont : T_font ;
+
+cell : T_cell T_end_cell ;
+ : T_cell image T_end_cell ;
+ : T_cell fonttext T_end_cell ;
+ : T_cell fonttable T_end_cell ;
+
+string : T_string ;
+
+cells : cells cell ;
+ : cell ;
+
+/* terminals */
+T_end_br : "T_end_br" ;
+T_row : "T_row" ;
+T_end_table : "T_end_table" ;
+T_end_font : "T_end_font" ;
+T_cell : "T_cell" ;
+T_string : "T_string" ;
+T_end_row : "T_end_row" ;
+T_BR : "T_BR" ;
+T_br : "T_br" ;
+T_end_html : "T_end_html" ;
+T_font : "T_font" ;
+T_IMG : "T_IMG" ;
+T_img : "T_img" ;
+T_html : "T_html" ;
+T_end_img : "T_end_img" ;
+T_table : "T_table" ;
+T_end_cell : "T_end_cell" ;

@@ -1,0 +1,7 @@
+START : S ;
+
+S : CC97 S CC97 ;
+ : CC97 ;
+
+/* terminals */
+CC97 : "CC97" ;

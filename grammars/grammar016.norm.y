@@ -1,0 +1,66 @@
+%token CC102
+%token CC99
+%token CC100
+%token CC103
+%token CC105
+%token CC110
+%token CC107
+%token CC109
+%token CC97
+%token CC122
+%token CC98
+%token CC111
+%token CC116
+%token CC104
+%token CC101
+%token CC114
+%token CC115
+
+%%
+
+START : S 
+;
+
+S : N2 V2
+|
+N1 V1 
+;
+
+N1 : D N3 S1 
+;
+
+N2 : D N4 
+;
+
+V1 : V3 N2 
+;
+
+V2 : CC115 CC116 CC105 CC110 CC107
+|
+V4 S1 
+;
+
+S1 : C S 
+;
+
+D : CC116 CC104 CC101 
+;
+
+N3 : CC102 CC97 CC99 CC116 
+;
+
+N4 : CC100 CC111 CC103 CC115
+|
+CC99 CC97 CC116 CC115 
+;
+
+C : CC116 CC104 CC97 CC116 
+;
+
+V4 : CC116 CC104 CC105 CC110 CC107 
+;
+
+V3 : CC98 CC111 CC116 CC104 CC101 CC114 CC115
+|
+CC97 CC109 CC97 CC122 CC101 CC115 
+;

@@ -1,0 +1,22 @@
+START : A ;
+
+D : CC100 ;
+ : CC100 D ;
+ : CC97 CC100 ;
+
+C : CC98 CC99 ;
+ : CC99 ;
+ : C C ;
+
+B : CC98 D ;
+ : CC98 ;
+
+A : CC97 ;
+ : B ;
+ : C A ;
+
+/* terminals */
+CC99 : "CC99" ;
+CC98 : "CC98" ;
+CC97 : "CC97" ;
+CC100 : "CC100" ;

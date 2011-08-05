@@ -1,0 +1,165 @@
+%token Term_func_heading, Term_ident, PROGRAM, WITH, Term_declarations, END, SBEGIN, Term_declaration, Term_direction, FOR, DO, WHILE, Term_proc_dcl_part, UNTIL, REPEAT, Term_proc_or_func, OF, CASE, ELSE, Term_program, THEN, IF, DOTDOT, Term_external_files, NOT, Term_body, Term_newident, Term_block, Term_mult_op, Term_opt_declarations, BECOMES, UNSIGNED_INT, Term_proc_heading;
+
+%nodefault
+
+program :  Term_program Term_program Term_program Term_program Term_program Term_program
+|  PROGRAM Term_newident ';' block '.'
+;
+
+opt_declarations :  declarations
+| 
+;
+
+expression :  simple_expr relational_op simple_expr
+|  simple_expr
+;
+
+unsigned_lit :  unsigned_num
+;
+
+record_var :  variable
+;
+
+procedure_call :  Term_ident actual_params
+;
+
+assignment :  variable BECOMES expression
+;
+
+case_label :  constant
+;
+
+block :  opt_declarations statement_part
+|  Term_block Term_block
+;
+
+unsigned_num :  UNSIGNED_INT
+;
+
+constant :  unsigned_num
+;
+
+body :  block
+|  Term_body
+;
+
+case_list_elem : 
+|  case_label_list ':' statement
+;
+
+statement :  REPEAT statements UNTIL expression
+|  procedure_call
+|  label ':' statement
+|  WHILE expression DO statement
+|  FOR Term_ident BECOMES expression Term_direction expression DO statement
+|  CASE expression OF case_list END
+|  assignment
+|  compound_stmt
+| 
+|  WITH rec_var_list DO statement
+|  IF expression THEN statement ELSE statement
+;
+
+proc_or_func :  Term_proc_heading Term_proc_heading ';' body ';'
+|  Term_func_heading Term_func_heading ';' body ';'
+|  Term_proc_or_func Term_proc_or_func Term_proc_or_func Term_proc_or_func Term_proc_or_func
+;
+
+factor :  '(' expression ')'
+|  variable
+|  set
+|  unsigned_lit
+|  NOT factor
+;
+
+statements :  statements ';' statement
+|  statement
+;
+
+compound_stmt :  SBEGIN statements END
+;
+
+colon_things :  ':' expression
+|  ':' expression ':' expression
+;
+
+expressions :  expression
+|  expressions ',' expression
+;
+
+label :  UNSIGNED_INT
+;
+
+actual_param :  expression colon_things
+|  expression
+;
+
+add_op :  '<'
+;
+
+actuals_list :  actuals_list ',' actual_param
+|  actual_param
+;
+
+proc_dcl_part :  proc_or_func
+|  Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part
+;
+
+term :  term Term_mult_op factor
+|  factor
+;
+
+actual_params :  '(' actuals_list ')'
+;
+
+member :  expression
+|  expression DOTDOT expression
+;
+
+case_label_list :  case_label
+;
+
+variable :  Term_ident actual_params
+|  variable '^'
+|  variable '[' expressions ']'
+|  variable '.' Term_ident
+;
+
+members :  members ',' member
+|  member
+;
+
+member_list :  members
+;
+
+rec_var_list :  rec_var_list ',' record_var
+|  record_var
+;
+
+declaration :  Term_declaration Term_declaration Term_declaration
+|  proc_dcl_part
+;
+
+declarations :  Term_declarations Term_declarations Term_declarations
+|  declaration
+|  declarations declaration
+;
+
+relational_op :  '<'
+;
+
+case_list :  case_list_elem
+|  case_list ';' case_list_elem
+;
+
+set :  '[' member_list ']'
+;
+
+simple_expr :  '-' term
+|  simple_expr add_op term
+|  term
+|  '+' term
+;
+
+statement_part :  compound_stmt
+;

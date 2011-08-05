@@ -1,0 +1,18 @@
+%token CC42, CC97, CC41, CC40;
+
+%nodefault
+
+START :  E
+;
+
+F :  CC40 E CC41
+|  CC97
+;
+
+E :  E CC42 T
+|  T
+;
+
+T :  T CC42 F
+|  F
+;

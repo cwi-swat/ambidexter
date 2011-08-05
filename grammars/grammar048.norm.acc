@@ -1,0 +1,20 @@
+%token CC114, CC113, CC112;
+
+%nodefault
+
+START :  P
+;
+
+P :  P R Q
+|  CC112
+;
+
+R :  CC112 CC114
+|  CC114
+|  CC114 R
+;
+
+Q :  CC113
+|  CC113 Q
+|  CC114 CC113
+;

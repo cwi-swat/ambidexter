@@ -1,0 +1,16 @@
+%token CC41, CC40, CC46;
+
+%nodefault
+
+START :  S
+;
+
+T :  T CC46
+|  CC40 S CC41
+|  T CC40 S CC41
+;
+
+S :  CC46 S
+|  T
+| 
+;

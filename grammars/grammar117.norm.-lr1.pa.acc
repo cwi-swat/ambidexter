@@ -1,0 +1,82 @@
+%token Term_block, Term_newident, Term_proc_dcl_part, Term_opt_declarations, Term_proc_heading, Term_direction, Term_ident, PROGRAM, WITH, END, SBEGIN, FOR, DO, WHILE, Term_func_heading, UNTIL, REPEAT, OF, CASE, ELSE, THEN, IF, Term_declarations, Term_rec_var_list, Term_declaration, BECOMES, Term_proc_or_func, Term_expression, Term_body, UNSIGNED_INT, Term_program, Term_external_files;
+
+%nodefault
+
+program :  Term_program Term_program Term_program Term_program Term_program Term_program
+|  PROGRAM Term_newident ';' block '.'
+;
+
+opt_declarations :  declarations
+| 
+;
+
+proc_dcl_part :  Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part
+|  proc_or_func
+;
+
+case_label :  constant
+;
+
+block :  opt_declarations statement_part
+|  Term_block Term_block
+;
+
+case_label_list :  case_label
+;
+
+unsigned_num :  UNSIGNED_INT
+;
+
+constant :  unsigned_num
+;
+
+case_list_elem : 
+|  case_label_list ':' statement
+;
+
+body :  Term_body
+|  block
+;
+
+statement :  label ':' statement
+|  IF Term_expression THEN statement ELSE statement
+|  compound_stmt
+|  REPEAT statements UNTIL Term_expression
+| 
+|  WHILE Term_expression DO statement
+|  IF Term_expression THEN statement
+|  WITH Term_rec_var_list DO statement
+|  CASE Term_expression OF case_list END
+|  FOR Term_ident BECOMES Term_expression Term_direction Term_expression DO statement
+;
+
+proc_or_func :  Term_proc_or_func Term_proc_or_func Term_proc_or_func Term_proc_or_func Term_proc_or_func
+|  Term_proc_heading Term_proc_heading ';' body ';'
+|  Term_func_heading Term_func_heading ';' body ';'
+;
+
+statements :  statements ';' statement
+|  statement
+;
+
+declaration :  Term_declaration Term_declaration Term_declaration
+|  proc_dcl_part
+;
+
+compound_stmt :  SBEGIN statements END
+;
+
+declarations :  Term_declarations Term_declarations Term_declarations
+|  declaration
+|  declarations declaration
+;
+
+case_list :  case_list ';' case_list_elem
+|  case_list_elem
+;
+
+statement_part :  compound_stmt
+;
+
+label :  UNSIGNED_INT
+;

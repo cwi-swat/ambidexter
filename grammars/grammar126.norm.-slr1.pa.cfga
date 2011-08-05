@@ -1,0 +1,279 @@
+file : file external_definition ;
+ : external_definition ;
+
+selection_statement : SWITCH CC40 expr CC41 statement ;
+ : IF CC40 expr CC41 statement ;
+ : IF CC40 expr CC41 statement ELSE statement ;
+
+assignment_expr : unary_expr assignment_operator assignment_expr ;
+ : conditional_expr ;
+
+parameter_list : parameter_declaration ;
+ : parameter_list CC44 parameter_declaration ;
+
+expression_statement : CC59 ;
+ : expr CC59 ;
+
+shift_expr : additive_expr ;
+ : shift_expr LEFT_OP additive_expr ;
+ : shift_expr RIGHT_OP additive_expr ;
+
+assignment_operator : CC61 ;
+
+compound_statement : CC123 declaration_list statement_list CC125 ;
+ : CC123 statement_list CC125 ;
+ : CC123 declaration_list CC125 ;
+
+struct_declarator : CC58 constant_expr ;
+ : declarator CC58 constant_expr ;
+ : declarator ;
+
+labeled_statement : CASE constant_expr CC58 statement ;
+ : Term_identifier CC58 statement ;
+ : DEFAULT CC58 statement ;
+
+initializer : CC123 initializer_list CC44 CC125 ;
+ : assignment_expr ;
+ : CC123 initializer_list CC125 ;
+
+struct_declarator_list : struct_declarator_list CC44 struct_declarator ;
+ : struct_declarator ;
+
+additive_expr : additive_expr CC45 multiplicative_expr ;
+ : multiplicative_expr ;
+ : additive_expr CC43 multiplicative_expr ;
+
+statement : iteration_statement ;
+ : selection_statement ;
+ : expression_statement ;
+ : compound_statement ;
+ : labeled_statement ;
+ : jump_statement ;
+
+identifier_list : Term_identifier ;
+ : identifier_list CC44 Term_identifier ;
+
+type_specifier_list : type_specifier ;
+ : type_specifier_list type_specifier ;
+
+declarator : pointer declarator2 ;
+ : declarator2 ;
+
+conditional_expr : logical_or_expr CC63 logical_or_expr CC58 conditional_expr ;
+ : logical_or_expr ;
+
+argument_expr_list : argument_expr_list CC44 assignment_expr ;
+ : assignment_expr ;
+
+struct_declaration : type_specifier_list struct_declarator_list CC59 ;
+
+init_declarator : declarator CC61 initializer ;
+ : declarator ;
+
+logical_or_expr : logical_or_expr OR_OP logical_and_expr ;
+ : logical_and_expr ;
+
+initializer_list : initializer ;
+ : initializer_list CC44 initializer ;
+
+multiplicative_expr : multiplicative_expr CC47 cast_expr ;
+ : multiplicative_expr CC37 cast_expr ;
+ : multiplicative_expr CC42 cast_expr ;
+ : cast_expr ;
+
+type_specifier : enum_specifier ;
+ : struct_or_union_specifier ;
+
+postfix_expr : postfix_expr CC46 Term_identifier ;
+ : postfix_expr CC40 argument_expr_list CC41 ;
+ : postfix_expr CC91 expr CC93 ;
+ : postfix_expr DEC_OP ;
+ : primary_expr ;
+ : postfix_expr PTR_OP Term_identifier ;
+ : postfix_expr CC40 CC41 ;
+ : postfix_expr INC_OP ;
+
+logical_and_expr : inclusive_or_expr ;
+ : logical_and_expr AND_OP inclusive_or_expr ;
+
+parameter_identifier_list : identifier_list ;
+ : identifier_list CC44 ELIPSIS ;
+
+expr : expr CC44 assignment_expr ;
+ : assignment_expr ;
+
+struct_declaration_list : struct_declaration ;
+ : struct_declaration_list struct_declaration ;
+
+parameter_type_list : parameter_list ;
+ : parameter_list CC44 ELIPSIS ;
+
+inclusive_or_expr : exclusive_or_expr ;
+ : inclusive_or_expr CC124 exclusive_or_expr ;
+
+init_declarator_list : init_declarator_list CC44 init_declarator ;
+ : init_declarator ;
+
+declaration_specifiers : type_specifier ;
+ : Term_storage_class_specifier declaration_specifiers ;
+ : type_specifier declaration_specifiers ;
+
+enum_specifier : ENUM Term_identifier CC123 enumerator_list CC125 ;
+ : ENUM CC123 enumerator_list CC125 ;
+
+primary_expr : CC40 expr CC41 ;
+ : Term_identifier ;
+
+exclusive_or_expr : and_expr ;
+ : exclusive_or_expr CC94 and_expr ;
+
+declaration : declaration_specifiers init_declarator_list CC59 ;
+ : declaration_specifiers CC59 ;
+
+struct_or_union_specifier : Term_struct_or_union CC123 struct_declaration_list CC125 ;
+ : Term_struct_or_union Term_identifier CC123 struct_declaration_list CC125 ;
+
+constant_expr : conditional_expr ;
+
+external_definition : declaration ;
+ : function_definition ;
+
+and_expr : and_expr CC38 equality_expr ;
+ : equality_expr ;
+
+pointer : CC42 pointer ;
+ : CC42 type_specifier_list ;
+ : CC42 type_specifier_list pointer ;
+ : CC42 ;
+
+declaration_list : declaration ;
+ : declaration_list declaration ;
+
+abstract_declarator2 : abstract_declarator2 CC91 constant_expr CC93 ;
+ : CC91 constant_expr CC93 ;
+ : CC40 abstract_declarator CC41 ;
+ : abstract_declarator2 CC40 parameter_type_list CC41 ;
+ : CC40 parameter_type_list CC41 ;
+ : abstract_declarator2 CC40 CC41 ;
+ : abstract_declarator2 CC91 CC93 ;
+
+declarator2 : Term_identifier ;
+ : declarator2 CC91 constant_expr CC93 ;
+ : declarator2 CC40 parameter_type_list CC41 ;
+ : CC40 declarator CC41 ;
+ : declarator2 CC40 CC41 ;
+ : declarator2 CC91 CC93 ;
+ : declarator2 CC40 parameter_identifier_list CC41 ;
+
+type_name : type_specifier_list abstract_declarator ;
+ : type_specifier_list ;
+
+equality_expr : equality_expr EQ_OP relational_expr ;
+ : equality_expr NE_OP relational_expr ;
+ : relational_expr ;
+
+statement_list : statement_list statement ;
+ : statement ;
+
+abstract_declarator : pointer ;
+ : abstract_declarator2 ;
+ : pointer abstract_declarator2 ;
+
+function_body : compound_statement ;
+ : declaration_list compound_statement ;
+
+cast_expr : CC40 type_name CC41 cast_expr ;
+ : unary_expr ;
+
+unary_operator : CC43 ;
+ : CC42 ;
+ : CC38 ;
+ : CC45 ;
+
+enumerator : Term_identifier ;
+ : Term_identifier CC61 constant_expr ;
+
+function_definition : declaration_specifiers declarator function_body ;
+ : declarator function_body ;
+
+jump_statement : RETURN expr CC59 ;
+
+unary_expr : SIZEOF CC40 type_name CC41 ;
+ : postfix_expr ;
+ : SIZEOF unary_expr ;
+ : INC_OP unary_expr ;
+ : DEC_OP unary_expr ;
+ : unary_operator cast_expr ;
+
+relational_expr : shift_expr ;
+ : relational_expr LE_OP shift_expr ;
+ : relational_expr GE_OP shift_expr ;
+ : relational_expr CC60 shift_expr ;
+ : relational_expr CC62 shift_expr ;
+
+parameter_declaration : type_specifier_list declarator ;
+ : type_name ;
+
+enumerator_list : enumerator_list CC44 enumerator ;
+ : enumerator ;
+
+iteration_statement : FOR CC40 CC59 CC59 expr CC41 statement ;
+ : FOR CC40 expr CC59 CC59 CC41 statement ;
+ : WHILE CC40 expr CC41 statement ;
+ : FOR CC40 expr CC59 expr CC59 expr CC41 statement ;
+ : FOR CC40 expr CC59 expr CC59 CC41 statement ;
+ : FOR CC40 CC59 CC59 CC41 statement ;
+ : FOR CC40 expr CC59 CC59 expr CC41 statement ;
+ : DO statement WHILE CC40 expr CC41 CC59 ;
+ : FOR CC40 CC59 expr CC59 expr CC41 statement ;
+ : FOR CC40 CC59 expr CC59 CC41 statement ;
+
+/* terminals */
+CC61 : "=" ;
+CC58 : ":" ;
+CC46 : "." ;
+CC63 : "?" ;
+CC37 : "%" ;
+Term_identifier : "Term_identifier" ;
+Term_struct_or_union : "Term_struct_or_union" ;
+CC47 : "/" ;
+CC93 : "]" ;
+CC91 : "[" ;
+OR_OP : "OR_OP" ;
+AND_OP : "AND_OP" ;
+NE_OP : "NE_OP" ;
+EQ_OP : "EQ_OP" ;
+CC41 : ")" ;
+GE_OP : "GE_OP" ;
+CC124 : "|" ;
+LE_OP : "LE_OP" ;
+RIGHT_OP : "RIGHT_OP" ;
+CC40 : "(" ;
+CC125 : "}" ;
+LEFT_OP : "LEFT_OP" ;
+DEC_OP : "DEC_OP" ;
+CC123 : "{" ;
+INC_OP : "INC_OP" ;
+PTR_OP : "PTR_OP" ;
+SIZEOF : "SIZEOF" ;
+CC94 : "^" ;
+CC59 : ";" ;
+CC45 : "-" ;
+CC43 : "+" ;
+Term_storage_class_specifier : "Term_storage_class_specifier" ;
+CC42 : "*" ;
+RETURN : "RETURN" ;
+CC38 : "&" ;
+FOR : "FOR" ;
+DO : "DO" ;
+WHILE : "WHILE" ;
+SWITCH : "SWITCH" ;
+ELSE : "ELSE" ;
+IF : "IF" ;
+DEFAULT : "DEFAULT" ;
+CASE : "CASE" ;
+CC62 : ">" ;
+ELIPSIS : "ELIPSIS" ;
+ENUM : "ENUM" ;
+CC60 : "<" ;
+CC44 : "," ;

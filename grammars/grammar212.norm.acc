@@ -1,0 +1,27 @@
+%token Td, Te;
+
+%nodefault
+
+START :  S
+;
+
+E :  Te
+;
+
+D :  Td
+;
+
+S :  C
+|  A
+;
+
+C :  D
+;
+
+B :  S
+;
+
+A :  E
+|  C
+|  B
+;

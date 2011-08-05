@@ -1,0 +1,184 @@
+%%
+%% Keywords.sdf:
+%% this file is a part of CxxGrammar from the Transformers project.
+%% Copyright (C) 2004 EPITA Research and Development Laboratory.
+%%
+%% This program is free software; you can redistribute it and/or modify
+%% it under the terms of the GNU General Public License as published by
+%% the Free Software Foundation; either version 2 of the License, or
+%% (at your option) any later version.
+%%
+%% This program is distributed in the hope that it will be useful,
+%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%% GNU General Public License for more details.
+%%
+%% You should have received a copy of the GNU General Public License
+%% along with this program; if not, write to the Free Software
+%% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%%
+module Keywords
+
+imports
+
+  Layout
+  Identifiers
+
+exports
+
+  context-free syntax
+
+    %% 2.11 [lex.key]
+    "asm"              -> Identifier { reject }
+    "auto"             -> Identifier { reject }
+    "bool"             -> Identifier { reject }
+    "break"            -> Identifier { reject }
+    "case"             -> Identifier { reject }
+    "catch"            -> Identifier { reject }
+    "char"             -> Identifier { reject }
+    "class"            -> Identifier { reject }
+    "const"            -> Identifier { reject }
+    "const_cast"       -> Identifier { reject }
+    "continue"         -> Identifier { reject }
+    "default"          -> Identifier { reject }
+    "delete"           -> Identifier { reject }
+    "do"               -> Identifier { reject }
+    "double"           -> Identifier { reject }
+    "dynamic_cast"     -> Identifier { reject }
+    "else"             -> Identifier { reject }
+    "enum"             -> Identifier { reject }
+    "explicit"         -> Identifier { reject }
+    "export"           -> Identifier { reject }
+    "extern"           -> Identifier { reject }
+    "false"            -> Identifier { reject }
+    "float"            -> Identifier { reject }
+    "for"              -> Identifier { reject }
+    "friend"           -> Identifier { reject }
+    "goto"             -> Identifier { reject }
+    "if"               -> Identifier { reject }
+    "inline"           -> Identifier { reject }
+    "int"              -> Identifier { reject }
+    "long"             -> Identifier { reject }
+    "mutable"          -> Identifier { reject }
+    "namespace"        -> Identifier { reject }
+    "new"              -> Identifier { reject }
+    "operator"         -> Identifier { reject }
+    "private"          -> Identifier { reject }
+    "protected"        -> Identifier { reject }
+    "public"           -> Identifier { reject }
+    "register"         -> Identifier { reject }
+    "reinterpret_cast" -> Identifier { reject }
+    "return"           -> Identifier { reject }
+    "short"            -> Identifier { reject }
+    "signed"           -> Identifier { reject }
+    "sizeof"           -> Identifier { reject }
+    "static"           -> Identifier { reject }
+    "static_cast"      -> Identifier { reject }
+    "struct"           -> Identifier { reject }
+    "switch"           -> Identifier { reject }
+    "template"         -> Identifier { reject }
+    "this"             -> Identifier { reject }
+    "throw"            -> Identifier { reject }
+    "true"             -> Identifier { reject }
+    "try"              -> Identifier { reject }
+    "typedef"          -> Identifier { reject }
+    "typeid"           -> Identifier { reject }
+    "typename"         -> Identifier { reject }
+    "union"            -> Identifier { reject }
+    "unsigned"         -> Identifier { reject }
+    "using"            -> Identifier { reject }
+    "virtual"          -> Identifier { reject }
+    "void"             -> Identifier { reject }
+    "volatile"         -> Identifier { reject }
+    "wchar_t"          -> Identifier { reject }
+    "while"            -> Identifier { reject }
+
+    %% 2.11 [lex.key]
+    "and"    -> Identifier { reject }
+    "and_eq" -> Identifier { reject }
+    "bitand" -> Identifier { reject }
+    "bitor"  -> Identifier { reject }
+    "compl"  -> Identifier { reject }
+    "not"    -> Identifier { reject }
+    "not_eq" -> Identifier { reject }
+    "or"     -> Identifier { reject }
+    "or_eq"  -> Identifier { reject }
+    "xor"    -> Identifier { reject }
+    "xor_eq" -> Identifier { reject }
+
+  %% "intmain" is an identifier, not a keyword followed by an identifier
+  lexical restrictions
+    "asm"		-/- [a-zA-Z0-9\_]
+    "auto"		-/- [a-zA-Z0-9\_]
+    "bool"		-/- [a-zA-Z0-9\_]
+    "break"		-/- [a-zA-Z0-9\_]
+    "case"		-/- [a-zA-Z0-9\_]
+    "catch"		-/- [a-zA-Z0-9\_]
+    "char"		-/- [a-zA-Z0-9\_]
+    "class"		-/- [a-zA-Z0-9\_]
+    "const"		-/- [a-zA-Z0-9\_]
+    "const_cast"	-/- [a-zA-Z0-9\_]
+    "continue"		-/- [a-zA-Z0-9\_]
+    "default"		-/- [a-zA-Z0-9\_]
+    "delete"		-/- [a-zA-Z0-9\_]
+    "do"		-/- [a-zA-Z0-9\_]
+    "double"		-/- [a-zA-Z0-9\_]
+    "dynamic_cast"	-/- [a-zA-Z0-9\_]
+    "else"		-/- [a-zA-Z0-9\_]
+    "enum"		-/- [a-zA-Z0-9\_]
+    "explicit"		-/- [a-zA-Z0-9\_]
+    "export"		-/- [a-zA-Z0-9\_]
+    "extern"		-/- [a-zA-Z0-9\_]
+    "false"		-/- [a-zA-Z0-9\_]
+    "float"		-/- [a-zA-Z0-9\_]
+    "for"		-/- [a-zA-Z0-9\_]
+    "friend"		-/- [a-zA-Z0-9\_]
+    "goto"		-/- [a-zA-Z0-9\_]
+    "if"		-/- [a-zA-Z0-9\_]
+    "inline"		-/- [a-zA-Z0-9\_]
+    "int"		-/- [a-zA-Z0-9\_]
+    "long"		-/- [a-zA-Z0-9\_]
+    "mutable"		-/- [a-zA-Z0-9\_]
+    "namespace"		-/- [a-zA-Z0-9\_]
+    "new"		-/- [a-zA-Z0-9\_]
+    "operator"		-/- [a-zA-Z0-9\_]
+    "private"		-/- [a-zA-Z0-9\_]
+    "protected"		-/- [a-zA-Z0-9\_]
+    "public"		-/- [a-zA-Z0-9\_]
+    "register"		-/- [a-zA-Z0-9\_]
+    "reinterpret_cast"	-/- [a-zA-Z0-9\_]
+    "return"		-/- [a-zA-Z0-9\_]
+    "short"		-/- [a-zA-Z0-9\_]
+    "signed"		-/- [a-zA-Z0-9\_]
+    "sizeof"		-/- [a-zA-Z0-9\_]
+    "static"		-/- [a-zA-Z0-9\_]
+    "static_cast"	-/- [a-zA-Z0-9\_]
+    "struct"		-/- [a-zA-Z0-9\_]
+    "switch"		-/- [a-zA-Z0-9\_]
+    "template"		-/- [a-zA-Z0-9\_]
+    "this"		-/- [a-zA-Z0-9\_]
+    "throw"		-/- [a-zA-Z0-9\_]
+    "true"		-/- [a-zA-Z0-9\_]
+    "try"		-/- [a-zA-Z0-9\_]
+    "typedef"		-/- [a-zA-Z0-9\_]
+    "typeid"		-/- [a-zA-Z0-9\_]
+    "typename"		-/- [a-zA-Z0-9\_]
+    "union"		-/- [a-zA-Z0-9\_]
+    "unsigned"		-/- [a-zA-Z0-9\_]
+    "using"		-/- [a-zA-Z0-9\_]
+    "virtual"		-/- [a-zA-Z0-9\_]
+    "void"		-/- [a-zA-Z0-9\_]
+    "volatile"		-/- [a-zA-Z0-9\_]
+    "wchar_t"		-/- [a-zA-Z0-9\_]
+    "while"		-/- [a-zA-Z0-9\_]
+    "and"		-/- [a-zA-Z0-9\_]
+    "and_eq"		-/- [a-zA-Z0-9\_]
+    "bitand"		-/- [a-zA-Z0-9\_]
+    "bitor"		-/- [a-zA-Z0-9\_]
+    "compl"		-/- [a-zA-Z0-9\_]
+    "not"		-/- [a-zA-Z0-9\_]
+    "not_eq"		-/- [a-zA-Z0-9\_]
+    "or"		-/- [a-zA-Z0-9\_]
+    "or_eq"		-/- [a-zA-Z0-9\_]
+    "xor"		-/- [a-zA-Z0-9\_]
+    "xor_eq"		-/- [a-zA-Z0-9\_]

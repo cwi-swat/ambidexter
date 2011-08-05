@@ -1,0 +1,96 @@
+program : Term_program Term_program Term_program Term_program Term_program Term_program ;
+ : PROGRAM Term_newident CC59 block CC46 ;
+
+opt_declarations : declarations ;
+ : ;
+
+proc_dcl_part : Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part ;
+ : proc_or_func ;
+
+case_label : constant ;
+
+block : opt_declarations statement_part ;
+ : Term_block Term_block ;
+
+case_label_list : case_label ;
+
+unsigned_num : UNSIGNED_INT ;
+
+constant : unsigned_num ;
+
+case_list_elem : ;
+ : case_label_list CC58 statement ;
+
+body : Term_body ;
+ : block ;
+
+statement : label CC58 statement ;
+ : IF Term_expression THEN statement ELSE statement ;
+ : compound_stmt ;
+ : REPEAT statements UNTIL Term_expression ;
+ : ;
+ : WHILE Term_expression DO statement ;
+ : IF Term_expression THEN statement ;
+ : WITH Term_rec_var_list DO statement ;
+ : CASE Term_expression OF case_list END ;
+ : FOR Term_ident BECOMES Term_expression Term_direction Term_expression DO statement ;
+
+proc_or_func : Term_proc_or_func Term_proc_or_func Term_proc_or_func Term_proc_or_func Term_proc_or_func ;
+ : Term_proc_heading Term_proc_heading CC59 body CC59 ;
+ : Term_func_heading Term_func_heading CC59 body CC59 ;
+
+statements : statements CC59 statement ;
+ : statement ;
+
+declaration : Term_declaration Term_declaration Term_declaration ;
+ : proc_dcl_part ;
+
+compound_stmt : SBEGIN statements END ;
+
+declarations : Term_declarations Term_declarations Term_declarations ;
+ : declaration ;
+ : declarations declaration ;
+
+case_list : case_list CC59 case_list_elem ;
+ : case_list_elem ;
+
+statement_part : compound_stmt ;
+
+label : UNSIGNED_INT ;
+
+/* terminals */
+Term_block : "Term_block" ;
+Term_newident : "Term_newident" ;
+Term_proc_dcl_part : "Term_proc_dcl_part" ;
+Term_opt_declarations : "Term_opt_declarations" ;
+CC46 : "." ;
+Term_proc_heading : "Term_proc_heading" ;
+CC59 : ";" ;
+Term_direction : "Term_direction" ;
+Term_ident : "Term_ident" ;
+PROGRAM : "PROGRAM" ;
+WITH : "WITH" ;
+END : "END" ;
+SBEGIN : "SBEGIN" ;
+FOR : "FOR" ;
+DO : "DO" ;
+WHILE : "WHILE" ;
+Term_func_heading : "Term_func_heading" ;
+UNTIL : "UNTIL" ;
+REPEAT : "REPEAT" ;
+OF : "OF" ;
+CASE : "CASE" ;
+ELSE : "ELSE" ;
+THEN : "THEN" ;
+IF : "IF" ;
+Term_declarations : "Term_declarations" ;
+Term_rec_var_list : "Term_rec_var_list" ;
+Term_declaration : "Term_declaration" ;
+BECOMES : "BECOMES" ;
+Term_proc_or_func : "Term_proc_or_func" ;
+Term_expression : "Term_expression" ;
+Term_body : "Term_body" ;
+UNSIGNED_INT : "UNSIGNED_INT" ;
+Term_program : "Term_program" ;
+CC58 : ":" ;
+Term_external_files : "Term_external_files" ;

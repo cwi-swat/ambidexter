@@ -1,0 +1,21 @@
+module FollowAmb
+exports
+context-free start-symbols
+S
+
+context-free syntax
+
+ID ID -> S
+ID DECL -> S
+
+ID -> DECL
+
+lexical syntax
+
+[a-z]+ -> ID
+
+[\ ] -> LAYOUT
+
+lexical restrictions
+
+ID -/- [a-z]

@@ -1,0 +1,94 @@
+%%
+%% PostfixExpressions.sdf:
+%% this file is a part of CxxGrammar from the Transformers project.
+%% Copyright (C) 2004 EPITA Research and Development Laboratory.
+%%
+%% This program is free software; you can redistribute it and/or modify
+%% it under the terms of the GNU General Public License as published by
+%% the Free Software Foundation; either version 2 of the License, or
+%% (at your option) any later version.
+%%
+%% This program is distributed in the hope that it will be useful,
+%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%% GNU General Public License for more details.
+%%
+%% You should have received a copy of the GNU General Public License
+%% along with this program; if not, write to the Free Software
+%% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%%
+module PostfixExpressions
+
+imports
+
+  AssignmentExpressions
+  Expressions
+  IdExpressions
+  PrimaryExpressions
+  TemplateIds
+
+exports
+
+  sorts
+    PseudoDestructorName
+
+exports
+
+  sorts
+    ExpressionList
+    PostfixExpression
+
+  context-free syntax
+
+    %% 5.2 [expr.post]
+    PrimaryExpression                                                                   -> PostfixExpression
+
+    PostfixExpression "[" Expression "]"                 -> PostfixExpression
+
+    PostfixExpression "(" el:ExpressionList? ")"         -> PostfixExpression
+
+    SimpleTypeSpecifier "(" el:ExpressionList? ")"       -> PostfixExpression
+
+    "typename" root:"::"? NestedNameSpecifier Identifier
+    "(" el:ExpressionList? ")"                           -> PostfixExpression
+
+    "typename" root:"::"? NestedNameSpecifier template:"template"?
+    TemplateId "(" el:ExpressionList? ")"                -> PostfixExpression
+
+    PostfixExpression "." template:"template"? IdExpression
+                                                         -> PostfixExpression
+
+    PostfixExpression "->" template:"template"? IdExpression
+                                                         -> PostfixExpression
+
+    PostfixExpression "." PseudoDestructorName           -> PostfixExpression
+
+    PostfixExpression "->" PseudoDestructorName          -> PostfixExpression
+
+    PostfixExpression "++"                               -> PostfixExpression
+
+    PostfixExpression "--"                               -> PostfixExpression
+
+    "dynamic_cast" "<" TypeId ">" "(" Expression ")"     -> PostfixExpression
+
+    "static_cast" "<" TypeId ">" "(" Expression ")"      -> PostfixExpression
+
+    "reinterpret_cast" "<" TypeId ">" "(" Expression ")" -> PostfixExpression
+
+    "const_cast" "<" TypeId ">" "(" Expression ")"       -> PostfixExpression
+
+    "typeid" "(" Expression ")"                          -> PostfixExpression
+
+    "typeid" "(" TypeId ")"                              -> PostfixExpression
+
+    %% 5.2 [expr.post]
+    list:{ AssignmentExpression "," }+ -> ExpressionList
+
+    %% 5.2 [expr.post]
+    root:"::"? nns:NestedNameSpecifier? TypeName "::" "~" TypeName
+                                                        -> PseudoDestructorName
+
+    root:"::"? NestedNameSpecifier "template" TemplateId "::" "~" TypeName
+                                                        -> PseudoDestructorName
+
+    root:"::"? nns:NestedNameSpecifier? "~" TypeName    -> PseudoDestructorName

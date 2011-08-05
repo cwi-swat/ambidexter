@@ -1,0 +1,105 @@
+y_sql : y_select ;
+ : y_delete ;
+ : Term_y_sql Term_y_sql Term_y_sql ;
+ : y_update ;
+
+y_assignments : y_assignment ;
+ : y_assignments CC44 y_assignment ;
+ : Term_y_assignments Term_y_assignments Term_y_assignments ;
+
+y_boolean : NOT y_boolean ;
+ : y_comparison ;
+ : CC40 y_sub_condition CC41 ;
+ : Term_y_boolean Term_y_boolean Term_y_boolean ;
+
+y_condition : Term_y_condition Term_y_condition Term_y_condition ;
+ : y_sub_condition ;
+
+y_term : CC45 y_term ;
+ : y_atom ;
+ : Term_y_term ;
+
+y_assignment : Term_y_assignment Term_y_assignment Term_y_assignment ;
+ : NAME EQUAL y_expression ;
+
+y_delete : Term_y_delete Term_y_delete Term_y_delete ;
+ : DELETE FROM Term_y_table WHERE y_condition ;
+
+y_sub_condition2 : Term_y_sub_condition2 Term_y_sub_condition2 Term_y_sub_condition2 ;
+ : y_sub_condition2 AND y_boolean ;
+ : y_boolean ;
+
+y_update : Term_y_update Term_y_update Term_y_update Term_y_update Term_y_update Term_y_update ;
+ : UPDATE Term_y_table SET y_assignments ;
+ : UPDATE Term_y_table SET y_assignments WHERE y_condition ;
+
+y_sub_condition : Term_y_sub_condition Term_y_sub_condition Term_y_sub_condition ;
+ : y_sub_condition2 ;
+ : y_sub_condition OR y_sub_condition2 ;
+
+y_select : SELECT Term_y_columns FROM Term_y_table WHERE y_condition ;
+ : Term_y_select Term_y_select Term_y_select Term_y_select ;
+ : SELECT Term_y_columns FROM Term_y_table WHERE y_condition ORDER BY Term_y_order ;
+
+y_atom : Term_y_atom ;
+ : CC40 y_expression CC41 ;
+
+y_expression : y_product ;
+ : y_expression CC43 y_product ;
+ : y_expression CC45 y_product ;
+ : Term_y_expression ;
+ : CC40 y_expression CC41 ;
+
+y_comparison : y_expression COMPARISON_OPERATOR y_expression ;
+ : y_expression EQUAL y_expression ;
+ : y_expression IS NULL_VALUE ;
+ : y_expression NOT NULL_VALUE ;
+ : Term_y_comparison Term_y_comparison Term_y_comparison ;
+
+y_product : y_product CC47 y_term ;
+ : y_term ;
+ : Term_y_product ;
+ : y_product CC42 y_term ;
+
+/* terminals */
+Term_y_delete : "Term_y_delete" ;
+Term_y_term : "Term_y_term" ;
+Term_y_assignment : "Term_y_assignment" ;
+Term_y_condition : "Term_y_condition" ;
+CC42 : "*" ;
+Term_y_assignments : "Term_y_assignments" ;
+Term_y_order : "Term_y_order" ;
+Term_y_columns : "Term_y_columns" ;
+Term_y_boolean : "Term_y_boolean" ;
+Term_y_table : "Term_y_table" ;
+IS : "IS" ;
+BY : "BY" ;
+CC44 : "," ;
+ORDER : "ORDER" ;
+NULL_VALUE : "NULL_VALUE" ;
+Term_y_product : "Term_y_product" ;
+NOT : "NOT" ;
+OR : "OR" ;
+Term_y_expression : "Term_y_expression" ;
+AND : "AND" ;
+SET : "SET" ;
+UPDATE : "UPDATE" ;
+Term_y_comparison : "Term_y_comparison" ;
+Term_y_select : "Term_y_select" ;
+CC47 : "/" ;
+DELETE : "DELETE" ;
+WHERE : "WHERE" ;
+FROM : "FROM" ;
+Term_y_atom : "Term_y_atom" ;
+SELECT : "SELECT" ;
+EQUAL : "EQUAL" ;
+Term_y_sub_condition : "Term_y_sub_condition" ;
+CC45 : "-" ;
+Term_y_sql : "Term_y_sql" ;
+NAME : "NAME" ;
+CC43 : "+" ;
+CC41 : ")" ;
+COMPARISON_OPERATOR : "COMPARISON_OPERATOR" ;
+Term_y_update : "Term_y_update" ;
+CC40 : "(" ;
+Term_y_sub_condition2 : "Term_y_sub_condition2" ;

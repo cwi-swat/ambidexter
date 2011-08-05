@@ -1,0 +1,257 @@
+module Java-15-All
+
+imports Java-15
+
+exports
+context-free start-symbols
+
+AbstractMethodDec
+AbstractMethodMod
+Anno
+Anno | AbstractMethodMod
+Anno | AbstractMethodMod*
+TypeParams
+TypeParams?
+ResultType
+Id
+FormalParam
+{FormalParam ","}*
+Throws
+Throws?
+Dim
+Dim+
+Public
+Abstract
+MethodSpec
+Expr
+{Expr ","}*
+MethodName
+TypeArgs
+TypeArgs?
+TypeName
+AmbName
+ExprName
+ArrayCreationExpr
+ArrayBaseType
+DimExpr
+DimExpr+
+Dim*
+ArrayInit
+PrimType
+LocalVarDecStm
+LocalVarDec
+VarMod
+Anno | VarMod
+Anno | VarMod*
+Type
+VarDec
+{VarDec ","}+
+CharLiteral
+CharContent
+SingleChar
+<CharLiteral-CF>
+UnicodeEscape
+EscapeSeq
+Bool
+BoolLiteral
+VarInit
+{VarInit ","}*
+NullLiteral
+StaticInit
+Block
+PackageName
+{Id "."}+
+PackageOrTypeName
+ElemVal
+ElemValPair
+{ElemValPair ","}*
+{ElemVal ","}*
+LHS
+[u]+
+FloatLiteral
+DeciFloatLiteral
+HexaFloatLiteral
+DeciFloatNumeral
+[fFdD]?
+HexaFloatNumeral
+[0-9]+
+DeciFloatDigits
+DeciFloatExponentPart
+DeciFloatExponentPart?
+[0-9]*
+SignedInteger
+[\+\-]?
+HexaSignificand
+BinaryExponent
+[0-9a-fA-F]+
+[0-9a-fA-F]*
+AnnoDec
+AnnoDecHead
+AnnoElemDec
+AnnoElemDec*
+InterfaceMod
+Anno | InterfaceMod
+Anno | InterfaceMod*
+DefaultVal
+AbstractMethodMod*
+DefaultVal?
+ConstantDec
+ClassDec
+InterfaceDec
+EnumDec
+LineTerminator
+CarriageReturn
+EndOfFile
+Keyword
+CondMid
+RefType
+ActualTypeArg
+WildcardBound
+{ActualTypeArg ","}+
+WildcardBound?
+BlockStm
+BlockStm*
+Stm
+ID
+[A-Za-z0-9\_\$]*
+Literal
+IntLiteral
+StringLiteral
+ClassLiteral
+InterfaceDecHead
+ExtendsInterfaces
+InterfaceMemberDec
+InterfaceMemberDec*
+ExtendsInterfaces?
+InterfaceType
+{InterfaceType ","}+
+Protected
+Private
+Static
+StrictFP
+DeciLiteral
+HexaLiteral
+OctaLiteral
+DeciNumeral
+HexaNumeral
+OctaNumeral
+[lL]?
+[0-7]+
+FieldAccess
+TypeDec
+LAYOUT
+LAYOUT?
+ArrayAccess
+ArraySubscript
+NumType
+IntType
+FloatType
+StringPart
+StringChars
+FooStringChars
+<StringLiteral-CF>
+StringPart*
+<FooStringChars-LEX>
+~[\"\\\n\13]+
+InstanceInit
+ConstantMod
+Anno | ConstantMod
+Anno | ConstantMod*
+Final
+ConstrDec
+ConstrBody
+ConstrHead
+ConstrInv
+ConstrMod
+Anno | ConstrMod
+Anno | ConstrMod*
+ConstrInv?
+CompilationUnit
+PackageDec
+PackageDec?
+ImportDec
+ImportDec*
+TypeDec+
+ClassBody
+ClassBody?
+NamedEscape
+OctaEscape
+LastOcta
+ClassOrInterfaceType
+ClassType
+TypeDecSpec
+ArrayType
+TypeVar
+TypeVarId
+Anno*
+Native
+Transient
+Volatile
+Synchronized
+Modifier
+FieldDec
+VarDecId
+FieldMod
+Anno | FieldMod
+Anno | FieldMod*
+MethodDec
+MethodDecHead
+MethodBody
+MethodMod
+Anno | MethodMod
+Anno | MethodMod*
+ExceptionType
+{ExceptionType ","}+
+Comment
+EOLCommentChars
+CommentPart
+BlockCommentChars
+Asterisk
+EscEscChar
+EscChar
+~[\n\r]*
+CommentPart*
+~[\*\\]+
+SwitchBlock
+SwitchGroup
+SwitchLabel
+SwitchGroup*
+SwitchLabel*
+SwitchLabel+
+BlockStm+
+Expr?
+Id?
+CatchClause
+CatchClause+
+CatchClause*
+ClassDecHead
+ClassBodyDec
+ClassBodyDec*
+ClassMod
+Anno | ClassMod
+Anno | ClassMod*
+Super
+Super?
+Interfaces
+Interfaces?
+ClassMemberDec
+TypeParam
+TypeBound
+TypeBound?
+{ClassOrInterfaceType "&"}+
+{TypeParam ","}+
+EnumDecHead
+EnumBody
+EnumConst
+EnumConstArgs
+EnumBodyDecs
+{EnumConst ","}*
+EnumBodyDecs?
+EnumConstArgs?
+
+LayoutDummy
+
+context-free syntax
+
+EmptyDummy EmptyDummy -> LayoutDummy
+-> EmptyDummy

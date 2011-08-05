@@ -1,0 +1,14 @@
+START : S ;
+
+L : CC42 R ;
+ : CC97 ;
+
+S : L CC61 R ;
+ : R ;
+
+R : L ;
+
+/* terminals */
+CC42 : "CC42" ;
+CC97 : "CC97" ;
+CC61 : "CC61" ;

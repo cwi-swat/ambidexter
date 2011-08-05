@@ -1,0 +1,10 @@
+START : S ;
+
+S : A A ;
+
+A : CC120 A CC120 ;
+ : CC121 ;
+
+/* terminals */
+CC121 : "CC121" ;
+CC120 : "CC120" ;

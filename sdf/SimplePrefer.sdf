@@ -1,0 +1,23 @@
+module SimplePrefer
+exports
+context-free start-symbols
+S
+
+context-free syntax
+
+A -> S
+B -> S
+
+"a" -> A
+C -> B {prefer}
+"a" -> C
+
+
+D -> S
+
+"(" E ")" -> D
+
+"(" "e" ")" -> D {avoid}
+
+"e" -> E
+

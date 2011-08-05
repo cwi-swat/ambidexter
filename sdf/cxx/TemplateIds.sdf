@@ -1,0 +1,76 @@
+%%
+%% TemplateIds.sdf:
+%% this file is a part of CxxGrammar from the Transformers project.
+%% Copyright (C) 2004 EPITA Research and Development Laboratory.
+%%
+%% This program is free software; you can redistribute it and/or modify
+%% it under the terms of the GNU General Public License as published by
+%% the Free Software Foundation; either version 2 of the License, or
+%% (at your option) any later version.
+%%
+%% This program is distributed in the hope that it will be useful,
+%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%% GNU General Public License for more details.
+%%
+%% You should have received a copy of the GNU General Public License
+%% along with this program; if not, write to the Free Software
+%% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%%
+module TemplateIds
+
+imports
+
+  AssignmentExpressions
+  IdExpressions
+  TypeIds
+
+exports
+
+  sorts
+    TemplateName
+    TemplateArgument
+
+exports
+
+  sorts
+    TemplateId
+    TemplateArgumentList
+
+  context-free syntax
+
+    %% 14.2 [temp.names]
+    TemplateName "<" tal:TemplateArgumentList? ">" -> TemplateId
+
+    TemplateArgumentList -> TemplateArgumentList?
+
+                         -> TemplateArgumentList?
+
+    %% 14.2 [temp.names]
+    Identifier -> TemplateName
+
+    %% 14.2 [temp.names]
+    list:{ TemplateArgument "," }+ -> TemplateArgumentList
+
+    l:{ TemplateArgument "," }+ "," r:{ TemplateArgument "," }+
+         -> { TemplateArgument "," }+
+        {left}
+
+    %%FIXME
+    {TemplateArgument ","}+ "," {TemplateArgument ","}*
+      -> {TemplateArgument ","}+
+      {avoid}
+    {TemplateArgument ","}* "," {TemplateArgument ","}+
+      -> {TemplateArgument ","}+
+      {avoid}
+
+    TemplateArgument -> { TemplateArgument "," }+
+
+    %% 14.2 [temp.names]
+    AssignmentExpression -> TemplateArgument
+
+    TypeId               -> TemplateArgument
+
+    %% FIXME: This rule produces ambiguous parse trees, since IdExpression
+    %% also reduces as AssignmentExpression.
+    %% IdExpression      -> TemplateArgument

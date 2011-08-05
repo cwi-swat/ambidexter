@@ -1,0 +1,23 @@
+module CollectStart
+
+imports
+languages/sdf2/syntax/Sdf2
+
+exports
+
+context-free start-symbols
+Symbol*
+
+context-free syntax
+
+collect(SDF, Symbol*) -> Symbol* { traversal(accu, bottom-up, continue) }
+collect(Symbol, Symbol*) -> Symbol* { traversal(accu, bottom-up, continue) }
+
+
+variables
+
+"$ss"[0-9]? -> Symbol*
+"$s"[0-9]? -> Symbol
+"$cc"[0-9]? -> CharClass
+"$str"[0-9]? -> StrCon               
+"$q"[0-9]? -> SingleQuotedStrCon

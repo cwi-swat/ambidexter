@@ -1,0 +1,23 @@
+%token Td, Tc, Tb, Ta, Te;
+
+%nodefault
+
+START :  S
+;
+
+D :  Td A Te
+;
+
+S :  D
+|  Tb A Tc
+;
+
+C :  Ta
+;
+
+B :  Ta C
+;
+
+A :  B
+|  Ta Ta
+;

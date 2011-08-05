@@ -1,0 +1,21 @@
+%token CC98, CC97;
+
+%nodefault
+
+START :  S
+;
+
+S :  CC97 B
+|  CC98 A
+;
+
+B :  CC98
+|  CC98 S
+|  CC97 B B
+;
+
+A :  CC97
+|  CC97 S
+|  CC98 CC97 A
+|  CC98 CC98 A A CC97
+;

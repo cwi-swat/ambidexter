@@ -1,0 +1,25 @@
+%token CC99, CC98, CC97, CC100;
+
+%nodefault
+
+START :  T
+;
+
+T :  A B C
+|  A B D
+;
+
+D :  CC100
+;
+
+C :  CC99
+;
+
+B :  A B
+|  CC98
+;
+
+A :  A D
+|  A C
+|  CC97
+;

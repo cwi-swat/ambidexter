@@ -1,0 +1,32 @@
+module SimpleFollow
+
+exports
+
+context-free start-symbols
+S
+
+context-free syntax
+
+ID -> S
+
+ID ID -> S
+
+lexical syntax
+
+[0] [a] [b] [c] -> S
+
+[0] A [b] [c] -> S
+
+[a] -> A
+
+[a-c]+ -> ID
+
+[\ ] -> LAYOUT
+
+lexical restrictions
+
+ID -/- [a-c]
+
+A -/- [a-c] . [a-c]
+
+

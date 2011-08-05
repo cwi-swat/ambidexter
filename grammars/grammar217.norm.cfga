@@ -1,0 +1,20 @@
+START : S ;
+
+D : Td A Te ;
+
+S : D ;
+ : Tb A Tc ;
+
+C : Ta ;
+
+B : Ta C ;
+
+A : B ;
+ : Ta Ta ;
+
+/* terminals */
+Td : "Td" ;
+Tc : "Tc" ;
+Tb : "Tb" ;
+Ta : "Ta" ;
+Te : "Te" ;

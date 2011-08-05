@@ -1,0 +1,10 @@
+START : S ;
+
+S : CC46 S ;
+ : CC40 S CC41 S ;
+ : ;
+
+/* terminals */
+CC41 : "CC41" ;
+CC40 : "CC40" ;
+CC46 : "CC46" ;

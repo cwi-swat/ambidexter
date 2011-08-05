@@ -1,0 +1,13 @@
+equations
+[1]
+$cc !:= $s,
+$str !:= $s,
+$q !:= $s
+=======================
+collect($s, $ss) = $ss
+$s
+
+[2] $ss1 $s $ss2 $s $ss3 = $ss1
+$s
+$ss2
+$ss3

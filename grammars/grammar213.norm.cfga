@@ -1,0 +1,23 @@
+START : S ;
+
+F : Te Te ;
+
+E : Te Te ;
+
+D : Td Td ;
+
+S : CC40 A CC41 CC40 B CC41 ;
+
+C : Td Td ;
+
+B : F ;
+ : E ;
+
+A : D ;
+ : C ;
+
+/* terminals */
+Td : "Td" ;
+CC40 : "(" ;
+CC41 : ")" ;
+Te : "Te" ;

@@ -1,0 +1,37 @@
+%token Tb, Ta;
+
+%nodefault
+
+S :  A B
+;
+
+I :  Tb
+;
+
+H :  Ta
+;
+
+G :  I
+|  Tb
+;
+
+F :  H
+|  Ta
+;
+
+E :  Tb
+;
+
+D :  '(' F ',' G ')'
+;
+
+C :  Ta
+;
+
+B :  E
+|  D E
+;
+
+A :  C
+|  C D
+;

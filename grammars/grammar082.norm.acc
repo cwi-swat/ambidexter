@@ -1,0 +1,17 @@
+%token CC42, CC97, CC61;
+
+%nodefault
+
+START :  S
+;
+
+L :  CC42 R
+|  CC97
+;
+
+S :  L CC61 R
+|  R
+;
+
+R :  L
+;

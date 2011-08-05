@@ -1,0 +1,17 @@
+%token INT, Term_y_table, CREATE, TTABLE, NAME;
+
+%nodefault
+
+y_sql :  y_create
+;
+
+y_columndef :  NAME INT
+|  NAME INT ',' NAME INT
+;
+
+y_create :  CREATE TTABLE Term_y_table '(' y_columndefs ')'
+;
+
+y_columndefs :  y_columndef
+|  y_columndefs ',' y_columndef
+;

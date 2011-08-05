@@ -1,0 +1,59 @@
+%%
+%% ClassSpecifiers.sdf:
+%% this file is a part of CxxGrammar from the Transformers project.
+%% Copyright (C) 2004 EPITA Research and Development Laboratory.
+%%
+%% This program is free software; you can redistribute it and/or modify
+%% it under the terms of the GNU General Public License as published by
+%% the Free Software Foundation; either version 2 of the License, or
+%% (at your option) any later version.
+%%
+%% This program is distributed in the hope that it will be useful,
+%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%% GNU General Public License for more details.
+%%
+%% You should have received a copy of the GNU General Public License
+%% along with this program; if not, write to the Free Software
+%% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%%
+module ClassSpecifiers
+
+imports
+
+  BaseSpecifiers
+  IdExpressions
+  Identifiers
+  MemberSpecifications
+  TemplateIds
+
+exports
+
+  sorts
+    ClassSpecifier
+    ClassHead
+    ClassName
+    ClassKey
+
+  context-free syntax
+
+    %% 9 [class]
+    Identifier -> ClassName
+
+    TemplateId -> ClassName
+
+    %% 9 [class]
+    ClassHead "{" ms:MemberSpecification? "}" -> ClassSpecifier
+
+    %% 9 [class]
+    ClassKey i:Identifier? bc:BaseClause?                     -> ClassHead
+
+    ClassKey NestedNameSpecifier Identifier bc:BaseClause?     -> ClassHead
+    ClassKey ns:NestedNameSpecifier? TemplateId bc:BaseClause? -> ClassHead
+
+    %% 9 [class]
+    "class"  -> ClassKey
+
+    "struct" -> ClassKey
+
+    "union"  -> ClassKey

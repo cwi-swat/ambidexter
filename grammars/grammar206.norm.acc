@@ -1,0 +1,19 @@
+%token Tb, Ta;
+
+%nodefault
+
+START :  S
+;
+
+S :  A
+;
+
+C : 
+;
+
+B :  Ta Tb
+;
+
+A :  C B
+|  Ta Tb
+;

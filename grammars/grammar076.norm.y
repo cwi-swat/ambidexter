@@ -1,0 +1,24 @@
+%token CC99
+%token CC97
+%token CC117
+%token CC103
+
+%%
+
+START : R 
+;
+
+R : 
+|
+CC117 R CC103
+|
+CC103 R CC117
+|
+CC117 R CC97
+|
+CC97 R CC117
+|
+CC103 R CC99
+|
+CC99 R CC103 
+;

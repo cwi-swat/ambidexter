@@ -1,0 +1,103 @@
+%%
+%% MemberSpecifications.sdf:
+%% this file is a part of CxxGrammar from the Transformers project.
+%% Copyright (C) 2004 EPITA Research and Development Laboratory.
+%%
+%% This program is free software; you can redistribute it and/or modify
+%% it under the terms of the GNU General Public License as published by
+%% the Free Software Foundation; either version 2 of the License, or
+%% (at your option) any later version.
+%%
+%% This program is distributed in the hope that it will be useful,
+%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%% GNU General Public License for more details.
+%%
+%% You should have received a copy of the GNU General Public License
+%% along with this program; if not, write to the Free Software
+%% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%%
+module MemberSpecifications
+
+imports
+
+  AccessSpecifiers
+  ConstantExpressions
+  FunctionDefinitions
+  IdExpressions
+  Identifiers
+  Specifiers
+  UsingDeclarations
+  TemplateDeclarations
+
+exports
+
+  sorts
+    MemberDeclarator
+    MemberDeclaratorList
+    ConstantInitializer
+    PureSpecifier
+
+exports
+
+  sorts
+    MemberSpecification
+    MemberDeclaration
+
+  context-free syntax
+
+    %% 9.2 [class.mem]
+    MemberDeclaration ms:MemberSpecification?   -> MemberSpecification
+    AccessSpecifier ":" ms:MemberSpecification? -> MemberSpecification
+
+    %% 9.2 [class.mem]
+    ds:DeclSpecifierSeq? mdl:MemberDeclaratorList? ";"   -> MemberDeclaration
+
+    FunctionDefinition semi:";"?                          -> MemberDeclaration
+
+    root:"::"? nns:NestedNameSpecifier template:"template"? UnqualifiedId ";"
+                                                          -> MemberDeclaration
+    UsingDeclaration                                      -> MemberDeclaration
+    TemplateDeclaration                                   -> MemberDeclaration
+
+
+    MemberDeclaratorList -> MemberDeclaratorList?
+                         -> MemberDeclaratorList?
+
+    %% 9.2 [class.mem]
+    list:{ MemberDeclarator ","}+ -> MemberDeclaratorList
+
+    l1:{ MemberDeclarator "," }+ "," l2:{ MemberDeclarator "," }+ -> { MemberDeclarator "," }+
+
+    MemberDeclarator -> { MemberDeclarator "," }+
+
+    %%FIXME
+    l:{MemberDeclarator ","}+ "," {MemberDeclarator ","}* -> {MemberDeclarator ","}+
+      {avoid}
+    {MemberDeclarator ","}* "," l:{MemberDeclarator ","}+ -> {MemberDeclarator ","}+
+      {avoid}
+    l:{MemberDeclarator ","}+ -> {MemberDeclarator ","}*
+      {avoid}
+
+
+    %% 9.2 [class.mem]
+    %% Declarator PureSpecifier?          -> MemberDeclarator
+    %% Declarator ConstantInitializer?    -> MemberDeclarator
+    %% Identifier? ":" ConstantExpression -> MemberDeclarator
+
+    %% The chunk of grammar above generates useless ambiguities
+    %% when both `PureSpecifier?' and `ConstantInitializer?' are
+    %% empty.  It will work better this way:
+    Declarator                         -> MemberDeclarator
+
+    Declarator PureSpecifier           -> MemberDeclarator
+
+    Declarator ConstantInitializer     -> MemberDeclarator
+
+    i:Identifier? ":" ConstantExpression -> MemberDeclarator
+
+    %% 9.2 [class.mem]
+    "=" "0" -> PureSpecifier
+
+    %% 9.2 [class.mem]
+    "=" ConstantExpression -> ConstantInitializer

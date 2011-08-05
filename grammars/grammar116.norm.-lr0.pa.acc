@@ -1,0 +1,311 @@
+%token DOTDOT, IF, THEN, Term_mult_op, REPEAT, FUNCTION, OF, SBEGIN, LABEL, Term_add_op, WHILE, STRING, RECORD, SFILE, Term_direction, DO, VAR, WITH, UNSIGNED_INT, CONST, SET, UNTIL, END, TYPE, ARRAY, ELSE, PACKED, PROCEDURE, NOT, CASE, BECOMES, IDENTIFIER, FOR, PROGRAM;
+
+%nodefault
+
+program :  PROGRAM newident external_files ';' block '.'
+;
+
+fixed_part :  record_section
+|  fixed_part ';' record_section
+;
+
+compound_stmt :  SBEGIN statements END
+;
+
+expressions :  expression
+|  expressions ',' expression
+;
+
+actual_params : 
+|  '(' actuals_list ')'
+;
+
+formal_params : 
+|  '(' formal_p_sects ')'
+;
+
+newident :  IDENTIFIER
+;
+
+factor :  unsigned_lit
+|  variable
+|  '(' expression ')'
+|  set
+|  NOT factor
+;
+
+param_group :  newident_list ':' paramtype
+;
+
+case_list :  case_list ';' case_list_elem
+|  case_list_elem
+;
+
+unsigned_lit :  unsigned_num
+|  STRING
+;
+
+assignment :  variable BECOMES expression
+;
+
+function_form : 
+|  formal_params ':' ident
+;
+
+procedure_call :  ident actual_params
+;
+
+paramtype :  PACKED ARRAY '[' index_spec ']' OF ident
+|  ARRAY '[' index_specs ']' OF paramtype
+|  ident
+;
+
+opt_declarations : 
+|  declarations
+;
+
+field_list :  fixed_part
+|  variant_part
+|  fixed_part ';' variant_part
+;
+
+statement_part :  compound_stmt
+;
+
+case_list_elem : 
+|  case_label_list ':' statement
+;
+
+var_dcl_part :  VAR variable_dcls ';'
+;
+
+unsigned_num :  UNSIGNED_INT
+;
+
+type :  simple_type
+|  struct_type
+|  PACKED struct_type
+;
+
+declarations :  declarations declaration
+|  declaration
+;
+
+record_var :  variable
+;
+
+proc_or_func :  func_heading ';' body ';'
+|  proc_heading ';' body ';'
+;
+
+formal_p_sects :  formal_p_sects ';' formal_p_sect
+|  formal_p_sect
+;
+
+newident_list :  new_id_list
+;
+
+variable_dcls :  variable_dcls ';' variable_dcl
+|  variable_dcl
+;
+
+const_def :  newident '=' constant
+;
+
+simple_type :  ident
+|  '(' newident_list ')'
+|  constant DOTDOT constant
+;
+
+case_label :  constant
+;
+
+colon_things :  ':' expression ':' expression
+|  ':' expression
+;
+
+constant :  '-' ident
+|  STRING
+|  '+' ident
+|  ident
+|  '-' unsigned_num
+|  '+' unsigned_num
+|  unsigned_num
+;
+
+new_id_list :  new_id_list ',' newident
+|  newident
+;
+
+member_list :  members
+| 
+;
+
+body :  block
+|  IDENTIFIER
+;
+
+actual_param :  expression
+|  expression colon_things
+;
+
+member :  expression
+|  expression DOTDOT expression
+;
+
+members :  members ',' member
+|  member
+;
+
+proc_heading :  PROCEDURE newident formal_params
+;
+
+expression :  simple_expr
+|  simple_expr relational_op simple_expr
+;
+
+index_t_list :  index_t_list ',' simple_type
+|  simple_type
+;
+
+tag_field :  ident
+|  newident ':' ident
+;
+
+label_dcl_part :  LABEL labels ';'
+;
+
+variants :  variant
+|  variants ';' variant
+;
+
+block :  opt_declarations statement_part
+;
+
+variable_dcl :  newident_list ':' type
+;
+
+type_dcl_part :  TYPE type_defs ';'
+;
+
+index_spec :  newident DOTDOT newident ':' ident
+;
+
+func_heading :  FUNCTION newident function_form
+;
+
+variant : 
+|  case_label_list ':' '(' field_list ')'
+;
+
+rec_var_list :  rec_var_list ',' record_var
+|  record_var
+;
+
+external_files : 
+;
+
+formal_p_sect :  param_group
+|  proc_heading
+|  VAR param_group
+|  func_heading
+;
+
+const_dcl_part :  CONST const_defs ';'
+;
+
+type_def :  newident '=' type
+;
+
+labels :  label
+|  labels ',' label
+;
+
+variable :  ident actual_params
+|  variable '^'
+|  variable '[' expressions ']'
+|  variable '.' ident
+;
+
+declaration :  const_dcl_part
+|  label_dcl_part
+|  proc_dcl_part
+|  var_dcl_part
+|  type_dcl_part
+;
+
+relational_op :  '='
+;
+
+case_label_list :  case_label
+|  case_label_list ',' case_label
+;
+
+actuals_list :  actuals_list ',' actual_param
+|  actual_param
+;
+
+record_section :  newident_list ':' type
+| 
+;
+
+label :  UNSIGNED_INT
+;
+
+type_defs :  type_def
+|  type_defs ';' type_def
+;
+
+ident :  IDENTIFIER
+;
+
+statement :  WHILE expression DO statement
+|  CASE expression OF case_list END
+|  assignment
+|  compound_stmt
+|  procedure_call
+|  WITH rec_var_list DO statement
+|  IF expression THEN statement ELSE statement
+|  FOR ident BECOMES expression Term_direction expression DO statement
+|  REPEAT statements UNTIL expression
+| 
+|  label ':' statement
+;
+
+proc_dcl_part :  proc_or_func
+;
+
+variant_part :  CASE tag_field OF variants
+;
+
+term :  factor
+|  term Term_mult_op factor
+|  NOT term
+;
+
+index_specs :  index_spec
+|  index_specs ';' index_spec
+;
+
+const_defs :  const_def
+|  const_defs ';' const_def
+;
+
+statements :  statements ';' statement
+|  statement
+;
+
+struct_type :  SFILE OF type
+|  SET OF simple_type
+|  ARRAY '[' index_t_list ']' OF type
+|  RECORD field_list END
+;
+
+simple_expr :  '-' term
+|  '+' term
+|  term
+|  simple_expr Term_add_op term
+;
+
+set :  '[' member_list ']'
+;

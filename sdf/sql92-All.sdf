@@ -1,0 +1,193 @@
+module sql92-All
+imports sql92
+
+exports
+context-free start-symbols
+
+(As? RangeVar ("(" {ColumnName ","}+ ")")?)Stm
+CaseExpr
+ValExpr
+{ValExpr ","}+
+SimpleWhenClause
+SimpleWhenClause+
+ElseClause
+ElseClause?
+SearchedWhenClause
+SearchedWhenClause+
+ResultExpr
+CondExpr
+ColumnRef
+ColumnQualifier
+Table
+SetQuantifier
+Catalog
+(Catalog ".")
+(Catalog ".")?
+Identifier
+Schema
+(Schema ".")
+(Schema ".")?
+BaseTable
+(ColumnQualifier ".")
+(ColumnQualifier ".")?
+ColumnName
+RangeVar
+CharValExpr
+BitValExpr
+StringValFun
+CharValFun
+CollateClause
+BitValFun
+NumValExpr
+ForClause
+ForClause?
+QualifiedName
+TrimOp
+TrimOp?
+TrimSpec
+TrimSpec?
+CharValExpr?
+ReservedKeyword
+"AND"   |
+    "AVG"
+"FROM" |
+    "FULL"
+"INNER" |
+    "INTERSECT"
+"IN"    |
+    "INNER" |
+    "INTERSECT"
+"LIKE" |
+    "LEFT"
+"MAX"   |
+    "MIN"
+"NOT"   |
+    "NULL"
+"NATURAL" |
+    "NOT"   |
+    "NULL"
+"ORDER" |
+    "OUTER"
+"OR"    |
+    "ORDER" |
+    "OUTER"
+"ON"    |
+    "OR"    |
+    "ORDER" |
+    "OUTER"
+"SELECT" |
+    "SUM"
+CastOperand
+CastTarget
+CastSpec
+DomainName
+DataType
+LAYOUT
+LAYOUT?
+QueryExpr
+TableExpr
+RowConstructor
+JoinTableExpr
+All
+All?
+Corresponding
+Corresponding?
+ByClause
+ByClause?
+{ColumnName ","}+
+{RowConstructor ","}+
+TableName
+SetQuantifier?
+SelectItem
+{SelectItem ","}+
+As
+As?
+(As? ColumnName)
+(As? ColumnName)?
+(RangeVar ".")
+(RangeVar ".")?
+TableRef
+{TableRef ","}+
+WhereClause
+WhereClause?
+GroupByClause
+GroupByClause?
+HavingClause
+HavingClause?
+GroupingColumnRef
+{GroupingColumnRef ","}+
+( "(" {ColumnName ","}+ ")")
+( "(" {ColumnName ","}+ ")")?
+(As? RangeVar ( "(" {ColumnName ","}+ ")")? )
+(As? RangeVar ( "(" {ColumnName ","}+ ")")? )?
+JoinType
+JoinType?
+JoinSpec
+ExecStm
+DataStm
+DeleteStm
+SelectStm
+InsertStm
+UpdateStm
+TempTableDec
+OrderByClause
+OrderByClause?
+SortSpec
+{SortSpec ","}+
+SortKey
+OrderingSpec
+OrderingSpec?
+UnsignedInteger
+CompOp
+Not
+Not?
+InPredVal
+EscapeClause
+EscapeClause?
+Quantifier
+Unique
+Unique?
+PartialOrFull
+PartialOrFull?
+[a-zA-Z0-9\_]*
+UnsignedValSpec
+GeneralValSpec
+DynParamSpec
+VarSpec
+IndicatorVar
+VarName
+UnsignedLit
+Indicator
+Indicator?
+HostId
+Id
+Lit
+UnsignedNumLit
+GeneralLit
+CharStringLit
+NatCharStringLit
+BitStringLit
+HexStringLit
+DateTimeStringLit
+IntervalLit
+ApproxNumLit
+ExactNumLit
+[0-9]+
+NumDigits
+[0-9]*
+Exponent
+SignedInteger
+[\+\-]?
+CharRepr
+CharRepr*
+E
+AggrFun
+DupElim
+DupElim?
+
+LayoutDummy
+
+context-free syntax
+
+EmptyDummy EmptyDummy -> LayoutDummy
+-> EmptyDummy

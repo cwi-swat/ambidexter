@@ -1,0 +1,17 @@
+module EmptyListLayout
+
+exports
+context-free start-symbols
+S
+
+context-free syntax
+
+ L* -> S
+
+lexical syntax
+
+[\ ] -> LAYOUT
+
+context-free restrictions
+
+LAYOUT? -/- [\ ]

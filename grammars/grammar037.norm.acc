@@ -1,0 +1,13 @@
+%token CC99, CC98, CC119, CC115;
+
+%nodefault
+
+START :  S
+;
+
+S :  CC119 CC98 CC99 CC98 CC98 R CC98
+;
+
+R :  CC115
+|  CC115 R
+;

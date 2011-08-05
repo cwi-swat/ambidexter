@@ -1,0 +1,166 @@
+program : Term_program Term_program Term_program Term_program Term_program Term_program ;
+ : PROGRAM Term_newident CC59 block CC46 ;
+
+opt_declarations : declarations ;
+ : ;
+
+expression : simple_expr Term_relational_op simple_expr ;
+ : simple_expr ;
+
+unsigned_lit : unsigned_num ;
+
+record_var : variable ;
+
+procedure_call : Term_ident actual_params ;
+
+assignment : variable BECOMES expression ;
+
+case_label : constant ;
+
+block : opt_declarations statement_part ;
+ : Term_block Term_block ;
+
+unsigned_num : UNSIGNED_INT ;
+
+constant : unsigned_num ;
+
+body : block ;
+ : Term_body ;
+
+case_list_elem : ;
+ : case_label_list CC58 statement ;
+
+statement : REPEAT statements UNTIL expression ;
+ : procedure_call ;
+ : label CC58 statement ;
+ : WHILE expression DO statement ;
+ : FOR Term_ident BECOMES expression Term_direction expression DO statement ;
+ : CASE expression OF case_list END ;
+ : assignment ;
+ : compound_stmt ;
+ : ;
+ : WITH rec_var_list DO statement ;
+ : IF expression THEN statement ELSE statement ;
+
+proc_or_func : Term_proc_heading Term_proc_heading CC59 body CC59 ;
+ : Term_func_heading Term_func_heading CC59 body CC59 ;
+ : Term_proc_or_func Term_proc_or_func Term_proc_or_func Term_proc_or_func Term_proc_or_func ;
+
+statements : statements CC59 statement ;
+ : statement ;
+
+factor : variable ;
+ : set ;
+ : unsigned_lit ;
+ : NOT factor ;
+ : CC40 expression CC41 ;
+
+compound_stmt : SBEGIN statements END ;
+
+colon_things : CC58 expression ;
+ : CC58 expression CC58 expression ;
+
+expressions : expression ;
+ : expressions CC44 expression ;
+
+label : UNSIGNED_INT ;
+
+actual_param : expression colon_things ;
+ : expression ;
+
+actuals_list : actuals_list CC44 actual_param ;
+ : actual_param ;
+
+proc_dcl_part : proc_or_func ;
+ : Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part Term_proc_dcl_part ;
+
+term : term Term_mult_op factor ;
+ : NOT term ;
+ : factor ;
+
+actual_params : CC40 actuals_list CC41 ;
+
+member : expression ;
+ : expression DOTDOT expression ;
+
+case_label_list : case_label ;
+
+variable : Term_ident actual_params ;
+ : variable CC94 ;
+ : variable CC91 expressions CC93 ;
+ : variable CC46 Term_ident ;
+
+members : members CC44 member ;
+ : member ;
+
+member_list : members ;
+
+rec_var_list : rec_var_list CC44 record_var ;
+ : record_var ;
+
+declaration : Term_declaration Term_declaration Term_declaration ;
+ : proc_dcl_part ;
+
+declarations : Term_declarations Term_declarations Term_declarations ;
+ : declaration ;
+ : declarations declaration ;
+
+case_list : case_list_elem ;
+ : case_list CC59 case_list_elem ;
+
+set : CC91 member_list CC93 ;
+
+simple_expr : CC45 term ;
+ : term ;
+ : CC43 term ;
+ : simple_expr Term_add_op term ;
+
+statement_part : compound_stmt ;
+
+/* terminals */
+Term_relational_op : "Term_relational_op" ;
+CC41 : ")" ;
+Term_func_heading : "Term_func_heading" ;
+CC40 : "(" ;
+CC45 : "-" ;
+Term_ident : "Term_ident" ;
+CC43 : "+" ;
+CC46 : "." ;
+CC59 : ";" ;
+PROGRAM : "PROGRAM" ;
+CC93 : "]" ;
+CC91 : "[" ;
+WITH : "WITH" ;
+Term_declarations : "Term_declarations" ;
+CC44 : "," ;
+END : "END" ;
+Term_direction : "Term_direction" ;
+SBEGIN : "SBEGIN" ;
+Term_declaration : "Term_declaration" ;
+CC94 : "^" ;
+FOR : "FOR" ;
+DO : "DO" ;
+WHILE : "WHILE" ;
+Term_proc_dcl_part : "Term_proc_dcl_part" ;
+UNTIL : "UNTIL" ;
+REPEAT : "REPEAT" ;
+Term_proc_or_func : "Term_proc_or_func" ;
+Term_add_op : "Term_add_op" ;
+OF : "OF" ;
+CASE : "CASE" ;
+ELSE : "ELSE" ;
+Term_program : "Term_program" ;
+Term_external_files : "Term_external_files" ;
+THEN : "THEN" ;
+IF : "IF" ;
+Term_newident : "Term_newident" ;
+DOTDOT : "DOTDOT" ;
+NOT : "NOT" ;
+Term_body : "Term_body" ;
+Term_block : "Term_block" ;
+Term_opt_declarations : "Term_opt_declarations" ;
+BECOMES : "BECOMES" ;
+Term_mult_op : "Term_mult_op" ;
+UNSIGNED_INT : "UNSIGNED_INT" ;
+CC58 : ":" ;
+Term_proc_heading : "Term_proc_heading" ;

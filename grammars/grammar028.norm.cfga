@@ -1,0 +1,17 @@
+START : Z ;
+
+Z : CC97 X Y ;
+ : CC98 X Z ;
+ : CC122 ;
+
+Y : CC121 ;
+
+X : CC97 Y ;
+ : CC97 CC122 ;
+ : CC121 ;
+
+/* terminals */
+CC121 : "CC121" ;
+CC98 : "CC98" ;
+CC97 : "CC97" ;
+CC122 : "CC122" ;

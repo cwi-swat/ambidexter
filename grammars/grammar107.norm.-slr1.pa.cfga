@@ -1,0 +1,31 @@
+y_sql : y_update ;
+
+y_value : NULL_VALUE ;
+
+y_update : UPDATE Term_y_table SET y_assignments ;
+ : UPDATE Term_y_table SET y_assignments WHERE Term_y_condition Term_y_condition Term_y_condition ;
+
+y_expression : y_product ;
+
+y_atom : y_value ;
+
+y_product : y_term ;
+
+y_assignments : y_assignment ;
+ : y_assignments CC44 y_assignment ;
+
+y_assignment : NAME EQUAL NULL_VALUE ;
+ : NAME EQUAL y_expression ;
+
+y_term : y_atom ;
+
+/* terminals */
+NAME : "NAME" ;
+SET : "SET" ;
+CC44 : "," ;
+Term_y_condition : "Term_y_condition" ;
+UPDATE : "UPDATE" ;
+Term_y_table : "Term_y_table" ;
+WHERE : "WHERE" ;
+NULL_VALUE : "NULL_VALUE" ;
+EQUAL : "EQUAL" ;

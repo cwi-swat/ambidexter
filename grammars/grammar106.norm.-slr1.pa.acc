@@ -1,0 +1,81 @@
+%token COMPARISON_OPERATOR, NULL_VALUE, BY, Term_y_table, Term_y_order, Term_y_sql, Term_y_select, EQUAL, Term_y_assignments, NAME, UPDATE, WHERE, Term_y_term, Term_y_delete, SET, SELECT, AND, Term_y_product, NOT, Term_y_expression, Term_y_sub_condition2, Term_y_boolean, ORDER, DELETE, FROM, IS, Term_y_atom, Term_y_assignment, Term_y_columns, OR, Term_y_sub_condition, Term_y_comparison, Term_y_update, Term_y_condition;
+
+%nodefault
+
+y_sql :  Term_y_sql
+|  y_select
+|  y_delete
+|  y_update
+;
+
+y_assignments :  Term_y_assignments
+|  y_assignment
+|  y_assignments ',' y_assignment
+;
+
+y_update :  UPDATE Term_y_table SET y_assignments
+|  UPDATE Term_y_table SET y_assignments WHERE y_condition
+|  Term_y_update
+;
+
+y_comparison :  y_expression IS NULL_VALUE
+|  y_expression EQUAL y_expression
+|  y_expression NOT NULL_VALUE
+|  Term_y_comparison
+|  y_expression COMPARISON_OPERATOR y_expression
+;
+
+y_expression :  '(' y_expression ')'
+|  y_product
+|  y_expression '-' y_product
+|  y_expression '+' y_product
+|  Term_y_expression
+;
+
+y_sub_condition2 :  y_sub_condition2 AND y_boolean
+|  y_boolean
+|  Term_y_sub_condition2
+;
+
+y_product :  y_product '*' y_term
+|  Term_y_product
+|  y_term
+|  y_product '/' y_term
+;
+
+y_atom :  '(' y_expression ')'
+|  Term_y_atom
+;
+
+y_sub_condition :  Term_y_sub_condition
+|  y_sub_condition OR y_sub_condition2
+|  y_sub_condition2
+;
+
+y_condition :  Term_y_condition
+|  y_sub_condition
+;
+
+y_assignment :  Term_y_assignment
+|  NAME EQUAL y_expression
+;
+
+y_term :  y_atom
+|  Term_y_term
+|  '-' y_term
+;
+
+y_boolean :  Term_y_boolean
+|  y_comparison
+|  '(' y_sub_condition ')'
+|  NOT y_boolean
+;
+
+y_select :  SELECT Term_y_columns FROM Term_y_table WHERE y_condition ORDER BY Term_y_order
+|  Term_y_select
+|  SELECT Term_y_columns FROM Term_y_table WHERE y_condition
+;
+
+y_delete :  Term_y_delete
+|  DELETE FROM Term_y_table WHERE y_condition
+;

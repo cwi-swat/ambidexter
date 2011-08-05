@@ -1,0 +1,57 @@
+%token NAME, COMPARISON_OPERATOR, NULL_VALUE, UPDATE, WHERE, AND, Term_y_table, EQUAL, OR, NOT, SET;
+
+%nodefault
+
+y_sql :  y_update
+;
+
+y_assignments :  y_assignment
+|  y_assignments ',' y_assignment
+;
+
+y_update :  UPDATE Term_y_table SET y_assignments
+|  UPDATE Term_y_table SET y_assignments WHERE y_condition
+;
+
+y_comparison :  y_expression EQUAL y_expression
+|  y_expression COMPARISON_OPERATOR y_expression
+;
+
+y_expression :  y_product
+|  y_expression '-' y_product
+|  y_expression '+' y_product
+;
+
+y_sub_condition2 :  y_sub_condition2 AND y_boolean
+|  y_boolean
+;
+
+y_value :  NULL_VALUE
+;
+
+y_product :  y_product '*' y_term
+|  y_term
+|  y_product '/' y_term
+;
+
+y_atom :  y_value
+;
+
+y_sub_condition :  y_sub_condition OR y_sub_condition2
+|  y_sub_condition2
+;
+
+y_condition :  y_sub_condition
+;
+
+y_assignment :  NAME EQUAL NULL_VALUE
+|  NAME EQUAL y_expression
+;
+
+y_term :  y_atom
+|  '-' y_term
+;
+
+y_boolean :  y_comparison
+|  NOT y_boolean
+;

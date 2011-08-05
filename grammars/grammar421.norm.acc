@@ -1,0 +1,13 @@
+%token Td, Tc;
+
+%nodefault
+
+START :  S
+;
+
+S :  C C
+;
+
+C :  Td
+|  Tc C
+;

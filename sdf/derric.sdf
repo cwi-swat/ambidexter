@@ -1,0 +1,92 @@
+module derric
+
+imports
+	basic/Whitespace
+	basic/NatCon
+	basic/IdentifierCon
+	basic/StrCon
+
+hiddens
+context-free start-symbols Format
+
+Exp Sym Structures ValueListSpecifier FieldSpecifier FormatSpecifier
+
+exports
+sorts HexByte
+lexical syntax
+   [0][xX]([a-fA-F0-9][a-fA-F0-9])+ -> Byte {category("Constant")}
+
+lexical restrictions
+  Byte -/- [a-fA-F0-9]
+
+exports
+sorts
+context-free syntax
+
+  "format" IdCon Defaults Sequence Structures -> Format
+  "format" -> IdCon {reject}
+
+  ("default" DefaultFormatSpecifier)* -> Defaults
+  "default" -> IdCon {reject}
+
+  FormatSpecifierKeyword ( FormatSpecifierValue | NatCon ) -> DefaultFormatSpecifier
+  "unit" | "size" | "sign" | "endian" | "strings" | "type" -> FormatSpecifierKeyword
+  "true" | "false" | "byte" | "bit" | "integer" | "float" | "big" | "little" | "ascii" | "utf8" -> FormatSpecifierValue
+  
+  "sequence" Sym* -> Sequence
+  "sequence" -> IdCon {reject}
+
+  "(" Sym ")" -> Sym {bracket}
+  IdCon -> Sym
+  "not" "(" IdCon+ ")" -> Sym
+  "not" -> Sym {reject}
+  Sym "*" -> Sym
+  Sym "?" -> Sym
+
+  "structures" Structure* -> Structures
+  "structures" -> IdCon {reject}
+
+context-free syntax
+  StructureHead "{" (Field ";")* "}" -> Structure
+  IdCon -> StructureHead
+  IdCon "=" IdCon -> StructureHead
+  
+  IdCon ":" FieldSpecifier -> Field
+  IdCon -> Field
+
+  ValueListSpecifier FormatSpecifier* -> FieldSpecifier
+  FormatSpecifier+ -> FieldSpecifier
+  
+  FormatSpecifierKeyword ( FormatSpecifierValue | Exp ) -> FormatSpecifier
+
+  { Exp "," }+ -> ValueListSpecifier
+  "expected" ValueListSpecifier -> ValueListSpecifier
+  "expected" -> IdCon {reject}
+  "terminatedBefore" ValueListSpecifier -> ValueListSpecifier
+  "terminatedBefore" -> IdCon {reject}
+
+  Byte -> Exp
+  StrCon -> Exp
+  IdCon -> Exp
+  NatCon -> Exp
+  "(" Exp ")" -> Exp
+  "lengthOf" "(" Exp ")" -> Exp
+  "lengthOf" -> IdCon {reject}
+  "offset" "(" IdCon ")" -> Exp
+  "offset" -> IdCon {reject}
+
+context-free priorities
+  {non-assoc: "-" Exp -> Exp
+  "!" Exp -> Exp }
+  >
+  {non-assoc: Exp "*" Exp -> Exp {left}
+  Exp "/" Exp -> Exp {non-assoc}}
+  >
+  {left: Exp "+" Exp -> Exp {left}
+  Exp "-" Exp -> Exp {left}}
+  >
+  Exp ".." Exp -> Exp {non-assoc}
+  >
+  Exp "|" Exp -> Exp {left}
+  
+  

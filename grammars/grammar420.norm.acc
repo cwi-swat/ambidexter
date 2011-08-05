@@ -1,0 +1,17 @@
+%token Ts, Ti, Te;
+
+%nodefault
+
+START :  S
+;
+
+L :  Ti
+|  Ts R
+;
+
+S :  R
+|  L Te R
+;
+
+R :  L
+;

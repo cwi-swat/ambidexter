@@ -1,0 +1,13 @@
+%token CC121, CC120;
+
+%nodefault
+
+START :  S
+;
+
+S :  A A
+;
+
+A :  CC120 A CC120
+|  CC121
+;

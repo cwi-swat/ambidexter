@@ -1,0 +1,41 @@
+%token CC98
+%token CC99
+%token CC97
+
+%%
+
+START : S 
+;
+
+S : T Q
+|
+T CC98
+|
+CC98 
+;
+
+T : CC97
+|
+CC99 CC97
+|
+CC98 CC97
+|
+CC97 T
+|
+CC99 CC97 T
+|
+CC98 CC97 T 
+;
+
+Q : CC97 Q
+|
+CC97
+|
+CC99 CC97
+|
+CC99 CC97 Q
+|
+CC98 CC99 Q
+|
+CC98 CC99 
+;

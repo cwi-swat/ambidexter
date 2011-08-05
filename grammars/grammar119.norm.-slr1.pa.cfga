@@ -1,0 +1,230 @@
+program : PROGRAM newident CC59 block CC46 ;
+
+constant : CC45 unsigned_num ;
+ : ident ;
+ : CC43 ident ;
+ : STRING ;
+ : CC45 ident ;
+ : unsigned_num ;
+ : CC43 unsigned_num ;
+
+body : block ;
+
+case_list_elem : ;
+ : case_label_list CC58 statement ;
+
+statement : IF expression THEN statement ELSE statement ;
+ : procedure_call ;
+ : label CC58 statement ;
+ : REPEAT statements UNTIL expression ;
+ : assignment ;
+ : WHILE expression DO statement ;
+ : compound_stmt ;
+ : ;
+ : FOR ident BECOMES expression Term_direction expression DO statement ;
+ : CASE expression OF case_list END ;
+ : WITH rec_var_list DO statement ;
+
+field_list : variant_part ;
+ : fixed_part ;
+ : fixed_part CC59 variant_part ;
+
+mult_op : CC46 ;
+
+proc_or_func : Term_proc_heading Term_proc_heading CC59 body CC59 ;
+ : Term_func_heading Term_func_heading CC59 body CC59 ;
+
+statements : statements CC59 statement ;
+ : statement ;
+
+factor : variable ;
+ : set ;
+ : unsigned_lit ;
+ : NOT factor ;
+ : CC40 expression CC41 ;
+
+index_t_list : simple_type ;
+ : index_t_list CC44 simple_type ;
+
+compound_stmt : SBEGIN statements END ;
+
+colon_things : CC58 expression ;
+ : CC58 expression CC58 expression ;
+
+new_id_list : newident ;
+ : new_id_list CC44 newident ;
+
+expressions : expression ;
+ : expressions CC44 expression ;
+
+label : UNSIGNED_INT ;
+
+actual_param : expression colon_things ;
+ : expression ;
+
+variable_dcl : newident_list CC58 type ;
+
+actuals_list : actuals_list CC44 actual_param ;
+ : actual_param ;
+
+variable_dcls : variable_dcls CC59 variable_dcl ;
+ : variable_dcl ;
+
+proc_dcl_part : proc_or_func ;
+
+struct_type : SET OF simple_type ;
+ : SFILE OF type ;
+ : RECORD field_list END ;
+ : ARRAY CC91 index_t_list CC93 OF type ;
+
+term : term mult_op factor ;
+ : factor ;
+
+actual_params : ;
+ : CC40 actuals_list CC41 ;
+
+var_dcl_part : VAR variable_dcls CC59 ;
+
+member : expression ;
+ : expression DOTDOT expression ;
+
+simple_type : constant DOTDOT constant ;
+ : ident ;
+ : CC40 newident_list CC41 ;
+
+case_label_list : case_label_list CC44 case_label ;
+ : case_label ;
+
+type_dcl_part : TYPE type_defs CC59 ;
+
+variable : ident actual_params ;
+ : variable CC91 expressions CC93 ;
+ : variable CC94 ;
+ : variable CC46 ident ;
+
+members : members CC44 member ;
+ : member ;
+
+type : PACKED struct_type ;
+ : struct_type ;
+ : simple_type ;
+
+variant : case_label_list CC58 CC40 field_list CC41 ;
+ : ;
+
+member_list : members ;
+
+type_def : newident CC61 type ;
+
+rec_var_list : rec_var_list CC44 record_var ;
+ : record_var ;
+
+type_defs : type_defs CC59 type_def ;
+ : type_def ;
+
+variants : variants CC59 variant ;
+ : variant ;
+
+declaration : var_dcl_part ;
+ : type_dcl_part ;
+ : proc_dcl_part ;
+
+tag_field : ident ;
+ : newident CC58 ident ;
+
+declarations : declaration ;
+ : declarations declaration ;
+
+relational_op : CC61 ;
+
+case_list : case_list_elem ;
+ : case_list CC59 case_list_elem ;
+
+set : CC91 member_list CC93 ;
+
+simple_expr : simple_expr Term_add_op term ;
+ : term ;
+ : CC43 term ;
+ : CC45 term ;
+
+statement_part : compound_stmt ;
+
+opt_declarations : declarations ;
+
+expression : simple_expr relational_op simple_expr ;
+ : simple_expr ;
+
+unsigned_lit : STRING ;
+ : unsigned_num ;
+
+record_section : newident_list CC58 type ;
+ : ;
+
+ident : IDENTIFIER ;
+
+record_var : variable ;
+
+newident_list : new_id_list ;
+
+procedure_call : ident actual_params ;
+
+variant_part : CASE tag_field OF variants ;
+
+assignment : variable BECOMES expression ;
+
+fixed_part : fixed_part CC59 record_section ;
+ : record_section ;
+
+case_label : constant ;
+
+block : opt_declarations statement_part ;
+
+unsigned_num : UNSIGNED_INT ;
+
+newident : IDENTIFIER ;
+
+/* terminals */
+PROGRAM : "PROGRAM" ;
+CC61 : "=" ;
+PACKED : "PACKED" ;
+SFILE : "SFILE" ;
+SET : "SET" ;
+Term_proc_heading : "Term_proc_heading" ;
+RECORD : "RECORD" ;
+CC93 : "]" ;
+ARRAY : "ARRAY" ;
+TYPE : "TYPE" ;
+VAR : "VAR" ;
+CC91 : "[" ;
+WITH : "WITH" ;
+END : "END" ;
+SBEGIN : "SBEGIN" ;
+CC44 : "," ;
+FOR : "FOR" ;
+DO : "DO" ;
+CC94 : "^" ;
+WHILE : "WHILE" ;
+UNTIL : "UNTIL" ;
+Term_func_heading : "Term_func_heading" ;
+REPEAT : "REPEAT" ;
+OF : "OF" ;
+CASE : "CASE" ;
+ELSE : "ELSE" ;
+Term_direction : "Term_direction" ;
+THEN : "THEN" ;
+IF : "IF" ;
+DOTDOT : "DOTDOT" ;
+NOT : "NOT" ;
+Term_external_files : "Term_external_files" ;
+BECOMES : "BECOMES" ;
+IDENTIFIER : "IDENTIFIER" ;
+STRING : "STRING" ;
+UNSIGNED_INT : "UNSIGNED_INT" ;
+CC58 : ":" ;
+CC41 : ")" ;
+CC40 : "(" ;
+CC45 : "-" ;
+Term_add_op : "Term_add_op" ;
+CC43 : "+" ;
+CC46 : "." ;
+CC59 : ";" ;

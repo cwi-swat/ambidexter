@@ -1,0 +1,24 @@
+module SimpleReject
+
+exports
+
+context-free start-symbols
+S
+
+context-free syntax
+
+ID -> S
+
+"abc" -> S
+
+KeyWord -> ID { reject }
+
+"abc" -> KeyWord
+
+lexical syntax
+
+[a-c]+ -> ID
+
+[\ ] -> LAYOUT
+
+

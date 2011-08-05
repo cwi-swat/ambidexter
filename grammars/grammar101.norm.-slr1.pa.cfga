@@ -1,0 +1,56 @@
+y_sql : Term_y_sql Term_y_sql Term_y_sql ;
+ : y_select ;
+ : y_delete ;
+ : y_update ;
+
+y_condition : Term_y_condition Term_y_condition Term_y_condition ;
+ : y_sub_condition ;
+
+y_delete : Term_y_delete Term_y_delete Term_y_delete ;
+ : DELETE FROM Term_y_table WHERE y_condition ;
+
+y_sub_condition2 : y_sub_condition2 AND y_boolean ;
+ : Term_y_sub_condition2 Term_y_sub_condition2 Term_y_sub_condition2 ;
+ : y_boolean ;
+
+y_update : Term_y_update Term_y_update Term_y_update Term_y_update Term_y_update Term_y_update ;
+ : UPDATE Term_y_table SET Term_y_assignments Term_y_assignments Term_y_assignments WHERE y_condition ;
+
+y_sub_condition : y_sub_condition OR y_sub_condition ;
+ : y_sub_condition2 ;
+ : Term_y_sub_condition Term_y_sub_condition Term_y_sub_condition ;
+
+y_select : Term_y_select Term_y_select Term_y_select Term_y_select ;
+ : SELECT Term_y_columns FROM Term_y_table WHERE y_condition ;
+ : SELECT Term_y_columns FROM Term_y_table WHERE y_condition ORDER BY Term_y_order ;
+
+y_boolean : NOT y_boolean ;
+ : CC40 y_sub_condition CC41 ;
+ : Term_y_boolean Term_y_boolean Term_y_boolean ;
+
+/* terminals */
+Term_y_select : "Term_y_select" ;
+Term_y_sub_condition : "Term_y_sub_condition" ;
+Term_y_assignments : "Term_y_assignments" ;
+NOT : "NOT" ;
+OR : "OR" ;
+AND : "AND" ;
+SET : "SET" ;
+Term_y_sql : "Term_y_sql" ;
+UPDATE : "UPDATE" ;
+Term_y_update : "Term_y_update" ;
+DELETE : "DELETE" ;
+WHERE : "WHERE" ;
+Term_y_sub_condition2 : "Term_y_sub_condition2" ;
+FROM : "FROM" ;
+SELECT : "SELECT" ;
+Term_y_delete : "Term_y_delete" ;
+Term_y_order : "Term_y_order" ;
+Term_y_table : "Term_y_table" ;
+Term_y_condition : "Term_y_condition" ;
+Term_y_columns : "Term_y_columns" ;
+CC41 : ")" ;
+BY : "BY" ;
+ORDER : "ORDER" ;
+CC40 : "(" ;
+Term_y_boolean : "Term_y_boolean" ;

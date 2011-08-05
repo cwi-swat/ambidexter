@@ -1,0 +1,28 @@
+module SimpleComments
+exports
+context-free start-symbols
+S
+
+context-free syntax
+  "s"* -> S
+
+
+
+lexical syntax
+
+    Comment -> LAYOUT
+
+    "/*" CommentChar* "*/" -> Comment
+    ~[\*] -> CommentChar
+    Asterisk -> CommentChar
+    Comment -> LAYOUT
+    [\*] -> Asterisk
+    "//" ~[\n]* [\n] -> Comment
+
+  lexical restrictions
+    Asterisk -/- [\/]
+
+  context-free restrictions
+    LAYOUT? -/- [\/].[\/]
+    LAYOUT? -/- [\/].[\*]
+

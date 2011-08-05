@@ -1,0 +1,73 @@
+%%
+%% IntegerLiterals.sdf:
+%% this file is a part of CxxGrammar from the Transformers project.
+%% Copyright (C) 2004 EPITA Research and Development Laboratory.
+%%
+%% This program is free software; you can redistribute it and/or modify
+%% it under the terms of the GNU General Public License as published by
+%% the Free Software Foundation; either version 2 of the License, or
+%% (at your option) any later version.
+%%
+%% This program is distributed in the hope that it will be useful,
+%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%% GNU General Public License for more details.
+%%
+%% You should have received a copy of the GNU General Public License
+%% along with this program; if not, write to the Free Software
+%% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%%
+module IntegerLiterals
+
+imports
+
+  Characters
+
+exports
+
+  sorts
+    INTEGER-LITERAL
+    DECIMAL-LITERAL
+    OCTAL-LITERAL
+    HEXADECIMAL-LITERAL
+    INTEGER-SUFFIX
+    UNSIGNED-SUFFIX
+    LONG-SUFFIX
+
+exports
+
+  sorts
+    IntegerLiteral
+
+  lexical syntax
+
+    %% 2.13.1 [lex.icon]
+    DECIMAL-LITERAL INTEGER-SUFFIX?     -> INTEGER-LITERAL
+    OCTAL-LITERAL INTEGER-SUFFIX?       -> INTEGER-LITERAL
+    HEXADECIMAL-LITERAL INTEGER-SUFFIX? -> INTEGER-LITERAL
+
+    %% 2.13.1 [lex.icon]
+    NONZERO-DIGIT DIGIT* -> DECIMAL-LITERAL
+
+    %% 2.13.1 [lex.icon]
+    "0" OCTAL-DIGIT* -> OCTAL-LITERAL
+
+    %% 2.13.1 [lex.icon]
+    "0x" HEXADECIMAL-DIGIT* -> HEXADECIMAL-LITERAL
+    "0X" HEXADECIMAL-DIGIT* -> HEXADECIMAL-LITERAL
+
+    %% 2.13.1 [lex.icon]
+    UNSIGNED-SUFFIX LONG-SUFFIX? -> INTEGER-SUFFIX
+    LONG-SUFFIX UNSIGNED-SUFFIX? -> INTEGER-SUFFIX
+
+    %% 2.13.1 [lex.icon]
+    [uU] -> UNSIGNED-SUFFIX
+    [lL] -> LONG-SUFFIX
+
+  context-free syntax
+
+    INTEGER-LITERAL -> IntegerLiteral
+
+  lexical restrictions
+
+    INTEGER-LITERAL -/- [\.]
