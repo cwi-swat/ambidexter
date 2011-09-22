@@ -517,7 +517,7 @@ public class Grammar {
 					}
 					
 					// replace default first sets with more precise one
-					first.put(n, i); // TODO experimental
+					first.put(n, i);
 				}
 			}
 		}
@@ -554,7 +554,7 @@ public class Grammar {
 				}
 				
 				// replace default follow sets with more precise one
-				follow.put(n, i); // TODO experimental?
+				follow.put(n, i);
 			}
 		}
 	}
@@ -1199,7 +1199,8 @@ public class Grammar {
 	/* ====================================================================== */
 	
 	private void calcMinimalStrings() {
-		// TODO does not take priorities into account, calc minimal strings for productions
+		// calc minimal strings for productions
+		// TODO does not take priorities into account
 		minimalStrings = new ShareableHashMap<NonTerminal, List<Symbol>>();
 		
 		// first count all productions with only terminals (or empty ones)

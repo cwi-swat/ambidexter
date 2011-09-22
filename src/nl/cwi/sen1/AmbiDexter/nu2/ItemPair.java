@@ -26,9 +26,9 @@ public class ItemPair {
 	protected static final long ALLOW_PAIRWISE_REDUCE_1 = 0x01;
 	protected static final long ALLOW_PAIRWISE_REDUCE_2 = 0x02;
 	
-	protected static int ITEM_BITS;// = 16;
-	protected static long ITEM_MASK_1;// = 0x0000FFFF;
-	protected static long ITEM_MASK_2;// = 0xFFFF0000;
+	protected static int ITEM_BITS;
+	protected static long ITEM_MASK_1;
+	protected static long ITEM_MASK_2;
 	
 	protected static int flagBits = 2;
 	protected static long flagMask = 0x03;
