@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="AmbiDexter Category"
+            id="ambidexter.commands.category">
+      </category>
+      <command
+            name="Start AmbiDexter"
+            categoryId="ambidexter.commands.category"
+            id="ambidexter.commands.runCommand">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="ambidexter.commands.runCommand"
+            class="nl.cwi.sen1.AmbiDexter.plugin.RunHandler">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="ambidexter.commands.runCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+6">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               label="AmbiDexter"
+               mnemonic="M"
+               id="ambidexter.menus.runMenu">
+            <command
+                  commandId="ambidexter.commands.runCommand"
+                  mnemonic="A"
+                  id="ambidexter.menus.runCommand">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="ambidexter.toolbars.sampleToolbar">
+            <command
+                  commandId="ambidexter.commands.runCommand"
+                  icon="icons/ambidexter-a-16.png"
+                  id="ambidexter.toolbars.runCommand"
+                  tooltip="Run AmbiDexter">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+
+</plugin>
