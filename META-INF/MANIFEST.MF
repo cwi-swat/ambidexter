@@ -3,10 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: AmbiDexter
 Bundle-SymbolicName: AmbiDexter;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-ClassPath: AmbiDexter.jar,
- lib/aterm-java.jar,
- lib/jjtraveler.jar,
- lib/shared-objects.jar
+Bundle-ClassPath: AmbiDexter.jar
 Export-Package: nl.cwi.sen1.AmbiDexter,
  nl.cwi.sen1.AmbiDexter.automata,
  nl.cwi.sen1.AmbiDexter.derivgen,
