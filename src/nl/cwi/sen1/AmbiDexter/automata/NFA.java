@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
 import nl.cwi.sen1.AmbiDexter.grammar.CharacterClass;
 import nl.cwi.sen1.AmbiDexter.grammar.Derive;
 import nl.cwi.sen1.AmbiDexter.grammar.FollowRestrictions;
@@ -47,7 +47,7 @@ public abstract class NFA {
 	private ShareableHashMap<Transition, Symbol[]> minimalStrings; // shifts
 	public int precision;
 	protected boolean includeRejects;
-	protected boolean unfoldedForFollowRestrictions;
+	public boolean followRestrictionsPropagated;
 
 	public static int itemID;
 	public static Queue<Transition> transQueue;
@@ -114,22 +114,22 @@ public abstract class NFA {
 	
 	protected abstract void buildNFA();
 
-	public void build(boolean includeRejects, boolean unfold) {
+	public void build(boolean includeRejects, AmbiDexterConfig config) {
 		itemID = 2; // 0 : StartItem, 1 : EndItem
 		this.includeRejects = includeRejects;
 		buildNFA();
 
-		if (unfold) {
-			if (Main.unfoldNonRecursiveTails) {
+		if (config != null) {
+			if (config.unfoldNonRecursiveTails) {
 				unfoldNonRecursiveTails();
-			} else if (Main.unfoldStronglyConnectedComponents) {
+			} else if (config.unfoldStronglyConnectedComponents) {
 				unfoldStronglyConnectedComponents();
 			} else {
-				if (Main.unfoldLayout || Main.unfoldLexical || Main.unfoldEmpties || Main.unfoldNonRecursiveTails || Main.unfoldStackDepth || Main.unfoldStackContents) {
-					doUnfoldings(Main.unfoldLayout, Main.unfoldLayout, Main.unfoldLexical, Main.unfoldEmpties, Main.unfoldNonRecursiveTails, Main.unfoldStackDepth || Main.unfoldStackContents);
+				if (config.unfoldLayout || config.unfoldLexical || config.unfoldEmpties || config.unfoldNonRecursiveTails || config.unfoldStackDepth || config.unfoldStackContents) {
+					doUnfoldings(config.unfoldLayout, config.unfoldLayout, config.unfoldLexical, config.unfoldEmpties, config.unfoldNonRecursiveTails, config.unfoldStackDepth || config.unfoldStackContents, config);
 				}
-				if (Main.unfoldJoiningTails) {
-					unfoldJoiningTails();
+				if (config.unfoldJoiningTails) {
+					unfoldJoiningTails(config.unfoldOnlyLexicalTails);
 				}
 			}
 		}
@@ -152,11 +152,11 @@ public abstract class NFA {
 		
 		computeDistances();
 		
-		if (Main.writeDFA) {
+		if (AmbiDexterConfig.writeDFA) {
 			//calcMinimalStrings();
 			minimalStrings = new NFAMinimalStringGen().getMinimalStrings(this);
 
-			if (!Main.quick) {
+			if (!AmbiDexterConfig.quick) {
 				for (Transition t : startItem.shifts) {
 					System.out.println("Minimal string for start symbol: " + Arrays.toString(minimalStrings.get(t)));
 				}
@@ -257,7 +257,7 @@ public abstract class NFA {
 			}
 		}
 		
-		if (Main.verbose) {
+		if (config.verbose) {
 			System.out.println("Number of clusters: " + clusters.size());
 		}
 	}*/
@@ -358,7 +358,7 @@ public abstract class NFA {
 	
 	//-------------------------------------------------------------------------
 
-	public void doUnfoldings(boolean layout, boolean literals, boolean cftolex, boolean empties, boolean tails, boolean stackdepth) {
+	public void doUnfoldings(boolean layout, boolean literals, boolean cftolex, boolean empties, boolean tails, boolean stackdepth, AmbiDexterConfig config) {
 		
 		// XXX Make sure we don't unfold two transitions of which one leads to the other in the same loop!!  
 		
@@ -419,7 +419,7 @@ public abstract class NFA {
 		}
 		
 		if (stackdepth) {
-			unfoldStackDepths(Main.unfoldStackDepth, Main.stackUnfoldingDepth);
+			unfoldStackDepths(config.unfoldStackDepth, config.stackUnfoldingDepth);
 		}
 	}
 
@@ -522,7 +522,7 @@ public abstract class NFA {
 		transitions.addAll(neww);		
 	}
 	
-	private void unfoldJoiningTails() {
+	private void unfoldJoiningTails(final boolean unfoldOnlyLexicalTails) {
 		// depth first traversal with in place unfolding if we reach an already 
 		// visited node that is not part of the same strongly connected component
 		
@@ -551,7 +551,7 @@ public abstract class NFA {
 								unfold = false;
 							}
 						}
-						if (unfold && (!Main.unfoldOnlyLexicalTails || 
+						if (unfold && (!unfoldOnlyLexicalTails || 
 								(t.target.production != null && t.target.production.lhs.lexical))) {
 							unfoldTransition(t);
 						}
@@ -903,7 +903,7 @@ public abstract class NFA {
 		items = newItems;
 		startItem = newStartItem;
 		endItem = newEndItem;
-		unfoldedForFollowRestrictions = true;
+		followRestrictionsPropagated = true;
 	}
 
 	public void connectShiftAndReduces() {
@@ -1752,7 +1752,7 @@ public abstract class NFA {
 			}
 		}
 				
-		if (unfoldedForFollowRestrictions) {
+		if (followRestrictionsPropagated) {
 			for (Item i : items) {
 				for (Transition t : i.reduces) {
 					for (Transition shift : t.shifts) {
@@ -1785,7 +1785,7 @@ public abstract class NFA {
 
 	public void printSize(String prefix) {
 		System.out.println(prefix + " size: " + (items.size() + 2) + " states, " + transitions.size() + " transitions");
-		if (Main.verbose) {
+		if (AmbiDexterConfig.verbose) {
 			int derives = 0;
 			int shifts = 0;
 			int reduces = 0;
@@ -2089,14 +2089,12 @@ public abstract class NFA {
 			if (shift == null) {
 				return this;
 			}
-			Item i1 = null, i2 = null;
+			Item i1 = null;
 			if (shift != null && !visited.contains(shift.target)) {
 				i1 = shift.target.followShifts(visited);
 			}
 			if (i1 != null) {
 				return i1;
-			} else if (i2 != null) {
-				return i2;
 			} else {
 				return null; // can happen with lists on end of production
 			}

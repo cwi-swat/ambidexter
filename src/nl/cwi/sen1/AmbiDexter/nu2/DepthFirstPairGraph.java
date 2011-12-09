@@ -1,9 +1,10 @@
 package nl.cwi.sen1.AmbiDexter.nu2;
 
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
+import nl.cwi.sen1.AmbiDexter.IAmbiDexterMonitor;
 import nl.cwi.sen1.AmbiDexter.automata.NFA;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.Item;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.Transition;
@@ -29,8 +30,8 @@ public class DepthFirstPairGraph extends PairGraph {
 	public DepthFirstPairGraph() { }
 	
 	@Override
-	public void init(NFA nfa) {
-		super.init(nfa);		
+	public void init(NFA nfa, IAmbiDexterMonitor monitor) {
+		super.init(nfa, monitor);		
 		transArray = new LongArrayStack[nfa.maxDistanceToEnd * 2 + 1];
 		for (int i = transArray.length - 1; i >= 0; --i) {
 			transArray[i] = new LongArrayStack(256);
@@ -133,11 +134,11 @@ public class DepthFirstPairGraph extends PairGraph {
 					}
 					
 					/*if (endPairs.contains(p)) { // endpair, print path
-						System.out.println("--------------------");
+						monitor.println("--------------------");
 						for (int i = 0; i <= csp; i += 2) {
-							System.out.println(toString(lookupPair(callStack.get(i), callStack.get(i + 1))));
+							monitor.println(toString(lookupPair(callStack.get(i), callStack.get(i + 1))));
 						}
-						System.out.println("--------------------");
+						monitor.println("--------------------");
 					}*/
 					
 					int bucketSize = p.bucket.properties.length;
@@ -155,8 +156,8 @@ public class DepthFirstPairGraph extends PairGraph {
 						printSize("" + iteration);
 						
 						if ((nr - 1) % (progressInterval * 20) == 0) {
-							System.out.println("    " + done.usageStatistics());
-							//System.out.println("    Can be compressed to: " + done.getCompressedSize());
+							monitor.println("    " + done.usageStatistics());
+							//monitor.println("    Can be compressed to: " + done.getCompressedSize());
 							int inTrans = 0;
 							int transSpace = 0;
 							for (int i = tsp; i >= 0; --i) {
@@ -164,7 +165,7 @@ public class DepthFirstPairGraph extends PairGraph {
 								transSpace += transStack.get(i).length;
 							}
 							
-							System.out.println("    Call stack depth: " + csp + ", Item stack depth: " + isp + ", in trans: " + inTrans + ", allocated trans: " + transSpace);
+							monitor.println("    Call stack depth: " + csp + ", Item stack depth: " + isp + ", in trans: " + inTrans + ", allocated trans: " + transSpace);
 						}
 					}
 				} else {
@@ -247,7 +248,7 @@ public class DepthFirstPairGraph extends PairGraph {
 		}
 				
 		printSize("Done: " + (nr - 1) + " -");
-		System.out.println("Max call stack size: " + maxCallStackSize + ", max item stack size: " + maxItemStackSize);		
+		monitor.println("Max call stack size: " + maxCallStackSize + ", max item stack size: " + maxItemStackSize);		
 	}
 
 	@Override
@@ -267,7 +268,7 @@ public class DepthFirstPairGraph extends PairGraph {
 					usedItems.add(p.getB());
 				}
 			} // alive items contains <end>
-			System.out.println("Alive pairs: " + alivePairs + ", States used: " + usedItems.size());
+			monitor.println("Alive pairs: " + alivePairs + ", States used: " + usedItems.size());
 		}
 		return usedItems;
 	}
@@ -294,22 +295,22 @@ public class DepthFirstPairGraph extends PairGraph {
 			}
 		}
 		
-		System.out.println("Harmless derivation patterns: " + pat.size() + " / " + nrOrigPatterns);
+		monitor.println("Harmless derivation patterns: " + pat.size() + " / " + nrOrigPatterns);
 		Relation<Pair<Production, Integer>, Production> inUsed = new Relation<Pair<Production,Integer>, Production>();
 		ShareableHashMap<Production, Integer> prodUseCount = new ShareableHashMap<Production, Integer>();
 		for (Entry<Pair<Production, Integer>, Set<Production>> e : pat.m) {
-			if (!Main.quick && e.getValue().size() > 0) {
-				System.out.println( "    " + e.getKey().a.toString(e.getKey().b)); // print item						
+			if (!AmbiDexterConfig.quick && e.getValue().size() > 0) {
+				monitor.println( "    " + e.getKey().a.toString(e.getKey().b)); // print item						
 			}
 	
 			for (Production p : e.getValue()) {
 				if (usedProductions.contains(e.getKey().a) && usedProductions.contains(p)) {
 					inUsed.add(e.getKey(), p);
-					if (!Main.quick) {
-						System.out.println("        u " + p);
+					if (!AmbiDexterConfig.quick) {
+						monitor.println("        u " + p);
 					}
-				} else if (!Main.quick) {
-					System.out.println("        " + p);						
+				} else if (!AmbiDexterConfig.quick) {
+					monitor.println("        " + p);						
 				}
 				
 				Integer i = prodUseCount.get(p);
@@ -320,14 +321,14 @@ public class DepthFirstPairGraph extends PairGraph {
 				}
 			}
 		}
-		System.out.println("Harmless derivation patterns in used productions: " + inUsed.size());
+		monitor.println("Harmless derivation patterns in used productions: " + inUsed.size());
 		
-		if (Main.verbose) {
-			System.out.println("Production usage in right side of harmless patterns:");
+		if (AmbiDexterConfig.verbose) {
+			monitor.println("Production usage in right side of harmless patterns:");
 			for (Entry<Production, Integer> e : prodUseCount) {
-				System.out.println("    " + e.getValue() + " " + e.getKey());
+				monitor.println("    " + e.getValue() + " " + e.getKey());
 			}
-			System.out.println("Number of productions in right sides: " + prodUseCount.size());
+			monitor.println("Number of productions in right sides: " + prodUseCount.size());
 		}
 		
 		return inUsed;

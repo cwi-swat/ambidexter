@@ -6,10 +6,9 @@ package nl.cwi.sen1.AmbiDexter.grammar;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
 import nl.cwi.sen1.AmbiDexter.util.Relation;
 
 
@@ -160,10 +159,7 @@ public class Production {
 
 	public boolean isDerivationAllowed(Production prod, int i) {
 		// check if we are allowed to derive to production p from position i.
-		if (Main.doPriorities) {
-			return !deriveRestrictions.contains(i, prod);
-		}
-		return true; // derive ok
+		return !deriveRestrictions.contains(i, prod);
 	}
 	
 	public void addDeriveRestriction(int pos, Production prod) {

@@ -2,8 +2,9 @@ package nl.cwi.sen1.AmbiDexter.nu2;
 
 import java.util.Set;
 
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
 import nl.cwi.sen1.AmbiDexter.AmbiguityDetector;
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.IAmbiDexterMonitor;
 import nl.cwi.sen1.AmbiDexter.automata.NFA;
 import nl.cwi.sen1.AmbiDexter.grammar.Production;
 import nl.cwi.sen1.AmbiDexter.util.Pair;
@@ -15,28 +16,41 @@ public class NoncanonicalUnambiguityTest implements AmbiguityDetector {
 	public Set<Production> harmlessProductions = null;
 	public Set<Production> harmfulProductions = null;
 	public Relation<Pair<Production, Integer>, Production> harmlessPatterns = null;
+	public AmbiDexterConfig config = null;
+	public IAmbiDexterMonitor monitor;
 	
 	NFA nfa;
 	
 	public void build(NFA nfa) {
 		this.nfa = nfa;
 	}
+	
+	@Override
+	public void setConfig(AmbiDexterConfig config) {
+		this.config = config;
+	}
+	
+	@Override
+	public void setMonitor(IAmbiDexterMonitor monitor) {
+		this.monitor = monitor;
+	}
 
+	@Override
 	public void detectAmbiguities(DetectionMethod method) {		
 		IPairGraph pg = createPairGraph(method);			
-		pg.init(nfa);
+		pg.init(nfa, monitor);
 		pg.detectAmbiguities();
 
 		if (!pg.potentiallyAmbiguous()) {
-			if (Main.findHarmlessProductions) {
+			if (config.findHarmlessProductions) {
 				harmlessProductions = nfa.grammar.productions;
 				harmfulProductions = new ShareableHashSet<Production>();
 				harmlessPatterns = new Relation<Pair<Production,Integer>, Production>();
 			}
 		} else {
-			if (Main.findHarmlessProductions) {
+			if (config.findHarmlessProductions) {
 				Set<Production> usedProductions = pg.getUsedProductions();
-				System.out.println("Used productions: " + usedProductions.size() + " / " + nfa.grammar.nrReachableProductions);
+				monitor.println("Used productions: " + usedProductions.size() + " / " + nfa.grammar.nrReachableProductions);
 				
 				harmlessProductions = new ShareableHashSet<Production>();
 				for (Production p : nfa.grammar.productions) {
@@ -58,19 +72,19 @@ public class NoncanonicalUnambiguityTest implements AmbiguityDetector {
 	
 	private IPairGraph createPairGraph(DetectionMethod method) {
 		PairGraph pg;
-		if (Main.outputGraphs) {
+		if (AmbiDexterConfig.outputGraphs) {
 			pg = new DotPairGraph();
-		} else if (Main.filterUnmatchedDerivesReduces) {
+		} else if (config.filterUnmatchedDerivesReduces) {
 			pg = new DepthFirstTransitionPairGraph();
 		} else {
 			pg = new DepthFirstPairGraph();
 		}
 		
-		if (nfa.grammar.scannerless && Main.doRejects) {
-			pg.addExtension(new ScannerlessPGE());
+		if (nfa.grammar.scannerless && config.doRejects) {
+			pg.addExtension(new RejectPGE());
 		}
 		
-		if (Main.alternating) {
+		if (config.alternating) {
 			pg.addExtension(new AlternatingEmptyPGE());
 		}
 		

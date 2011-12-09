@@ -1,15 +1,15 @@
 package nl.cwi.sen1.AmbiDexter.derivgen;
 
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
 import nl.cwi.sen1.AmbiDexter.automata.ItemPDA;
 import nl.cwi.sen1.AmbiDexter.automata.NFA;
-import nl.cwi.sen1.AmbiDexter.automata.PDA;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.Item;
+import nl.cwi.sen1.AmbiDexter.automata.PDA;
 import nl.cwi.sen1.AmbiDexter.automata.PDA.PDAState;
 import nl.cwi.sen1.AmbiDexter.grammar.CharacterClass;
+import nl.cwi.sen1.AmbiDexter.grammar.FollowRestrictions;
 import nl.cwi.sen1.AmbiDexter.grammar.Grammar;
 import nl.cwi.sen1.AmbiDexter.grammar.NonTerminal;
 import nl.cwi.sen1.AmbiDexter.grammar.Production;
@@ -26,6 +26,8 @@ import nl.cwi.sen1.AmbiDexter.util.ShareableHashSet;
 
 public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 
+	static boolean doFollow = true;
+	
 	public ScannerlessDerivGen2(int threads) {
 		super(threads);
 	}
@@ -38,10 +40,15 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public void setDFA(PDA dfa) {
+	public void setDFA(PDA<?> dfa) {
 		this.dfa = dfa;
 		dfa.printSize("IDFA");
+	}
+	
+	@Override
+	protected void detect() {
+		doFollow = config.doFollowRestrictions && !dfa.nfa.followRestrictionsPropagated;
+		super.detect();
 	}
 	
 	@Override
@@ -51,7 +58,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	protected IStackFrame newStackFrame(PDAState t) {
+	protected IStackFrame newStackFrame(@SuppressWarnings("rawtypes") PDAState t) {
 		return new StackFrame(t);
 	}
 	
@@ -68,7 +75,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 			// don't try to refactor: recursive functions are almost twice as slow as this (i've tried it)
 
 			LinkedList<ESet<Symbol>> shiftablesStack = job.shiftablesStack;		
-			Object gss[] = job.gss; 
+			Object gss[] = job.gss;
 			int shifted = job.shifted;
 			int maxdepth = job.maxdepth;
 			Symbol sentence[] = job.sentence;
@@ -125,7 +132,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 							if (l.n != null) {
 								// TODO there's still a problem with prefer/avoid, see Stratego len 19
 								// after fixing, remove workaround in ParallelDerivationGenerator.ambiguity()
-								if (Main.doPreferAvoid) {
+								if (config.doPreferAvoid) {
 									if (!(l.prefers == 1 || (l.prefers == 0 && l.normals == 1) || (l.prefers == 0 && l.normals == 0 && l.avoids == 1))) {
 										ambiguity(sentence, l.prev.level, l.level, l.n, id);
 									}
@@ -138,6 +145,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 							
 							if (i >= topSizeBeforeReduce) {
 								// add reject states of newly added normal state
+								@SuppressWarnings("rawtypes")
 								final PDAState rs = l.state.rejectState;
 								if (rs != null) {
 									boolean containsRS = false;
@@ -255,6 +263,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 							StackFrame l = rejectTop.get(i);
 							for (Entry<Symbol, ItemPDA.PDAState> e : l.state.shifts) {
 								if (e.getKey().canShiftWith(s)) {
+									@SuppressWarnings("rawtypes")
 									final PDAState next = e.getValue();
 									final StackFrame f = new StackFrame(next, l);
 									f.level = shifted + 1;
@@ -339,8 +348,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 				if (existing == null) {
 					// prevent empty right recursion loops
 					if (to != l.state || to != from.state) {
-						existing = new StackFrame(to, from, p);
-						existing.level = l.level;
+						existing = from.pushReduce(to, p.lhs, l);
 						top.add(existing); // unsafe
 					}
 				}
@@ -367,7 +375,10 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 				for (int i = top.size() - 1; i >= 0; i--) {
 					StackFrame f = top.get(i);
 					for (Symbol s : f.state.shiftables) {
-						ccs.add((CharacterClass) s);
+						//ccs.add((CharacterClass) s);
+						if (f.canShift(s)) {
+							ccs.add(f.getAfterShift((CharacterClass) s));
+						}
 					}
 				}
 				shiftablesStack.elem = CharacterClass.getCommonShiftables(ccs);
@@ -386,6 +397,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 		int prefers = 0, avoids = 0, normals = 0;
 		int level = 0;
 		NonTerminal n;
+		FollowRestrictions followRestrictions = null;
 				
 		// initial first element
 		public StackFrame(ItemPDA.PDAState t) {
@@ -393,21 +405,64 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 		}
 		
 		// push t onto s (shift)
-		protected StackFrame(ItemPDA.PDAState t, StackFrame s) {
+		private StackFrame(ItemPDA.PDAState t, StackFrame s) {
 			state = t;
 			prev = s;
 		}
-
-		// push t onto s (reduce)
-		protected StackFrame(ItemPDA.PDAState t, StackFrame s, Production n) {
-			state = t;
-			prev = s;
-			this.n = n.lhs;
+		
+		// reduce
+		public StackFrame pushReduce(ItemPDA.PDAState t, NonTerminal reduced, StackFrame from) {
+			StackFrame f = new StackFrame(t, this);
+			f.followRestrictions = from.getNextRestrictions(reduced);
+			f.level = from.level;
+			f.n = reduced;
+			return f;
+		}
+		
+		// shift
+		public StackFrame pushShift(ItemPDA.PDAState t, Symbol shifted) {
+			StackFrame f = new StackFrame(t, this);
+			f.followRestrictions = getNextRestrictions(shifted);
+			return f;
+		}
+		
+		public boolean canShift(Symbol s) {
+			if (followRestrictions != null) {
+				return followRestrictions.canShift(s);
+			}
+			return true;
+		}
+		
+		public CharacterClass getAfterShift(CharacterClass cc) {
+			if (followRestrictions != null) {
+				return followRestrictions.getNextCharClassAfterShift(cc);
+			}
+			return cc;
+		}
+		
+		public FollowRestrictions getNextRestrictions(Symbol s) {
+			if (!doFollow) {
+				return null;
+			}
+			if (s instanceof NonTerminal) { // restrictions after reduce of s
+				NonTerminal n = (NonTerminal) s;
+				if (followRestrictions != null) {
+					return followRestrictions.getNextAfterReduce(n);
+				} else {
+					return n.followRestrictions; 
+				}
+			} else { // restrictions after shift of s
+				if (followRestrictions != null) {
+					return followRestrictions.getNextAfterShift(s);
+				} else {
+					return null;
+				}
+			}			
 		}
 
 		@Override
 		public String toString() {
-			return /*"@" + level + "@" +*/ state.toString();
+			return /*"@" + level + "@" +*/ state.toString() + (followRestrictions == null ? "" : " -/- " + followRestrictions);
 		}
 		
 		@Override
@@ -415,6 +470,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((state == null) ? 0 : state.hashCode());
+			result = prime * result	+ ((followRestrictions == null) ? 0 : followRestrictions.hashCode());
 			return result;
 		}
 
@@ -434,7 +490,15 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 					return false;
 			} else if (!state.equals(other.state))
 				return false;
-			return this.prev == other.prev;
-		}
+			if (this.prev != other.prev) {
+				return false;
+			}
+			if (followRestrictions == null) {
+				if (other.followRestrictions != null)
+					return false;
+			} else if (!followRestrictions.equals(other.followRestrictions))
+				return false;
+			return true;
+		}	
 	}
 }

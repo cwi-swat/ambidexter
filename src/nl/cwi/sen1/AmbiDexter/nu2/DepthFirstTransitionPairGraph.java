@@ -102,18 +102,18 @@ public class DepthFirstTransitionPairGraph extends DepthFirstPairGraph {
 					}
 					
 //					if (p.items == endPairItems) { // endpair, print path
-//						System.out.println("--------------------");
+//						monitor.println("--------------------");
 //						for (int i = 0; i <= csp; i += 3) {							
 //							long pt = callStack.get(i + 2);
 //							if (pt != 0) {
 //								final Transition t1 = NFA.transQueue.get((int)(pt & 0xFFFFFFFFL));
 //								final Transition t2 = NFA.transQueue.get((int)(pt >>> 32));
-//								System.out.println("    " + new PairTransition(null, t1, t2, null));
+//								monitor.println("    " + new PairTransition(null, t1, t2, null));
 //							}
 //							ItemPair p2 = lookupPair(callStack.get(i), callStack.get(i + 1));
-//							System.out.println(toString(p2));
+//							monitor.println(toString(p2));
 //						}
-//						System.out.println("--------------------");
+//						monitor.println("--------------------");
 //					}
 					
 					int bucketSize = p.bucket.properties.length;
@@ -131,7 +131,7 @@ public class DepthFirstTransitionPairGraph extends DepthFirstPairGraph {
 						printSize("" + iteration);
 						
 						if ((nr - 1) % (progressInterval * 20) == 0) {
-							System.out.println("    " + done.usageStatistics());
+							monitor.println("    " + done.usageStatistics());
 							int inTrans = 0;
 							int transSpace = 0;
 							for (int i = tsp; i >= 0; --i) {
@@ -139,7 +139,7 @@ public class DepthFirstTransitionPairGraph extends DepthFirstPairGraph {
 								transSpace += transStack.get(i).length;
 							}
 							
-							System.out.println("    Call stack depth: " + csp + ", Item stack depth: " + isp + ", in trans: " + inTrans + ", allocated trans: " + transSpace);
+							monitor.println("    Call stack depth: " + csp + ", Item stack depth: " + isp + ", in trans: " + inTrans + ", allocated trans: " + transSpace);
 						}
 					}
 				} else {
@@ -265,7 +265,7 @@ public class DepthFirstTransitionPairGraph extends DepthFirstPairGraph {
 		}
 				
 		printSize("Done: " + (nr - 1) + " -");
-		System.out.println("Max call stack size: " + maxCallStackSize + ", max item stack size: " + maxItemStackSize);		
+		monitor.println("Max call stack size: " + maxCallStackSize + ", max item stack size: " + maxItemStackSize);		
 	}
 
 	@Override

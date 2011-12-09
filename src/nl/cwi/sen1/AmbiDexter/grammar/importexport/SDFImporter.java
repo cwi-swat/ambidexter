@@ -2,11 +2,10 @@ package nl.cwi.sen1.AmbiDexter.grammar.importexport;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
-import nl.cwi.sen1.AmbiDexter.grammar.Character;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
 import nl.cwi.sen1.AmbiDexter.grammar.CharacterClass;
 import nl.cwi.sen1.AmbiDexter.grammar.FollowRestrictions;
 import nl.cwi.sen1.AmbiDexter.grammar.Grammar;
@@ -30,12 +29,15 @@ public class SDFImporter extends GrammarImporter {
 	
 	Map<ATerm, CharacterClass> characterClasses = new ShareableHashMap<ATerm, CharacterClass>();
 	Map<ATerm, NonTerminal> nonterminals = new ShareableHashMap<ATerm, NonTerminal>();
+	AmbiDexterConfig config = null;
 	
 	public SDFImporter() {
 	}
 
 	@Override
-	public Grammar importGrammar(String filename) {
+	public Grammar importGrammar(String filename, AmbiDexterConfig config) {
+		this.config = config;
+		
 		ATerm term = null;
 		try {
 			term = SingletonFactory.getInstance().readFromFile(filename);
@@ -43,39 +45,26 @@ public class SDFImporter extends GrammarImporter {
 			throw new RuntimeException("Cannot read file " + filename);
 		}
 		
-		g = new Grammar(filename, true);
+		g = new Grammar(filename, true, config.doRejects, config.doFollowRestrictions);
 		
 		readConcGrammars((ATermAppl)term);
-		if (!Main.ignoreLayout) {
-			g.layoutOpt = g.getNonTerminal("cf(LAYOUT?)");
-			g.layout = g.getNonTerminal("cf(LAYOUT)");
-		}
+		g.layoutOpt = g.getNonTerminal("cf(LAYOUT?)");
+		g.layout = g.getNonTerminal("cf(LAYOUT)");
 		setRejects();
 		
 		simplifyIterProductions(); // TODO check to see if we can do this?? (b/c of manually added iter productions)
 		
-		if (Main.doPriorities) {
+		if (config.doPriorities) {
 			g.nrPrioritiesRead = priorities.size();
 			prioritiesTransitiveClosure();
 			addPrioritiesToProductions();
-			if (Main.verbose) {
+			if (AmbiDexterConfig.verbose) {
 				System.out.println("Priorities read: " + g.nrPrioritiesRead);
 				System.out.println("Priorities after closure: " + priorities.size());
 			}
 		}		
 		
 		g.startSymbol = g.getNonTerminal("FILE-START");
-		
-		// calculate highest character used
-		int max = 0;
-		for (CharacterClass c : characterClasses.values()) {
-			int m = c.getMaxCharacter();
-			if (m > max) {
-				max = m;
-			}
-		}
-		Character.maxCharacterUsed = Character.maxCharacterInOriginalGrammar = max; // probably always 256
-		
 		return g;
 	}
 
@@ -87,7 +76,9 @@ public class SDFImporter extends GrammarImporter {
 			} else if (checkAppl(a, "priorities")) {
 				readPriorities(castAppl(a, "priorities"));
 			} else if (checkAppl(a, "restrictions")) {
-				readRestrictions(castAppl(a, "restrictions"));
+				if (config.doFollowRestrictions) {
+					readRestrictions(castAppl(a, "restrictions"));
+				}
 			} else if (checkAppl(a, "conc-grammars")) {
 				readConcGrammars(castAppl(a, "conc-grammars"));
 			} else if (a instanceof ATermList) {
@@ -138,20 +129,13 @@ public class SDFImporter extends GrammarImporter {
 		if (p != null) return p;
 
 		NonTerminal n = (NonTerminal) getSymbol(a.getArgument(1));
-		if (Main.ignoreLayout && n.layout) {
-			return null;
-		}
 		p = g.newProduction(n);
 		
 		ATermList rhs = (ATermList) a.getArgument(0);
 		Set<Integer> skipped = new ShareableHashSet<Integer>();
 		for (int i = 0; i < rhs.getLength(); i++) {
 			Symbol s = getSymbol(rhs.elementAt(i));
-			if (!Main.ignoreLayout || !(s instanceof NonTerminal) || !((NonTerminal) s).layout) {
-				p.addSymbol(s);
-			} else {
-				skipped.add(i);
-			}
+			p.addSymbol(s);
 		}
 //		
 //		// check for cf(list) -> lex(list)
@@ -226,9 +210,7 @@ public class SDFImporter extends GrammarImporter {
 				n.asfixName = getAsfixName(a);
 			}
 			
-			if (!Main.ignoreLayout || !n.layout) {
-				g.nonTerminals.put(n.s, n);
-			}
+			g.nonTerminals.put(n.s, n);
 			nonterminals.put(a, n);
 		}
 		return n;
@@ -433,7 +415,7 @@ public class SDFImporter extends GrammarImporter {
 							} // else it's cf() -> lex()
 						} else {
 							if (ln.sep && ln.separator == null) {
-								if (n.lexical || Main.ignoreLayout) {
+								if (n.lexical) {
 									ln.separator = p.getSymbolAt(1);
 								} else {
 									ln.separator = p.getSymbolAt(2);
@@ -447,12 +429,12 @@ public class SDFImporter extends GrammarImporter {
 					if (ln.listElem != null) {
 						Production p = g.newProduction(ln);
 						p.addSymbol(ln);
-						if (!ln.lexical && !Main.ignoreLayout) {
+						if (!ln.lexical) {
 							p.addSymbol(g.layoutOpt);
 						}
 						if (ln.sep) {
 							p.addSymbol(ln.separator);
-							if (!ln.lexical && !Main.ignoreLayout) {
+							if (!ln.lexical) {
 								p.addSymbol(g.layoutOpt);
 							}
 						}
@@ -574,7 +556,6 @@ public class SDFImporter extends GrammarImporter {
 				getChainPart(chain.elementAt(j), p2);
 				p1.p2 = p2.p1;
 				if (p1.p2 != null && p1.p2 != null) { // productions can be null if layout is ignored
-					adjustPosition(p1);
 					priorities.add(p1);
 				}
 				
@@ -601,19 +582,6 @@ public class SDFImporter extends GrammarImporter {
 			p.p1 = getProduction(castAppl(castAppl(a, "simple-group").getArgument(0), "prod"));
 		} else		
 			throw new RuntimeException("Unknown term: " + a);
-	}
-	
-	private void adjustPosition(Priority p) {
-		if (Main.ignoreLayout) {
-			// adjust position according to removed layout nonterminals
-			int d = 0;
-			for (int i = 0; i < p.pos; i++) {
-				if (ignoredLayout.contains(p.p1, i)) {
-					d++;
-				}
-			}
-			p.pos -= d;
-		}
 	}
 	
 	private void prioritiesTransitiveClosure() {		

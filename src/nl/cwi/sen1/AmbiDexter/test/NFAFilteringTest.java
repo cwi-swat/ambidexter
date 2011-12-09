@@ -2,19 +2,19 @@ package nl.cwi.sen1.AmbiDexter.test;
 
 import java.util.regex.Pattern;
 
-import nl.cwi.sen1.AmbiDexter.Main;
-import nl.cwi.sen1.AmbiDexter.grammar.Symbol;
-import nl.cwi.sen1.AmbiDexter.grammar.SymbolString;
-import nl.cwi.sen1.AmbiDexter.util.Pair;
-import nl.cwi.sen1.AmbiDexter.util.Relation;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import nl.cwi.sen1.AmbiDexter.ConsoleMonitor;
+import nl.cwi.sen1.AmbiDexter.IAmbiDexterMonitor;
+import nl.cwi.sen1.AmbiDexter.Main;
 
 public class NFAFilteringTest extends TestCase {
 
 	public static Object[][] diff1; // what sglr finds and we don't
 	public static Object[][] diff2; // what we find and sglr doesn't
+	
+	IAmbiDexterMonitor monitor = new ConsoleMonitor();
 	
 	public static Test suite(){
 		return new TestSuite(NFAFilteringTest.class);
@@ -68,43 +68,8 @@ public class NFAFilteringTest extends TestCase {
 	private void testScannerlessGrammar(String grammar, int len, String parseTable, Object[][] diff1, Object[][] diff2) {
 		ScannerlessDerivGenTest.diff1 = diff1;
 		ScannerlessDerivGenTest.diff2 = diff2;
-		Main m = new Main();
-		m.executeArguments((new String[] {"-q", "-pgp", "-k", String.valueOf(len), "-ogs", "-rdfa", "unf", grammar}));
-	}
-	
-	public static void compareAmbiguities(Relation<Symbol, SymbolString> sglr, Relation<Symbol, SymbolString> scan, int depth) {
-		boolean different = false;
-		different |= checkDifference(sglr, scan, diff1 == null ? null : diff1[depth - 1], "Ambiguous by SGLR: ");
-		different |= checkDifference(scan, sglr, diff2 == null ? null : diff2[depth - 1], "Ambiguous by AmbiDexter: ");
-		assertFalse(different);
-	}
-
-	private static boolean checkDifference(Relation<Symbol, SymbolString> r1, Relation<Symbol, SymbolString> r2, Object[] diff, String message) {
-		boolean different = false;
-		for (Pair<Symbol, SymbolString> p : r1) {
-			if (!r2.contains(p)) {
-				boolean found = false;
-				if (diff != null) {
-					String a = p.b.toAscii();
-					for (int i = diff.length - 1; i >= 0 && !found; --i) {
-						if (diff[i] instanceof Pattern) {
-							if (((Pattern) diff[i]).matcher(a).find()) { // TODO multiple matches might be possible
-								found = true;
-								break;
-							}							
-						} else if (diff[i].equals(a)) {
-							found = true;
-							break;
-						}
-					}
-				}
-				if (!found) {
-					System.out.println(message + p.a + ", " + p.b.prettyPrint());
-					different = true;
-				}
-			}
-		}
-		return different;
-	}
+		Main m = new Main(monitor);
+		m.executeArguments((new String[] {"-q", "-pg", "-k", String.valueOf(len), "-ogs", "-rdfa", "unf", grammar}));
+	}	
 }
 

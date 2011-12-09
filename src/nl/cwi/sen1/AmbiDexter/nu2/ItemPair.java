@@ -62,7 +62,6 @@ public class ItemPair {
 			++ITEM_BITS;
 		}
 		ITEM_MASK_2 = ITEM_MASK_1 << ITEM_BITS;
-		System.out.println("Item bits: " + ITEM_BITS);
 	}
 
 	public ItemPair(long items, long flags, Bucket bucket, int propArray, int propIndex) {

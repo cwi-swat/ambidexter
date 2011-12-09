@@ -2,7 +2,8 @@ package nl.cwi.sen1.AmbiDexter.derivgen;
 
 import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
+import nl.cwi.sen1.AmbiDexter.IAmbiDexterMonitor;
 import nl.cwi.sen1.AmbiDexter.automata.NFA;
 import nl.cwi.sen1.AmbiDexter.automata.PDA;
 import nl.cwi.sen1.AmbiDexter.automata.PDA.PDAState;
@@ -13,8 +14,8 @@ import nl.cwi.sen1.AmbiDexter.grammar.Symbol;
 import nl.cwi.sen1.AmbiDexter.grammar.SymbolString;
 import nl.cwi.sen1.AmbiDexter.parse.IParser;
 import nl.cwi.sen1.AmbiDexter.parse.ParseTree;
-import nl.cwi.sen1.AmbiDexter.parse.SGLRStub;
 import nl.cwi.sen1.AmbiDexter.parse.ParseTree.ParseTreeNode;
+import nl.cwi.sen1.AmbiDexter.parse.SGLRStub;
 import nl.cwi.sen1.AmbiDexter.util.ESet;
 import nl.cwi.sen1.AmbiDexter.util.LinkedList;
 import nl.cwi.sen1.AmbiDexter.util.Pair;
@@ -25,7 +26,7 @@ import nl.cwi.sen1.AmbiDexter.util.Util;
 
 public abstract class ParallelDerivationGenerator implements DerivationGenerator {
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	protected PDA dfa;
 	int length;
 	protected Queue<Job> jobs = new Queue<Job>();
@@ -34,19 +35,31 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 	protected int workers;
 	protected int dealLength = 4;
 	long startTime;
+	protected AmbiDexterConfig config;
 	IParser parser;
 	protected boolean scannerless = false;
 	protected boolean incremental = false;
-
+	protected String outputFilePrefix = null;
+	protected IAmbiDexterMonitor monitor; 
+	
+	
 	public abstract void build(NFA nfa);
-	@SuppressWarnings("unchecked")
-	public abstract void setDFA(PDA dfa);
-	@SuppressWarnings("unchecked")
-	protected abstract IStackFrame newStackFrame(PDAState t);
+	public abstract void setDFA(PDA<?> dfa);
+	protected abstract IStackFrame newStackFrame(@SuppressWarnings("rawtypes") PDAState t);
 	protected abstract AbstractWorker newWorker(String id);
 
 	public ParallelDerivationGenerator(int threads) {
 		workers = threads;
+	}
+	
+	@Override
+	public void setConfig(AmbiDexterConfig config) {
+		this.config = config;
+	}
+	
+	@Override
+	public void setMonitor(IAmbiDexterMonitor monitor) {
+		this.monitor = monitor;
 	}
 	
 	public void setLength(int l) {
@@ -57,8 +70,7 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		dealLength = l;
 	}
 
-	@SuppressWarnings("unchecked")
-	public PDA getDFA() {
+	public PDA<?> getDFA() {
 		return dfa;
 	}
 
@@ -74,31 +86,37 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 	public void setIncremental(boolean i) {
 		incremental = i;
 	}
+	
+	public void setOutputFilePrefix(String s) {
+		outputFilePrefix = s;
+	}
 
 	public void detectAmbiguities(DetectionMethod method) {
 		ambiguities = new Relation<Symbol, SymbolString>();
-		for (int i = 0; i <= length; i++) {
+		int maxlen = incremental ? config.derivGenMaxDepth : config.derivGenMinDepth;
+		for (int i = 0; i <= maxlen; i++) {
 			possibleAmbiguities.add(new Relation<Symbol, SymbolString>());
 		}
 		
 		if (incremental) {
-			while (true) {
+			while (length <= config.derivGenMaxDepth) {
 				detect();
 				++length;
 				possibleAmbiguities.set(length, new Relation<Symbol, SymbolString>());
 			}
 		} else {
 			detect();
-			if (Main.outputAmbiguities) {
-				outputAmbiguousCores();
-			}
+			outputAmbiguousCores(); // outputs only if outputFilePrefix is set
 		}	
 	}
 
 	private void outputAmbiguousCores() {
-		Grammar g = dfa.nfa.grammar;
-		String outputFile = g.name + "." + Main.filterFile + "." + length + ".amb";
-		System.out.println("Writing " + outputFile);
+		if (outputFilePrefix == null) {
+			return;
+		}
+		
+		String outputFile = outputFilePrefix + "." + length + ".amb";
+		monitor.println("Writing " + outputFile);
 		
 		StringBuilder b = new StringBuilder();
 		for (Pair<Symbol, SymbolString> p : ambiguities) {
@@ -112,7 +130,7 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 	}
 
 	protected void detect() {
-		System.out.println("\nDerivation length: " + length);
+		monitor.println("\nDerivation length: " + length);
 		
 		AbstractWorker workerPool[] = new AbstractWorker[workers];
 	
@@ -123,7 +141,7 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		dealer.setDealer(true);
 		dealer.go(j, true);
 	
-		System.out.println("Jobs: " + jobs.size());
+		monitor.println("Jobs: " + jobs.size());
 	
 		
 		long sentences = 0;
@@ -144,16 +162,16 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 			}
 		}
 		
-		System.out.println("Done");
-		System.out.println("Sentences: " + sentences);
+		monitor.println("Done");
+		monitor.println("Sentences: " + sentences);
 		int parsed = 0;
 		for (Relation<Symbol, SymbolString> r : possibleAmbiguities) {
 			parsed += r.size();
 		}
-		System.out.println("Parsed: " + parsed);
-		System.out.println("Ambiguities found: " + ambiguities.size());
-		System.out.println("Ambiguous nonterminals: " + ambiguities.m.size());
-		System.out.println("Time: " + (System.currentTimeMillis() - startTime));
+		monitor.println("Parsed: " + parsed);
+		monitor.println("Ambiguities found: " + ambiguities.size());
+		monitor.println("Ambiguous nonterminals: " + ambiguities.m.size());
+		monitor.println("Time: " + (System.currentTimeMillis() - startTime));
 	}
 
 	protected void ambiguity(Symbol[] sentence, int from, int to, NonTerminal nt, String workerId) {
@@ -161,15 +179,6 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		SymbolString s = new SymbolString(len);
 		for (int z = 0; z < len; z++) {
 			s.add(sentence[z + from]);
-		}
-		
-		// only identify ambiguous nonterminals, do not track all their strings
-		if (!Main.outputAmbiguities) {
-			synchronized(ambiguities) {
-				if (ambiguities.m.contains(nt)) {
-					return;
-				}
-			}
 		}
 		
 		boolean isnew;
@@ -192,18 +201,15 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 						//System.out.println(p.b.top.prettyPrint());
 						reallyAmbiguous = false;
 					} else {
-						System.out.println(workerId + ": Ambiguity found for " + n.getRootSymbol() + ": " + n.yield().prettyPrint());
+						monitor.ambiguousString(n.yield(), (NonTerminal) n.getRootSymbol(), "" + workerId + ": ");
 					}
 				} else {
-					System.out.println(workerId + ": Ambiguity found for " + nt + ": " + s.prettyPrint());
+					monitor.ambiguousString(s, nt, "" + workerId + ": ");
 				}
 				if (reallyAmbiguous) {
 					synchronized(ambiguities) {
-						if (Main.outputAmbiguities) {
-							ambiguities.add(p.b.getAmbiguousCore());
-						} else {
-							ambiguities.add(nt, s);
-						}
+						ambiguities.add(p.b.getAmbiguousCore());
+						//ambiguities.add(nt, s);
 					}
 				}
 			}
@@ -222,8 +228,8 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		} else {
 			ParseTree parse = parser.parse(s, n);
 			boolean ambiguous = parse != null && parse.nrAmbiguities > 0;
-			if (ambiguous && !Main.quick) {
-				System.out.println(parse.top.prettyPrint());
+			if (ambiguous && AmbiDexterConfig.verbose) {
+				monitor.println(parse.top.prettyPrint());
 			}
 			return new Pair<Boolean, ParseTree>(ambiguous, parse);
 		}		

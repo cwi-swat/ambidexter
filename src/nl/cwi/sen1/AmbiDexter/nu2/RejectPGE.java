@@ -2,7 +2,6 @@ package nl.cwi.sen1.AmbiDexter.nu2;
 
 import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.Transition;
 import nl.cwi.sen1.AmbiDexter.grammar.NonTerminal;
 import nl.cwi.sen1.AmbiDexter.grammar.Reduce;
@@ -11,7 +10,7 @@ import nl.cwi.sen1.AmbiDexter.util.IdShareableHashSet;
 import nl.cwi.sen1.AmbiDexter.util.Queue;
 import nl.cwi.sen1.AmbiDexter.util.ShareableHashSet;
 
-public class ScannerlessPGE implements PairGraphExtension {
+public class RejectPGE implements PairGraphExtension {
 	
 	private static final int reduceBits = 9;
 	private static final int reduced1Offset = ItemPair.newFlags(reduceBits);
@@ -24,7 +23,7 @@ public class ScannerlessPGE implements PairGraphExtension {
 	private static Queue<IdShareableHashSet<NonTerminal>> reducedIndex;
 	private static int reducedId;
 	
-	public ScannerlessPGE() {
+	public RejectPGE() {
 		super();
 	}
 
@@ -182,10 +181,6 @@ public class ScannerlessPGE implements PairGraphExtension {
 	}
 	
 	private int getReduced1AfterReduce(ItemPair p, NonTerminal n) {
-		if (!Main.doRejects) {
-			return 0;
-		}
-	
 		IdShareableHashSet<NonTerminal> reduced1 = getReduced1(p);
 		if (n.usedInRejectFilter || n.rejectedLiterals != null) {
 			IdShareableHashSet<NonTerminal> newReduced = new IdShareableHashSet<NonTerminal>();
@@ -216,10 +211,6 @@ public class ScannerlessPGE implements PairGraphExtension {
 	}
 	
 	private int getReduced2AfterReduce(ItemPair p, NonTerminal n) {
-		if (!Main.doRejects) {
-			return 0;
-		}
-
 		IdShareableHashSet<NonTerminal> reduced2 = getReduced2(p);
 		if (n.usedInRejectFilter || n.rejectedLiterals != null) {
 			IdShareableHashSet<NonTerminal> newReduced = new IdShareableHashSet<NonTerminal>();

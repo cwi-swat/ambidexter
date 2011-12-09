@@ -1,5 +1,6 @@
 package nl.cwi.sen1.AmbiDexter.grammar.importexport;
 
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
 import nl.cwi.sen1.AmbiDexter.grammar.Grammar;
 import nl.cwi.sen1.AmbiDexter.grammar.NonTerminal;
 import nl.cwi.sen1.AmbiDexter.grammar.Production;
@@ -14,14 +15,14 @@ public class YaccImporter extends GrammarImporter {
 	}
 
 	@Override
-	public Grammar importGrammar(String filename) {
+	public Grammar importGrammar(String filename, AmbiDexterConfig config) {
 		String s = Util.readTextFile(filename);
 		return importYacc(s, filename);
 	}
 
 	// read grammar from yacc file
 	public Grammar importYacc(String s, String name) {
-		g = new Grammar(name, false);
+		g = new Grammar(name, false, false, false);
 		String startSymbol = null;
 		
 		final String openBraceChar = "!!OPENBRACECHAR!!";

@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-import nl.cwi.sen1.AmbiDexter.Main;
 import nl.cwi.sen1.AmbiDexter.grammar.Character;
 import nl.cwi.sen1.AmbiDexter.grammar.ListNonTerminal;
 import nl.cwi.sen1.AmbiDexter.grammar.NonTerminal;
@@ -14,6 +13,12 @@ import nl.cwi.sen1.AmbiDexter.grammar.SymbolString;
 
 public class SGLRStub implements IParser {
 
+	String parseTableFile;
+	
+	public SGLRStub(String parseTableFile) {
+		this.parseTableFile = parseTableFile;
+	}
+	
 	@Override
 	public ParseTree parse(SymbolString s) {
 		return null;
@@ -63,7 +68,7 @@ public class SGLRStub implements IParser {
 
 	private boolean parseSGLR(String s, String startSymbol) {
 		// TODO fix case where startSymbol is "start"
-		String cmd = "sglr -t -p " + Main.parseTable + " -S " + startSymbol;
+		String cmd = "sglr -t -p " + parseTableFile + " -S " + startSymbol;
 		String tree = execSGLR(s, cmd);
 	    boolean ambig = !tree.equals("") && !tree.endsWith(",0)") && !tree.startsWith("summary");
 	    return ambig;

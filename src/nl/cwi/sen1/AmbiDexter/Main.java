@@ -1,18 +1,18 @@
 package nl.cwi.sen1.AmbiDexter;
 
+import com.sun.xml.internal.ws.api.message.FilterMessageImpl;
+
 import nl.cwi.sen1.AmbiDexter.AmbiguityDetector.DetectionMethod;
 import nl.cwi.sen1.AmbiDexter.automata.ItemPDA;
 import nl.cwi.sen1.AmbiDexter.automata.LALR1NFA;
 import nl.cwi.sen1.AmbiDexter.automata.LR0NFA;
 import nl.cwi.sen1.AmbiDexter.automata.LR1NFA;
 import nl.cwi.sen1.AmbiDexter.automata.NFA;
-import nl.cwi.sen1.AmbiDexter.automata.PDA;
-import nl.cwi.sen1.AmbiDexter.automata.ProductionPDA;
-import nl.cwi.sen1.AmbiDexter.automata.SLR1NFA;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.Item;
+import nl.cwi.sen1.AmbiDexter.automata.PDA;
+import nl.cwi.sen1.AmbiDexter.automata.SLR1NFA;
 import nl.cwi.sen1.AmbiDexter.derivgen.DerivationGenerator;
 import nl.cwi.sen1.AmbiDexter.derivgen.ParallelDerivationGenerator;
-import nl.cwi.sen1.AmbiDexter.derivgen.ScannerlessDerivGen1;
 import nl.cwi.sen1.AmbiDexter.derivgen.ScannerlessDerivGen2;
 import nl.cwi.sen1.AmbiDexter.grammar.Grammar;
 import nl.cwi.sen1.AmbiDexter.grammar.GrammarMetrics;
@@ -31,94 +31,37 @@ import nl.cwi.sen1.AmbiDexter.util.Util;
 
 public class Main {
 	
-	public final static int LR0 = 0;
-	public final static int SLR1 = 1;
-	public final static int LALR1 = 2;
-	public final static int LR1 = 3;
-	final static String precisionName[] = {
-		"lr0",
-		"slr1",
-		"lalr1",
-		"lr1",
-		"Mohri-Nederhof"
-	};
+	private AmbiDexterConfig config = new AmbiDexterConfig();
+	private Grammar grammar;
+    private GrammarMetrics metrics;
+    private IAmbiDexterMonitor monitor;
 	
-	DetectionMethod method = DetectionMethod.NU;
-	int derivGenDepth = 10; // depth of derivation generation
-	int derivGenDealLength = 0;
-	int threads = 1; // parallel derivation generation
-	boolean incrementalDerivGen = false;
-	String alternativeStartSymbol;
-	public static boolean findCommonTops = false;
-	public static boolean findHarmlessProductions = false;
-	public static boolean outputGraphs = false;
-	public static boolean outputDistMap = false;
-	boolean outputStatistics = false;
-	boolean outputReconstructedGrammar = false;
-	boolean outputReconstructedGrammarYacc = false;
-	boolean outputReconstructedGrammarCFGA = false;
-	boolean outputReconstructedGrammarAccent = false;
-	boolean outputReconstructedGrammarDKBrics = false;
-	boolean readDFA = false;
-	public static boolean writeDFA = false;
-	String dfaName;
-	
-	boolean convert = false;
-	public static boolean alternating = false;
-	public static boolean filterUnmatchedDerivesReduces = false;
-
-	public static boolean unfoldStronglyConnectedComponents = false;
-	public static boolean unfoldNonRecursiveTails = false;
-	public static boolean unfoldJoiningTails = false;
-	public static boolean unfoldOnlyLexicalTails = false;
-	public static boolean unfoldEmpties = false;
-	public static boolean unfoldLexical = false;
-	public static boolean unfoldLayout = false;
-	public static boolean tokenizeLexicalSyntax = false;
-
-	public static boolean unfoldStackDepth = false;
-	public static boolean unfoldStackContents = false;
-	public static int stackUnfoldingDepth = 0;
-	
-	public static boolean verbose = false;
-	public static boolean quick = false;
-	public static final boolean nonTerminalLookahead = false;
-	public static boolean ignoreLayout = false;
-	public static boolean doRejects = true;
-	public static boolean doFollowRestrictions = true;
-	public static boolean doPriorities = true;
-	public static boolean doPreferAvoid = true;
-	
-	public static String parseTable;
-	public static boolean outputAmbiguities;
-	
-	int precision = LR0;
-    String filename = "";
-    public static String filterFile;
-    Grammar grammar;
-    GrammarMetrics metrics;
-	
-    {
-    	parseTable = null;
-    	doPriorities = doFollowRestrictions = doRejects = true;
-    }
-    
-    public Main() {
+    public Main(IAmbiDexterMonitor m) {
+    	monitor = m;
     }
     
 	public static void main(String[] args) {
 
 		//try { Thread.sleep(8000); } catch (Exception e) {}
-
-		Main m = new Main();
+		IAmbiDexterMonitor monitor = new ConsoleMonitor(); 
+		
+		Main m = new Main(monitor);
 		m.executeArguments(args);
 		if (m.metrics != null) {
 			m.metrics.write();
 		}
 	}
 	
-	static void usage() {
-		System.out.println(
+	public void setGrammar(Grammar g) {
+		grammar = g;
+	}
+	
+	public void setConfig(AmbiDexterConfig cfg) {
+		config = cfg;
+	}
+	
+	static String usage() {
+		return
 			"AmbiDexter 0.4, April 15th, 2011\n" +
 			"Bas Basten, CWI, Amsterdam, The Netherlands (basten@cwi.nl)\n" +
 			"\n" +
@@ -161,18 +104,18 @@ public class Main {
 			"    -uscc        unfold strongly connected components\n" +
 			"\n" +
 			"Options for sentence generation:\n" +
-			"    -pgp         do parallel depth first sentence generation\n" +
+			"    -pg          do parallel depth first sentence generation\n" +
 			"    -k <nr>      specify maximum length of sentences to generate\n" +
 			"    -ik <nr>     incrementally search from <nr> upwards\n" +
 			"    -p <nr>      specify number of parallel threads (default 1)\n" +
 			"    -dl <nr>     specify length of strings dealt to threads\n" +
 			"    -rdfa <name> generate sentences from dfa <name> (otherwise a new dfa is made)\n"
-			);
+		;
 	}
 
 	public void executeArguments(String[] args) {
 		if (args.length == 0) {
-			usage();
+			monitor.println(usage());
 			return;
 		}
 
@@ -181,70 +124,67 @@ public class Main {
 			if (arg.charAt(0) == '-') {
 				if (arg.equals("-//"))    { return; } // end of arguments
 
-				if (arg.equals("-nu"))    { method = DetectionMethod.NU; continue; }
-				if (arg.equals("-anu"))   { method = DetectionMethod.NU; alternating = true; continue; }
-				if (arg.equals("-ru"))    { method = DetectionMethod.RU; continue; }
-				if (arg.equals("-pg"))    { method = DetectionMethod.PG; continue; }
-				if (arg.equals("-pgp"))   { method = DetectionMethod.PGP; continue; }
-				if (arg.equals("-tsdg"))  { method = DetectionMethod.TSDG; continue; }
+				if (arg.equals("-nu"))    { config.filterMethod = DetectionMethod.NU; continue; }
+				if (arg.equals("-anu"))   { config.filterMethod = DetectionMethod.NU; config.alternating = true; continue; }
+				if (arg.equals("-ru"))    { config.filterMethod = DetectionMethod.RU; continue; }
+				if (arg.equals("-pg"))    { config.derivGenMethod = DetectionMethod.PG; continue; }
+				if (arg.equals("-tsdg"))  { config.derivGenMethod = DetectionMethod.TSDG; continue; }
 				
 				// NFA precision
-				if (arg.equals("-lr0"))   { precision = LR0; continue; }
-				if (arg.equals("-slr1"))  { precision = SLR1; continue; }
-				if (arg.equals("-lalr1")) { precision = LALR1; continue; }
-				if (arg.equals("-lr1"))   { precision = LR1; continue; }
+				if (arg.equals("-lr0"))   { config.precision = AmbiDexterConfig.LR0; continue; }
+				if (arg.equals("-slr1"))  { config.precision = AmbiDexterConfig.SLR1; continue; }
+				if (arg.equals("-lalr1")) { config.precision = AmbiDexterConfig.LALR1; continue; }
+				if (arg.equals("-lr1"))   { config.precision = AmbiDexterConfig.LR1; continue; }
 
 				// general output and grammar options
-				if (arg.equals("-s"))     { outputStatistics = true; verbose = true; continue; }
-				if (arg.equals("-v"))	  { verbose = true; continue; }
-				if (arg.equals("-q"))     { quick = true; continue; }
-				if (arg.equals("-g"))     { outputGraphs = true; continue; }
-				if (arg.equals("-dm"))    { outputDistMap = true; continue; }
+				if (arg.equals("-s"))     { config.outputStatistics = true; AmbiDexterConfig.verbose = true; continue; }
+				if (arg.equals("-v"))	  { AmbiDexterConfig.verbose = true; continue; }
+				if (arg.equals("-q"))     { AmbiDexterConfig.quick = true; continue; }
+				if (arg.equals("-g"))     { AmbiDexterConfig.outputGraphs = true; continue; }
+				if (arg.equals("-dm"))    { AmbiDexterConfig.outputDistMap = true; continue; }
 				if (arg.equals("-m"))     { metrics = new GrammarMetrics(args[++i]); continue; }
-				if (arg.equals("-as"))	  { alternativeStartSymbol = args[++i]; continue; }
+				if (arg.equals("-as"))	  { config.alternativeStartSymbol = args[++i]; continue; }
 
 				// NU test
-				if (arg.equals("-t"))     { findCommonTops = true; continue; }
-				if (arg.equals("-h"))     { findHarmlessProductions = true; continue; }
-				if (arg.equals("-udr"))   { filterUnmatchedDerivesReduces = true; continue; }
+				if (arg.equals("-h"))     { config.filterMethod = DetectionMethod.NU; config.findHarmlessProductions = true; continue; }
+				if (arg.equals("-udr"))   { config.filterUnmatchedDerivesReduces = true; continue; }
 
 				// grammar conversion/filtering
-				if (arg.equals("-c"))     { convert = true; continue; }
-				if (arg.equals("-oy"))	  { outputReconstructedGrammarYacc = true; continue; }
-				if (arg.equals("-oc"))	  { outputReconstructedGrammarCFGA = true; continue; }
-				if (arg.equals("-oa"))	  { outputReconstructedGrammarAccent = true; continue; }
-				if (arg.equals("-ob"))	  { outputReconstructedGrammarDKBrics = true; continue; }
-				if (arg.equals("-wdfa"))  { writeDFA = true; dfaName = args[++i]; continue; }
-				if (arg.equals("-rdfa"))  { readDFA = true; filterFile = dfaName = args[++i]; continue; }
+				if (arg.equals("-c"))     { config.convert = true; continue; }
+				if (arg.equals("-oy"))	  { config.outputReconstructedGrammarYacc = true; continue; }
+				if (arg.equals("-oc"))	  { config.outputReconstructedGrammarCFGA = true; continue; }
+				if (arg.equals("-oa"))	  { config.outputReconstructedGrammarAccent = true; continue; }
+				if (arg.equals("-ob"))	  { config.outputReconstructedGrammarDKBrics = true; continue; }
+				if (arg.equals("-wdfa"))  { AmbiDexterConfig.writeDFA = true; config.dfaName = args[++i]; continue; }
+				if (arg.equals("-rdfa"))  { config.readDFA = true; config.filterFile = config.dfaName = args[++i]; continue; }
 				
 				// derivation generation
-				if (arg.equals("-pt"))    { parseTable = args[++i]; continue; }
-				if (arg.equals("-ogs"))   { outputAmbiguities = true; continue; }
-				if (arg.equals("-k"))     { derivGenDepth = Integer.valueOf(args[++i]); continue; }
-				if (arg.equals("-ik"))    { derivGenDepth = Integer.valueOf(args[++i]); incrementalDerivGen = true; continue; }
-				if (arg.equals("-dl"))    { derivGenDealLength = Integer.valueOf(args[++i]); continue; }
-				if (arg.equals("-p"))     { threads = Integer.valueOf(args[++i]); continue; }
+				if (arg.equals("-pt"))    { config.parseTableSGLR = args[++i]; continue; }
+				if (arg.equals("-ogs"))   { config.outputAmbiguities = true; continue; }
+				if (arg.equals("-k"))     { config.derivGenMinDepth = Integer.valueOf(args[++i]); continue; }
+				if (arg.equals("-ik"))    { config.derivGenMinDepth = Integer.valueOf(args[++i]); config.incrementalDerivGen = true; continue; }
+				if (arg.equals("-dl"))    { config.derivGenDealLength = Integer.valueOf(args[++i]); continue; }
+				if (arg.equals("-p"))     { config.threads = Integer.valueOf(args[++i]); continue; }
 				
 				// NFA unfolding
-				if (arg.equals("-ue"))    { unfoldEmpties = true; continue; }
-				if (arg.equals("-ulex"))  { unfoldLexical = true; continue; }
-				if (arg.equals("-ulo"))   { unfoldLayout = true; continue; }
-				if (arg.equals("-usd"))   { unfoldStackDepth = true; stackUnfoldingDepth = Integer.valueOf(args[++i]); continue; }
-				if (arg.equals("-us"))    { unfoldStackContents = true; stackUnfoldingDepth = Integer.valueOf(args[++i]); continue; }
-				if (arg.equals("-unrt"))  { unfoldNonRecursiveTails = true; continue; }
-				if (arg.equals("-ut"))    { unfoldJoiningTails = true; continue; }
-				if (arg.equals("-ult"))   { unfoldJoiningTails = true; unfoldOnlyLexicalTails = true; continue; }
-				if (arg.equals("-uscc"))  { unfoldStronglyConnectedComponents = true; continue; }
+				if (arg.equals("-ue"))    { config.unfoldEmpties = true; continue; }
+				if (arg.equals("-ulex"))  { config.unfoldLexical = true; continue; }
+				if (arg.equals("-ulo"))   { config.unfoldLayout = true; continue; }
+				if (arg.equals("-usd"))   { config.unfoldStackDepth = true; config.stackUnfoldingDepth = Integer.valueOf(args[++i]); continue; }
+				if (arg.equals("-us"))    { config.unfoldStackContents = true; config.stackUnfoldingDepth = Integer.valueOf(args[++i]); continue; }
+				if (arg.equals("-unrt"))  { config.unfoldNonRecursiveTails = true; continue; }
+				if (arg.equals("-ut"))    { config.unfoldJoiningTails = true; continue; }
+				if (arg.equals("-ult"))   { config.unfoldJoiningTails = true; config.unfoldOnlyLexicalTails = true; continue; }
+				if (arg.equals("-uscc"))  { config.unfoldStronglyConnectedComponents = true; continue; }
 				
 				// various (test) settings
-				if (arg.equals("-iglo"))  { ignoreLayout = true; continue; }
-				if (arg.equals("-ndf"))   { doPriorities = doFollowRestrictions = doRejects = doPreferAvoid = false; continue; } // no disambiguation filters
-				if (arg.equals("-tok"))   { tokenizeLexicalSyntax = true; continue; }
+				if (arg.equals("-ndf"))   { config.doPriorities = config.doFollowRestrictions = config.doRejects = config.doPreferAvoid = false; continue; } // no disambiguation filters
+				if (arg.equals("-tok"))   { config.tokenizeLexicalSyntax = true; continue; }
 				
-				System.out.println("Unknown option: " + arg); return;
+				monitor.println("Unknown option: " + arg); return;
 			} else {
 //				try {
-					filename = arg;
+					config.filename = arg;
 					if (!handleGrammar()) {
 						return;
 					}
@@ -256,29 +196,29 @@ public class Main {
 	}
 
 	private boolean handleGrammar() {
-		outputReconstructedGrammar = outputReconstructedGrammarAccent || outputReconstructedGrammarCFGA || outputReconstructedGrammarYacc || outputReconstructedGrammarDKBrics;
-		if (outputReconstructedGrammar && filename.endsWith(".pt")) {
-			System.out.println("Output of SDF grammars not supported, use -of instead.");
+		config.outputReconstructedGrammar = config.outputReconstructedGrammarAccent || config.outputReconstructedGrammarCFGA || config.outputReconstructedGrammarYacc || config.outputReconstructedGrammarDKBrics;
+		if (config.outputReconstructedGrammar && config.filename.endsWith(".pt")) {
+			monitor.println("Output of SDF grammars not supported, use -of instead.");
 			return false;
 		}
-		System.out.println("Loading grammar " + filename + " ...");
-		grammar = GrammarImporter.importGrammar(filename, alternativeStartSymbol);
+		monitor.println("Loading grammar " + config.filename + " ...");
+		grammar = GrammarImporter.importGrammar(config.filename, config.alternativeStartSymbol, config);
 		
 		if (grammar.productions.size() == 0) {
-			System.out.println("Invalid grammar: " + filename);
+			monitor.println("Invalid grammar: " + config.filename);
 			return false;
 		}
 		
-		if (outputGraphs) {
-			grammar.dependencyGraphToDot(filename + ".deps.dot");
+		if (AmbiDexterConfig.outputGraphs) {
+			grammar.dependencyGraphToDot(config.filename + ".deps.dot");
 		}
 		
-		if (convert) {
-			if (!outputReconstructedGrammar) {
-				System.out.println("Error, unspecified output format.");
+		if (config.convert) {
+			if (!config.outputReconstructedGrammar) {
+				monitor.println("Error, unspecified output format.");
 			} else {
-				if (filename.endsWith(".y") && outputReconstructedGrammarYacc) {
-					System.out.println("Conversion from Yacc to Yacc not allowed.");
+				if (config.filename.endsWith(".y") && config.outputReconstructedGrammarYacc) {
+					monitor.println("Conversion from Yacc to Yacc not allowed.");
 				} else {
 					dumpGrammar(grammar, "");
 				}
@@ -289,150 +229,162 @@ public class Main {
 				return true;
 			}
 			
+			if (AmbiDexterConfig.verbose) {
+				printGrammar(grammar);
+			}
+			if (config.outputStatistics) {
+				return true;
+			}
+			
 			checkGrammar(grammar);
-			System.out.println("");
+			monitor.println("");
 		}
 		return true;
 	}
 
-	void checkGrammar(Grammar grammar) {
-		if (verbose) {
-			int emptyRules = 0, injections = 0;
-			for (Production p : grammar.productions) {
-				if (p.reachable) {
-					if (p.isEmpty()) {
-						++emptyRules;
-					} else if (p.isInjection()) {
-						++injections;
-					}
-				}
-			}
-			
-			System.out.println("Empty production rules: " + emptyRules);
-			System.out.println("Injections: " + injections + "\n");			
-			
-			System.out.println("Nonterminal usage (in reachable productions):");
-			grammar.printNonTerminalUsage();
-			
-			System.out.println("\nProductions:");
-			for (NonTerminal n : grammar.nonTerminals.values()) {
-				for (Production p : n.productions) {
-					System.out.println("" + p.nr + ": " + (p.reachable ? "r" : " ") + (p.usedForReject ? "u" : " ") + " " + p);
-				}
-			}
-			
-			grammar.printFirstAndFollow();
-			grammar.printPrioritiesAndFollowRestrictions();
-		}
-		
-		if (outputStatistics) {
+	public void checkGrammar(Grammar grammar) {
+		if (config.filterMethod == DetectionMethod.NONE && config.derivGenMethod == DetectionMethod.NONE) {
+			monitor.println("Please select a filtering and/or derivation generation setting.");
 			return;
 		}
 		
-		System.out.println("----------------------------------------------------------------");
-		System.out.println("Checking with " + precisionName[precision] +" ...");
+		monitor.println("----------------------------------------------------------------");
+		monitor.println("Checking with " + AmbiDexterConfig.precisionName[config.precision] +" ...");
 		
-		switch (method) {
+		switch (config.filterMethod) {
 			case RU: doNUtest(); break; 
 			case NU: doNUtest(); break;
-			case PG: case PGP:  doDerivationGeneration(derivGenDepth); break;
-			case TSDG: testScannerlessDerivationGeneration(); break;
-			default: throw new RuntimeException("Method not implemented yet");
 		}
+		
+		switch (config.derivGenMethod) {
+			case PG: doDerivationGeneration(config.derivGenMinDepth, null); break;
+			case TSDG: testScannerlessDerivationGeneration(); break;
+		}
+	}
+
+	public void printGrammar(Grammar grammar) {
+		int emptyRules = 0, injections = 0;
+		for (Production p : grammar.productions) {
+			if (p.reachable) {
+				if (p.isEmpty()) {
+					++emptyRules;
+				} else if (p.isInjection()) {
+					++injections;
+				}
+			}
+		}
+		
+		monitor.println("Empty production rules: " + emptyRules);
+		monitor.println("Injections: " + injections + "\n");			
+		
+		monitor.println("Nonterminal usage (in reachable productions):");
+		grammar.printNonTerminalUsage();
+		
+		monitor.println("\nProductions:");
+		for (NonTerminal n : grammar.nonTerminals.values()) {
+			for (Production p : n.productions) {
+				monitor.println("" + p.nr + ": " + (p.reachable ? "r" : " ") + (p.usedForReject ? "u" : " ") + " " + p);
+			}
+		}
+		
+		grammar.printFirstAndFollow();
+		grammar.printPrioritiesAndFollowRestrictions();
 	}		
 	
 	// check nfa for potential ambiguities with pg
 	NFA buildNFA(boolean includeRejects, boolean unfold, boolean propagateFollowRestrictions) {
 		
 		NFA nfa = null;		
-		switch (precision) {
-			case LR0   : nfa = new LR0NFA(grammar); break;
-			case SLR1  : nfa = new SLR1NFA(grammar); break;
-			case LALR1 : nfa = new LALR1NFA(grammar); break;
-			case LR1   : nfa = new LR1NFA(grammar); break;
+		switch (config.precision) {
+			case AmbiDexterConfig.LR0   : nfa = new LR0NFA(grammar); break;
+			case AmbiDexterConfig.SLR1  : nfa = new SLR1NFA(grammar, config); break;
+			case AmbiDexterConfig.LALR1 : nfa = new LALR1NFA(grammar, config); break;
+			case AmbiDexterConfig.LR1   : nfa = new LR1NFA(grammar, config); break;
 			default    : throw new RuntimeException("Unknown precision");
 		}
-		nfa.precision = precision;
+		nfa.precision = config.precision;
 		
-		System.out.println("");
+		monitor.println("");
 
-		nfa.build(includeRejects, unfold);
+		nfa.build(includeRejects, unfold ? config : null);
 		nfa.printSize("NFA");
 		
 		if (propagateFollowRestrictions && grammar.scannerless) {
 			nfa.propagateFollowRestrictions();
 			nfa.printSize("Propagated follow restrictions");
 		} else {
-			if (writeDFA) {
+			if (AmbiDexterConfig.writeDFA) {
 				nfa.moveShiftsToSets(); // otherwise minimalstring calc won't work
 			}
 		}
 		
 		nfa.optimize(true);
-		if (writeDFA && includeRejects) {
+		if (AmbiDexterConfig.writeDFA && includeRejects) {
 			nfa.disconnectRejectPart();
 		}
 		nfa.printSize("Optimized");
 
 		nfa.finish();
-		if (!quick) {
+		if (!AmbiDexterConfig.quick) {
 			nfa.verify();
 		}
 		
-		if (verbose) {
-			System.out.println("Items + DFF");
+		if (AmbiDexterConfig.verbose) {
+			monitor.println("Items + DFF");
 			for (Item i : nfa.items) {
 				String o = "" + i.id + ": " + i;
 				while (o.length() < 80) {
 					o += " ";
 				}
-				System.out.println(o + i.dffb);
+				monitor.println(o + i.dffb);
 			}
 		}
 		
 		return nfa;
 	}
 
-	private void doNUtest() {		
-		NFA nfa = buildNFA(writeDFA, true, doFollowRestrictions);
-		if (outputGraphs) {
-			nfa.toDot(filename + "." + precisionName[precision] + ".nfa.dot");
+	public void doNUtest() {		
+		NFA nfa = buildNFA(AmbiDexterConfig.writeDFA, true, config.doFollowRestrictions);
+		if (AmbiDexterConfig.outputGraphs) {
+			nfa.toDot(config.filename + "." + AmbiDexterConfig.precisionName[config.precision] + ".nfa.dot");
 		}
 
 		NoncanonicalUnambiguityTest nu = new NoncanonicalUnambiguityTest();
+		nu.setConfig(config);
+		nu.setMonitor(monitor);
 		nu.build(nfa);		
-		nu.detectAmbiguities(method);
+		nu.detectAmbiguities(config.filterMethod);
 		
-		if (findHarmlessProductions) {
-			if (!quick) {
-				System.out.println("\nPotentially Harmful: ");
+		if (config.findHarmlessProductions) {
+			if (!AmbiDexterConfig.quick) {
+				monitor.println("\nPotentially Harmful: ");
 				for (Production p : nu.harmfulProductions) {
 					if (p.reachable) {
-						System.out.println(p.toString());
+						monitor.println(p.toString());
 					}
 				}
-				System.out.println("\nHarmless:");
+				monitor.println("\nHarmless:");
 				for (Production p : nu.harmlessProductions) {
 					String s = "";
 					if (!p.reachable) {
 						s = "*** ";
 					}
-					System.out.println(s + p);
+					monitor.println(s + p);
 				}
 			}
 			
-			System.out.println("Harmless productions: " + nu.harmlessProductions.size() + " / " + grammar.nrReachableProductions);
+			monitor.println("Harmless productions: " + nu.harmlessProductions.size() + " / " + grammar.nrReachableProductions);
 			
-			if (nu.harmfulProductions.size() > 0 && outputReconstructedGrammar && !grammar.scannerless) {
+			if (nu.harmfulProductions.size() > 0 && config.outputReconstructedGrammar && !grammar.scannerless) {
 				Grammar g2 = new Grammar(grammar, nu.harmfulProductions, true);
-				dumpGrammar(g2, ".-" + precisionName[precision] + ".pa");
+				dumpGrammar(g2, ".-" + AmbiDexterConfig.precisionName[config.precision] + ".pa");
 			}
 		}
 		
-		if (writeDFA) {			
-			System.out.println();
+		if (AmbiDexterConfig.writeDFA) {			
+			monitor.println();
 			nfa.reconnectRejectPart();
-			if (!doFollowRestrictions) {
+			if (!config.doFollowRestrictions) {
 				nfa.moveShiftsToSets();
 			}
 			nfa.reconstruct();
@@ -444,9 +396,9 @@ public class Main {
 			ItemPDA dfa = new ItemPDA();
 			dfa.build(snfa);
 			dfa.printSize("IDFA");			
-			dfa.serialize(filename + "." + dfaName + ".idfa");			
+			dfa.serialize(config.filename + "." + config.dfaName + ".idfa");			
 			
-			if (outputGraphs) {
+			if (AmbiDexterConfig.outputGraphs) {
 				nfa.toDot(grammar.name + ".nfa.reconstructed.dot");
 				snfa.toDot(grammar.name + ".nfa.simplified.dot");
 				dfa.toDot(grammar.name + ".dfa.reconstructed.dot");
@@ -454,110 +406,98 @@ public class Main {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private void doDerivationGeneration(int depth) {
+	public void doDerivationGeneration(int depth, String parseTableFile) {
 		DerivationGenerator dg = null;
-		switch (method) {
+		switch (config.derivGenMethod) {
 		case PG:
-			dg = new ScannerlessDerivGen1(threads);
-			((ParallelDerivationGenerator) dg).setDealerLength(derivGenDealLength);
-			break;
-		case PGP:
-			dg = new ScannerlessDerivGen2(threads);
-			((ParallelDerivationGenerator) dg).setDealerLength(derivGenDealLength);
+			dg = new ScannerlessDerivGen2(config.threads);
+			((ParallelDerivationGenerator) dg).setDealerLength(config.derivGenDealLength);
 			break;
 		}
 		dg.setScannerless(grammar.scannerless);
+		dg.setConfig(config);
+		dg.setMonitor(monitor);
+		if (config.outputAmbiguities) {
+			dg.setOutputFilePrefix(grammar.name + "." + config.filterFile);
+		}
 
-		if (readDFA) {
-			PDA dfa;
-			if (method == DetectionMethod.PGP) {
-				dfa = new ItemPDA();
-			} else {
-				dfa = new ProductionPDA();
-			}
-			dfa.deserialize(filename + "." + dfaName + ".idfa", grammar);
+		if (config.readDFA) {
+			@SuppressWarnings("rawtypes")
+			PDA dfa = new ItemPDA();
+			dfa.deserialize(config.filename + "." + config.dfaName + ".idfa", grammar);
 			dg.setDFA(dfa);
 		} else {
 			NFA nfa;
-			if (method == DetectionMethod.PGP) {
-				nfa = buildNFA(Main.doRejects, false, Main.doFollowRestrictions);
-				if (!grammar.scannerless || !Main.doFollowRestrictions) {
-					nfa.moveShiftsToSets();
-				}
-			} else {
-				nfa = buildNFA(Main.doRejects, false, false);
+			nfa = buildNFA(config.doRejects, false, config.doFollowRestrictions);
+			if (!nfa.followRestrictionsPropagated) {
+				nfa.moveShiftsToSets();
 			}
 			
-			if (outputGraphs) {
-				nfa.toDot(filename + "." + precisionName[precision] + ".gnfa.dot");
+			if (AmbiDexterConfig.outputGraphs) {
+				nfa.toDot(config.filename + "." + AmbiDexterConfig.precisionName[config.precision] + ".gnfa.dot");
 			}
 			dg.build(nfa);
 		}
 		dg.optimize();
 		dg.verify();
 		
-		if (outputGraphs) {
+		if (AmbiDexterConfig.outputGraphs) {
 			dg.getDFA().toDot("dfa.dot");
 		}
 		
 		dg.setLength(depth);
-		dg.setIncremental(incrementalDerivGen);
-		if (parseTable == null) {
-			dg.setParser(new SimpleSGLRParser(buildNFA(Main.doRejects, false, false)));
+		dg.setIncremental(config.incrementalDerivGen);
+		if (parseTableFile == null) {
+			dg.setParser(new SimpleSGLRParser(buildNFA(config.doRejects, false, false)));
 		} else {
-			dg.setParser(new SGLRStub());
+			dg.setParser(new SGLRStub(parseTableFile));
 		}
-		dg.detectAmbiguities(method);
+		dg.detectAmbiguities(config.derivGenMethod);
 	}
 
 	private void testScannerlessDerivationGeneration() {
-		method = DetectionMethod.PGP;
+		config.derivGenMethod = DetectionMethod.PG;
 		
-		if (parseTable == null) {
-			System.out.println("Parse table file(s) not set");
+		if (config.parseTableSGLR == null) {
+			monitor.println("Parse table file(s) not set");
 			return;
 		}
 		
-		String pt = parseTable;
-
-		for (int depth = 1; depth <= derivGenDepth; ++depth) {
+		for (int depth = 1; depth <= config.derivGenMinDepth; ++depth) {
 			// generate without disambiguation filters and parse with SGLR
-			Main.parseTable = pt;
-			Main.doFollowRestrictions = Main.doPriorities = Main.doRejects = Main.doPreferAvoid = false;
-			doDerivationGeneration(depth);
+			config.doFollowRestrictions = config.doPriorities = config.doRejects = config.doPreferAvoid = false;
+			doDerivationGeneration(depth, config.parseTableSGLR);
 			Relation<Symbol, SymbolString> sglr = ParallelDerivationGenerator.ambiguities;
 			
 			// generate with disambiguation filters
-			Main.parseTable = null;
-			Main.doFollowRestrictions = Main.doPriorities = Main.doRejects = Main.doPreferAvoid = true;
-			doDerivationGeneration(depth);
+			config.doFollowRestrictions = config.doPriorities = config.doRejects = config.doPreferAvoid = true;
+			doDerivationGeneration(depth, null);
 			Relation<Symbol, SymbolString> scan = ParallelDerivationGenerator.ambiguities;
 	
 			if (!sglr.equals(scan)) {
-				ScannerlessDerivGenTest.compareAmbiguities(sglr, scan, depth);
+				ScannerlessDerivGenTest.compareAmbiguities(sglr, scan, depth, monitor);
 			}
 		}
 	}
 
 	private void dumpGrammar(Grammar g, String postfix) {
-		String basename = filename.substring(0, filename.length() - 2) + postfix;
-		if (outputReconstructedGrammarYacc) {
+		String basename = config.filename.substring(0, config.filename.length() - 2) + postfix;
+		if (config.outputReconstructedGrammarYacc) {
 			dumpGrammar(basename + ".y", GrammarExporter.exportYacc(g));
 		}
-		if (outputReconstructedGrammarCFGA) {
+		if (config.outputReconstructedGrammarCFGA) {
 			dumpGrammar(basename + ".cfga", GrammarExporter.exportCFGA(g));
 		}
-		if (outputReconstructedGrammarAccent) {
+		if (config.outputReconstructedGrammarAccent) {
 			dumpGrammar(basename + ".acc", GrammarExporter.exportAccent(g));
 		}
-		if (outputReconstructedGrammarDKBrics) {
+		if (config.outputReconstructedGrammarDKBrics) {
 			dumpGrammar(basename + ".cfg", GrammarExporter.exportDKBrics(g));
 		}
 	}
 	
 	private void dumpGrammar(String filename, String contents) {
-		System.out.println("Exporting grammar to " + filename);
+		monitor.println("Exporting grammar to " + filename);
 		Util.writeTextFile(filename, contents);
 	}
 }

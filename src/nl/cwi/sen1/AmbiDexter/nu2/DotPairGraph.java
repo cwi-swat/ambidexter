@@ -40,7 +40,7 @@ public class DotPairGraph extends DepthFirstPairGraph {
 
 	@Override
 	public void toDot(String filename) {
-		System.out.println("Writing " + filename);
+		monitor.println("Writing " + filename);
 		BufferedWriter w = null;
 		try {
 			FileWriter fstream = new FileWriter(filename);

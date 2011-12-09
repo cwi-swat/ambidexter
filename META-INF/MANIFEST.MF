@@ -30,7 +30,4 @@ Export-Package: aterm,
  nl.cwi.sen1.AmbiDexter.test,
  nl.cwi.sen1.AmbiDexter.util,
  shared
-Require-Bundle: org.eclipse.ui;bundle-version="3.7.0",
- org.eclipse.core.runtime;bundle-version="3.7.0"
-Bundle-ActivationPolicy: lazy
-Bundle-Activator: nl.cwi.sen1.AmbiDexter.plugin.Activator
+

@@ -1,15 +1,15 @@
 package nl.cwi.sen1.AmbiDexter.grammar.importexport;
 
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
 import nl.cwi.sen1.AmbiDexter.grammar.Grammar;
 
 
 public abstract class GrammarImporter {
 
 	protected Grammar g;
-	protected abstract Grammar importGrammar(String filename);
+	protected abstract Grammar importGrammar(String filename, AmbiDexterConfig config);
 	
-	public final static Grammar importGrammar(String filename, String alternativeStartSymbol) {
+	public final static Grammar importGrammar(String filename, String alternativeStartSymbol, AmbiDexterConfig config) {
 		GrammarImporter importer = null;
 		if (filename.endsWith(".y")) {
 			importer = new YaccImporter();
@@ -19,7 +19,7 @@ public abstract class GrammarImporter {
 			throw new RuntimeException("Unknown extension: " + filename);
 		}
 		
-		Grammar g = importer.importGrammar(filename);
+		Grammar g = importer.importGrammar(filename, config);
 		
 		if (alternativeStartSymbol != null) { // TODO validate: goes wrong with Pico STATEMENT
 			if (!g.setNewStartSymbol(alternativeStartSymbol)) {
@@ -28,7 +28,7 @@ public abstract class GrammarImporter {
 			System.out.println("Using alternative start symbol: " + alternativeStartSymbol);
 		}
 		
-		if (Main.tokenizeLexicalSyntax) {
+		if (config.tokenizeLexicalSyntax) {
 			g.removeLexicalPart();
 		}
 

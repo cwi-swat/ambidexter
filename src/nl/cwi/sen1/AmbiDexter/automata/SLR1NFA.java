@@ -1,6 +1,6 @@
 package nl.cwi.sen1.AmbiDexter.automata;
 
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
 import nl.cwi.sen1.AmbiDexter.grammar.CharacterClass;
 import nl.cwi.sen1.AmbiDexter.grammar.Grammar;
 import nl.cwi.sen1.AmbiDexter.grammar.NonTerminal;
@@ -10,7 +10,7 @@ import nl.cwi.sen1.AmbiDexter.grammar.SymbolSet;
 
 public class SLR1NFA extends LR0NFA {
 
-	public SLR1NFA(Grammar g) {
+	public SLR1NFA(Grammar g, AmbiDexterConfig config) {
 		super(g);
 	}
 
@@ -70,7 +70,7 @@ public class SLR1NFA extends LR0NFA {
 			} else {
 				Symbol s = i.getNextSymbol(); // endItem.getNextSymbol() returns $
 				if (s instanceof NonTerminal) {
-					if (Main.nonTerminalLookahead) {
+					if (AmbiDexterConfig.nonTerminalLookahead) {
 						return lookahead.contains(s);
 					} else {
 						//return lookahead.intersects(Grammar.getInstance().emptyFreeFirst.get(s));

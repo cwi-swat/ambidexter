@@ -3,6 +3,7 @@ package nl.cwi.sen1.AmbiDexter.test;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import nl.cwi.sen1.AmbiDexter.ConsoleMonitor;
 import nl.cwi.sen1.AmbiDexter.Main;
 import nl.cwi.sen1.AmbiDexter.derivgen.ParallelDerivationGenerator;
 
@@ -145,7 +146,7 @@ public class DerivGenTest extends TestCase {
 	}
 
 	public void execute(String[] cmd, boolean ambiguous) {
-		Main m = new Main();
+		Main m = new Main(new ConsoleMonitor());
 		m.executeArguments(cmd);
 		int ambiguities = ParallelDerivationGenerator.ambiguities.size();
 		if (ambiguous) {

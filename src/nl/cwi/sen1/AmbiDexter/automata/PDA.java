@@ -5,10 +5,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.EndItem;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.Item;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.StartItem;
@@ -78,7 +77,7 @@ public abstract class PDA <R> {
 			
 			// split states used for reject
 			PDAState r = null;
-			if (Main.doRejects) {
+			if (nfa.includeRejects) {
 				Set<Item> rejectItems = new ShareableHashSet<Item>();
 				for (Item i : closure) {
 					if (i.production != null && i.production.usedForReject) {
@@ -342,6 +341,7 @@ public abstract class PDA <R> {
 				return false;
 			if (!(obj instanceof PDA.PDAState))
 				return false;
+			@SuppressWarnings("unchecked")
 			PDAState other = (PDAState) obj;
 			if (items == null) {
 				if (other.items != null)

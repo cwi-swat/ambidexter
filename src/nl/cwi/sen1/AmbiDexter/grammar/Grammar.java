@@ -8,10 +8,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
 import nl.cwi.sen1.AmbiDexter.util.ESet;
 import nl.cwi.sen1.AmbiDexter.util.LinkedList;
 import nl.cwi.sen1.AmbiDexter.util.Pair;
@@ -26,17 +26,20 @@ public class Grammar {
 	public static Terminal endmarker;
 	private static Grammar instance;
 
-	public boolean scannerless = false;
 	public String name;
+	public boolean scannerless = false;
 	public NonTerminal startSymbol = null;
 	public Map<String, Terminal> terminals;
 	public Map<String, NonTerminal> nonTerminals;
 	public Set<Production> productions;
 	public NonTerminal layoutOpt = null;
 	public NonTerminal layout = null;
-	
-	private int productionId = 0;
 
+	private boolean doReject = true;
+	private boolean doFollow = true;
+	private boolean doPreferAvoid = true;
+	private int productionId = 0;
+	
 	public Map<NonTerminal, SymbolSet> first;
 	public Map<NonTerminal, SymbolSet> follow;
 	public SymbolSet[] emptyFreeFirst; // only terminals
@@ -58,9 +61,12 @@ public class Grammar {
 		return instance;
 	}
 
-	public Grammar(String name, boolean usesCharacterClasses) {
+	public Grammar(String name, boolean usesCharacterClasses, boolean doRejects, boolean doFollowRestrictions) {
 		this.name = name;
 		this.scannerless = usesCharacterClasses;
+		this.doReject = doRejects;
+		this.doFollow = doFollowRestrictions;
+
 		Symbol.resetSymbolCache();
 		empty = new Terminal("empty");
 		endmarker = new Terminal("$");
@@ -91,7 +97,10 @@ public class Grammar {
 		name = original.name;
 		productionId = original.productionId;
 		scannerless = original.scannerless;
-
+		doReject = original.doReject;
+		doFollow = original.doFollow;
+		doPreferAvoid = original.doPreferAvoid;
+		
 		// 1. collect defined nonterminals in this.nonTerminals
 		// 2a. collect used terminals in this.terminals
 		for (Production p : potentiallyHarmful) {
@@ -156,7 +165,7 @@ public class Grammar {
 			improductiveNTs.removeAll(productiveNTs);
 			
 			if (improductiveNTs.size() > 0) {
-				if (Main.verbose) {
+				if (AmbiDexterConfig.verbose) {
 					System.out.println("Improductive: " + improductiveNTs);
 				}
 				
@@ -186,6 +195,22 @@ public class Grammar {
 		
 		for (NonTerminal n : nonTerminals.values()) {
 			n.finish();
+		}
+		
+		// calculate highest character used
+		if (scannerless) {
+			int max = 0;
+			for (Production p : productions) {
+				for (Symbol s : p.rhs) {
+					if (s instanceof CharacterClass) {
+						int m = ((CharacterClass) s).getMaxCharacter();
+						if (m > max) {
+							max = m;
+						}
+					}
+				}
+			}
+			Character.maxCharacterUsed = Character.maxCharacterInOriginalGrammar = max; // probably always 256
 		}
 		
 		calcReachableAndRejects();
@@ -445,7 +470,7 @@ public class Grammar {
 		for (NonTerminal n : nonTerminals.values()) {
 			if (n != startSymbol && !reachableN.contains(n)) {
 				//throw new RuntimeException("Unreachable nonterminal: " + n);
-				if (!Main.quick) {
+				if (!AmbiDexterConfig.quick) {
 					System.out.println("Unreachable nonterminal: " + n);
 				}
 				n.reachable = false;
@@ -469,7 +494,7 @@ public class Grammar {
 		for (Production p : unreachableP) {
 			if (p.lhs.reachable) {
 				//throw new RuntimeException("Unreachable production: " + p);
-				if (!Main.quick) {
+				if (!AmbiDexterConfig.quick) {
 					System.out.println("Unreachable production: " + p);
 				}
 			}
@@ -502,7 +527,7 @@ public class Grammar {
 			final SymbolSet i = ntfirst.get(n);
 			if (!o.equals(i)) {
 				if (n.productive && n.reachable) {
-					if (Main.verbose) {
+					if (AmbiDexterConfig.verbose) {
 						System.out.println("different first: " + n);
 						System.out.println("o    " + o);
 						System.out.println("n    " + i);
@@ -539,7 +564,7 @@ public class Grammar {
 			SymbolSet o = follow.get(n);
 			final SymbolSet i = ntfollow.get(n);
 			if (!o.equals(i)) {
-				if (Main.verbose) {
+				if (AmbiDexterConfig.verbose) {
 					System.out.println("different follow: " + n);
 					System.out.println("o  " + o);
 					System.out.println("n  " + i);
@@ -815,9 +840,11 @@ public class Grammar {
 		for (NonTerminal n : nonTerminals.values()) {
 			System.out.println("NULLABLE( " + n + " ) = " + n.isNullable);
 		}*/
-		System.out.println("");
-		for (NonTerminal n : nonTerminals.values()) {
-			System.out.println("MINSTRING( " + n + " ) = " + minimalStrings.get(n));
+		if (minimalStrings != null) {
+			System.out.println("");
+			for (NonTerminal n : nonTerminals.values()) {
+				System.out.println("MINSTRING( " + n + " ) = " + minimalStrings.get(n));
+			}
 		}
 		/*System.out.println("");
 		for (NonTerminal n : nonTerminals.values()) {
@@ -854,7 +881,7 @@ public class Grammar {
 					}
 					SymbolString ss = new SymbolString(len);
 					ss.add(s);
-					if (!Main.doFollowRestrictions || pn == null || pn.followRestrictions == null || pn.followRestrictions.check(ss)) {
+					if (!doFollow || pn == null || pn.followRestrictions == null || pn.followRestrictions.check(ss)) {
 						itemFirst.add(p, ss);
 					} else {
 						continue;
@@ -876,7 +903,7 @@ public class Grammar {
 						
 						ss = new SymbolString(ss);
 						ss.add(s2);
-						if (!Main.doFollowRestrictions || pn == null || pn.followRestrictions == null || pn.followRestrictions.check(ss)) {
+						if (!doFollow || pn == null || pn.followRestrictions == null || pn.followRestrictions.check(ss)) {
 							itemFirst.add(p, ss);
 						} else {
 							break;
@@ -913,7 +940,7 @@ public class Grammar {
 											if (ss2len <= left) {
 												SymbolString ss3 = new SymbolString(ss);
 												ss3.copy(ss2, ss.size() - 1);
-												if (!Main.doFollowRestrictions || p.a.lhs.followRestrictions == null || p.a.lhs.followRestrictions.check(ss3)) {
+												if (!doFollow || p.a.lhs.followRestrictions == null || p.a.lhs.followRestrictions.check(ss3)) {
 													itemFirst.add(p, ss3);
 												}
 											}
@@ -988,10 +1015,11 @@ public class Grammar {
 									int left = len - ss.size() + 1;
 									int i = p.b + 1;
 									if (i == p.a.getLength()) {
-										for (Pair<Production, Integer> p2 : reduces.get(p.a)) {
-											for (SymbolString ss2 : itemFollow.get(p2)) {
+										Set<Pair<Production, Integer>> r = reduces.get(p.a);
+										if (r.size() == 0) {
+											for (SymbolString ss2 : itemFollow.get(new Pair<Production, Integer>(p.a, i))) {
 												if (ss2.size() <= left) {
-													if (Main.doFollowRestrictions) {
+													if (doFollow) {
 														if (p.a.lhs.followRestrictions != null && !p.a.lhs.followRestrictions.check(ss2)) {
 															continue;
 														}
@@ -1006,11 +1034,31 @@ public class Grammar {
 													itemFollow.add(p, ss3);
 												}
 											}
+										} else {
+											for (Pair<Production, Integer> p2 : r) {
+												for (SymbolString ss2 : itemFollow.get(p2)) {
+													if (ss2.size() <= left) {
+														if (doFollow) {
+															if (p.a.lhs.followRestrictions != null && !p.a.lhs.followRestrictions.check(ss2)) {
+																continue;
+															}
+															NonTerminal n = (NonTerminal) s;
+															if (n.followRestrictions != null && !n.followRestrictions.check(ss2)) {
+																continue;
+															}														
+														}
+															
+														SymbolString ss3 = new SymbolString(ss);
+														ss3.copy(ss2, ss.size() - 1);
+														itemFollow.add(p, ss3);
+													}
+												}
+											}
 										}
 									} else {										
 										for (SymbolString ss2 : itemFollow.get(new Pair<Production, Integer>(p.a, i))) {
 											if (ss2.size() <= left) {
-												if (Main.doFollowRestrictions) {
+												if (doFollow) {
 													NonTerminal n = (NonTerminal) s;
 													if (n.followRestrictions != null && !n.followRestrictions.check(ss2)) {
 														continue;
@@ -1037,7 +1085,7 @@ public class Grammar {
 				} else {
 					for (Pair<Production, Integer> p2 : reduces.get(p.a)) {
 						for (SymbolString ss2 : itemFollow.get(p2)) {
-							if (Main.doFollowRestrictions && p.a.lhs.followRestrictions != null && !p.a.lhs.followRestrictions.check(ss2)) {
+							if (doFollow && p.a.lhs.followRestrictions != null && !p.a.lhs.followRestrictions.check(ss2)) {
 								continue;
 							}
 							itemFollow.add(p, ss2);
@@ -1098,7 +1146,7 @@ public class Grammar {
 		for (int i = start; i < l.size(); i++) {
 			s = l.get(i);
 			if (s instanceof NonTerminal) {
-				if (Main.nonTerminalLookahead) {
+				if (AmbiDexterConfig.nonTerminalLookahead) {
 					result.add(s); // add nonterminals to lookahead
 				}
 				fs = first.get(s);
@@ -1280,7 +1328,7 @@ public class Grammar {
 		// check for undefined nonterminals + terminalize
 		for (NonTerminal n : nonTerminals.values()) {
 			if (n.productions.size() == 0) {
-				if (Main.verbose) {
+				if (AmbiDexterConfig.verbose) {
 					System.out.println("Undefined nonterminal: " + n);
 				}
 				Production p = newProduction(n);
@@ -1356,7 +1404,7 @@ public class Grammar {
 		Set<NonTerminal> unreachableN = new ShareableHashSet<NonTerminal>();
 		for (NonTerminal n : nonTerminals.values()) {
 			if (!n.reachable && !n.usedForReject) {
-				if (Main.verbose) {
+				if (AmbiDexterConfig.verbose) {
 					System.out.println("Unused nonterminal: " + n);
 				}
 				unreachableN.add(n);
@@ -1373,7 +1421,7 @@ public class Grammar {
 		Set<Production> unreachableP = new ShareableHashSet<Production>();
 		for (Production p : productions) {
 			if (!(p.reachable || p.usedForReject)) {
-				if (Main.verbose) {
+				if (AmbiDexterConfig.verbose) {
 					System.out.println("Unreachable production: " + p);
 				}
 				p.lhs.productions.remove(p);
@@ -1412,7 +1460,7 @@ public class Grammar {
 		
 		for (NonTerminal n : unproductive) {
 			//throw new RuntimeException("Improductive nonterminal: " + n);
-			if (Main.verbose) {
+			if (AmbiDexterConfig.verbose) {
 				System.out.println("Unproductive nonterminal: " + n);
 			}
 			n.productive = false;

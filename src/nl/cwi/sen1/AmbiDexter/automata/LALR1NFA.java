@@ -1,10 +1,10 @@
 package nl.cwi.sen1.AmbiDexter.automata;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
 import nl.cwi.sen1.AmbiDexter.grammar.Grammar;
 import nl.cwi.sen1.AmbiDexter.grammar.NonTerminal;
 import nl.cwi.sen1.AmbiDexter.grammar.Production;
@@ -24,8 +24,8 @@ public class LALR1NFA extends SLR1NFA {
 	// map from set of LR0Items (kernel) to ItemSet containing LALR1Items
 	Map<Set<Item>, ItemSet> kernels = new ShareableHashMap<Set<Item>, ItemSet>();
 
-	public LALR1NFA(Grammar g) {
-		super(g);
+	public LALR1NFA(Grammar g, AmbiDexterConfig config) {
+		super(g, config);
 	}
 
 	@Override
@@ -248,7 +248,7 @@ public class LALR1NFA extends SLR1NFA {
 		// done
 		// print statistics
 		System.out.println("Item sets: " + kernels.values().size());
-		if (Main.verbose) {
+		if (AmbiDexterConfig.verbose) {
 			printItemSets();
 
 			int ls = 0;

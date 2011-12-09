@@ -8,7 +8,8 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
+import nl.cwi.sen1.AmbiDexter.IAmbiDexterMonitor;
 import nl.cwi.sen1.AmbiDexter.automata.NFA;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.Item;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.StartItem;
@@ -33,11 +34,15 @@ public abstract class PairGraph implements IPairGraph {
 	private Queue<PairGraphExtension> extensions = new Queue<PairGraphExtension>();
 	protected long endPairItems;
 	protected int iteration;
+	protected IAmbiDexterMonitor monitor;
 
-	public void init(NFA nfa) {
+	public void init(NFA nfa, IAmbiDexterMonitor monitor) {
 		this.nfa = nfa;
+		this.monitor = monitor;
+		
 		nfa.nrTransitionsAndItems();
-		ItemPair.initItemMasks(NFA.IDedItems);	
+		ItemPair.initItemMasks(NFA.IDedItems);
+		monitor.println("Item bits: " + ItemPair.ITEM_BITS);
 		
 		endPairItems = nfa.endItem.ID | (nfa.endItem.ID << ItemPair.ITEM_BITS);
 		
@@ -59,27 +64,27 @@ public abstract class PairGraph implements IPairGraph {
 		do {
 			++iteration;
 			
-			System.out.println("\nBuilding pair graph:");
+			monitor.println("\nBuilding pair graph:");
 			traverse();
-			System.out.println(done.usageStatistics());
+			monitor.println(done.usageStatistics());
 
 			if (maxpairs == 0 ) {
 				maxpairs = done.size();
 			}
 	
-			if (Main.outputGraphs) {
+			if (AmbiDexterConfig.outputGraphs) {
 				toDot(nfa.grammar.name + ".pp" + iteration + ".dot");
 			}
-			if (Main.outputDistMap) {
+			if (AmbiDexterConfig.outputDistMap) {
 				computeDistanceMap(nfa.grammar.name + ".distmap" + iteration + ".png");
 				//computeUsageMap(nfa.grammar.name + ".pairmap" + iterations + ".png");
 			}
 			
 			filter();
 			nfa.printSize("\nNFA " + iteration);
-			System.out.println("Used productions: " + nfa.getUsedProductions().size());
+			monitor.println("Used productions: " + nfa.getUsedProductions().size());
 			
-			if (Main.outputGraphs) {
+			if (AmbiDexterConfig.outputGraphs) {
 				nfa.toDot(nfa.grammar.name + ".nfa" + iteration + ".dot");
 			}
 			
@@ -87,7 +92,7 @@ public abstract class PairGraph implements IPairGraph {
 			size = nfa.items.size() + 2 + nfa.transitions.size();
 		} while (size > 3 && size != prevSize); // 3 are always used: startstate, endstate, and shift between the two
 		
-		System.out.println("\nIterations: " + iteration + ", max pairs: " + maxpairs);
+		monitor.println("\nIterations: " + iteration + ", max pairs: " + maxpairs);
 	}
 	
 	protected abstract void traverse();
@@ -296,7 +301,7 @@ public abstract class PairGraph implements IPairGraph {
 		for (int i = extensions.size() - 1; i >= 0; --i) {
 			prefix += extensions.get(i).printSize();
 		}
-		System.out.println(prefix);
+		monitor.println(prefix);
 	}
 
 	public abstract void toDot(String filename);
@@ -352,7 +357,7 @@ public abstract class PairGraph implements IPairGraph {
 			}
 		}
 		
-		System.out.println("Max distance to end: " + nfa.maxDistanceToEnd + ", max occuring: " + max);
+		monitor.println("Max distance to end: " + nfa.maxDistanceToEnd + ", max occuring: " + max);
 		
 		/*bi.setRGB(0, 0, 0);
 		bi.setRGB(1, 0, 127);

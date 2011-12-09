@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import nl.cwi.sen1.AmbiDexter.ConsoleMonitor;
+import nl.cwi.sen1.AmbiDexter.IAmbiDexterMonitor;
 import nl.cwi.sen1.AmbiDexter.Main;
 import nl.cwi.sen1.AmbiDexter.grammar.Symbol;
 import nl.cwi.sen1.AmbiDexter.grammar.SymbolString;
@@ -15,6 +17,8 @@ public class ScannerlessDerivGenTest extends TestCase {
 
 	public static Object[][] diff1; // what sglr finds and we don't
 	public static Object[][] diff2; // what we find and sglr doesn't
+	
+	IAmbiDexterMonitor monitor = new ConsoleMonitor();
 	
 	public static Test suite(){
 		return new TestSuite(ScannerlessDerivGenTest.class);
@@ -94,19 +98,19 @@ public class ScannerlessDerivGenTest extends TestCase {
 	private void testScannerlessGrammar(String grammar, int len, String parseTable, Object[][] diff1, Object[][] diff2) {
 		ScannerlessDerivGenTest.diff1 = diff1;
 		ScannerlessDerivGenTest.diff2 = diff2;
-		Main m = new Main();
+		Main m = new Main(monitor);
 		m.executeArguments((new String[] {"-tsdg", "-q", "-p", "1", "-pt", parseTable, "-k", String.valueOf(len), grammar}));
 		//assertTrue(Main.returnValue == expectedResult);
 	}
 	
-	public static void compareAmbiguities(Relation<Symbol, SymbolString> sglr, Relation<Symbol, SymbolString> scan, int depth) {
+	public static void compareAmbiguities(Relation<Symbol, SymbolString> sglr, Relation<Symbol, SymbolString> scan, int depth, IAmbiDexterMonitor monitor) {
 		boolean different = false;
-		different |= checkDifference(sglr, scan, diff1 == null ? null : diff1[depth - 1], "Ambiguous by SGLR: ");
-		different |= checkDifference(scan, sglr, diff2 == null ? null : diff2[depth - 1], "Ambiguous by AmbiDexter: ");
+		different |= checkDifference(sglr, scan, diff1 == null ? null : diff1[depth - 1], "Ambiguous by SGLR: ", monitor);
+		different |= checkDifference(scan, sglr, diff2 == null ? null : diff2[depth - 1], "Ambiguous by AmbiDexter: ", monitor);
 		assertFalse(different);
 	}
 
-	private static boolean checkDifference(Relation<Symbol, SymbolString> r1, Relation<Symbol, SymbolString> r2, Object[] diff, String message) {
+	private static boolean checkDifference(Relation<Symbol, SymbolString> r1, Relation<Symbol, SymbolString> r2, Object[] diff, String message, IAmbiDexterMonitor monitor) {
 		boolean different = false;
 		for (Pair<Symbol, SymbolString> p : r1) {
 			if (!r2.contains(p)) {
@@ -126,7 +130,7 @@ public class ScannerlessDerivGenTest extends TestCase {
 					}
 				}
 				if (!found) {
-					System.out.println(message + p.a + ", " + p.b.prettyPrint());
+					monitor.println(message + p.a + ", " + p.b.prettyPrint());
 					different = true;
 				}
 			}

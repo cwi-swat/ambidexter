@@ -42,7 +42,7 @@ public class NFAMinimalStringGen {
 			
 			for (Item i : begins) {
 				ShareableHashMap<Item, StackNode> level = new ShareableHashMap<Item, StackNode>();
-				level.put(i, new StackNode(i, null, null));
+				level.put(i, new StackNode(null, null));
 				
 				// breadth first traverse all shift transitions
 				// stacks join and continue with stack with minimal string length
@@ -55,11 +55,11 @@ public class NFAMinimalStringGen {
 								StackNode n = e.getValue();
 								StackNode nn = nextLevel.get(t.target);
 								if (nn == null) {
-									nextLevel.put(t.target, new StackNode(t.target, tstr, n));
+									nextLevel.put(t.target, new StackNode(tstr, n));
 								} else {
 									if (nn.len > n.len + tstr.length) {
 										// replace nn
-										nextLevel.put(t.target, new StackNode(t.target, tstr, n));
+										nextLevel.put(t.target, new StackNode(tstr, n));
 									}
 								}
 							}
@@ -129,13 +129,11 @@ public class NFAMinimalStringGen {
 	}
 	
 	private class StackNode {
-		Item i;
 		Symbol[] tstr; // of shift to i
 		StackNode prev;
 		int len = 0;
 		
-		public StackNode(Item i, Symbol[] tstr, StackNode prev) {
-			this.i = i;
+		public StackNode(Symbol[] tstr, StackNode prev) {
 			this.prev = prev;			
 			this.tstr = tstr;
 			

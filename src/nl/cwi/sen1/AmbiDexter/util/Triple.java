@@ -32,7 +32,6 @@ public class Triple<A, B, C> {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -41,7 +40,7 @@ public class Triple<A, B, C> {
 			return false;
 		if (!(obj instanceof Triple))
 			return false;
-		Triple other = (Triple) obj;
+		Triple<?, ?, ?> other = (Triple<?, ?, ?>) obj;
 		if (a == null) {
 			if (other.a != null)
 				return false;

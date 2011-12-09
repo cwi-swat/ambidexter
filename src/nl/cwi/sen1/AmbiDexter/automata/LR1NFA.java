@@ -3,7 +3,7 @@ package nl.cwi.sen1.AmbiDexter.automata;
 import java.util.Map;
 import java.util.Set;
 
-import nl.cwi.sen1.AmbiDexter.Main;
+import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
 import nl.cwi.sen1.AmbiDexter.grammar.Grammar;
 import nl.cwi.sen1.AmbiDexter.grammar.NonTerminal;
 import nl.cwi.sen1.AmbiDexter.grammar.Production;
@@ -27,7 +27,7 @@ public class LR1NFA extends LR0NFA {
 
 	Set<LR1Item> startSet;
 	
-	public LR1NFA(Grammar g) {
+	public LR1NFA(Grammar g, AmbiDexterConfig config) {
 		super(g);
 	}
 
@@ -158,7 +158,7 @@ public class LR1NFA extends LR0NFA {
 			} else {
 				Symbol s = i.getNextSymbol(); // endItem.getNextSymbol() returns $
 				if (s instanceof NonTerminal) {
-					if (Main.nonTerminalLookahead) {
+					if (AmbiDexterConfig.nonTerminalLookahead) {
 						return lookahead == s;
 					} else {
 						return Grammar.getInstance().emptyFreeFirst[s.id].contains(lookahead);						

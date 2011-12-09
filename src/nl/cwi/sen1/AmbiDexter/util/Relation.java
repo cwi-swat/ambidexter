@@ -134,7 +134,7 @@ public class Relation<A, B> implements Collection<Pair<A, B>> {
 	@SuppressWarnings("unchecked")
 	public boolean contains(Object o) {
 		if (o instanceof Pair) {
-			Pair<A,B> p = (Pair) o;
+			Pair<A,B> p = (Pair<A, B>) o;
 			return contains(p.a, p.b);
 		}
 		return false;
@@ -172,7 +172,7 @@ public class Relation<A, B> implements Collection<Pair<A, B>> {
 	@SuppressWarnings("unchecked")
 	public boolean remove(Object o) {
 		if (o instanceof Pair) {
-			Pair<A,B> p = (Pair) o;
+			Pair<A,B> p = (Pair<A, B>) o;
 			return remove(p.a, p.b);
 		}
 		return false;
@@ -223,11 +223,10 @@ public class Relation<A, B> implements Collection<Pair<A, B>> {
 		return r;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof Relation) {
-			return m.equals(((Relation) o).m);
+			return m.equals(((Relation<?, ?>) o).m);
 		} else {
 			return false;
 		}

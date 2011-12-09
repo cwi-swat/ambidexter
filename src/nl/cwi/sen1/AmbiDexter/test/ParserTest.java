@@ -93,7 +93,7 @@ public class ParserTest extends TestCase {
 		g.verify();
 		
 		NFA nfa = new LR0NFA(g);
-		nfa.build(true, false);
+		nfa.build(true, null);
 		nfa.finish();
 		nfa.optimize(true);
 		

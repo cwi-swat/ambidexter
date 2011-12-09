@@ -73,7 +73,6 @@ public class LinkedList<T> {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -82,7 +81,7 @@ public class LinkedList<T> {
 			return false;
 		if (!(obj instanceof LinkedList))
 			return false;
-		LinkedList other = (LinkedList) obj;
+		LinkedList<?> other = (LinkedList<?>) obj;
 		if (elem == null) {
 			if (other.elem != null)
 				return false;
