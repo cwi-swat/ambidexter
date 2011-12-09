@@ -141,7 +141,7 @@ public class DerivGenTest extends TestCase {
 	
 	public void testYaccGrammar(String grammar, int len, boolean ambiguous) {
 		for (int i = 1; i <= len; i++) {
-			execute(new String[] {"-ndf" , "-pgp", "-p", "1", "-k", String.valueOf(i), grammar}, i == len && ambiguous);
+			execute(new String[] {"-ndf" , "-pg", "-p", "1", "-k", String.valueOf(i), grammar}, i == len && ambiguous);
 		}
 	}
 

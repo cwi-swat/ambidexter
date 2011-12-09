@@ -867,4 +867,11 @@ public class CharacterClass extends Symbol implements SymbolSet {
 		
 		return result;
 	}
+	
+	public CharacterClass invert() {
+		// TODO write proper function!!
+		CharacterClass all = new CharacterClass();
+		all.add(0, 65536);
+		return all.subtract(this);
+	}
 }
