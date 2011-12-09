@@ -1,7 +1,5 @@
 package nl.cwi.sen1.AmbiDexter;
 
-import com.sun.xml.internal.ws.api.message.FilterMessageImpl;
-
 import nl.cwi.sen1.AmbiDexter.AmbiguityDetector.DetectionMethod;
 import nl.cwi.sen1.AmbiDexter.automata.ItemPDA;
 import nl.cwi.sen1.AmbiDexter.automata.LALR1NFA;
@@ -18,15 +16,11 @@ import nl.cwi.sen1.AmbiDexter.grammar.Grammar;
 import nl.cwi.sen1.AmbiDexter.grammar.GrammarMetrics;
 import nl.cwi.sen1.AmbiDexter.grammar.NonTerminal;
 import nl.cwi.sen1.AmbiDexter.grammar.Production;
-import nl.cwi.sen1.AmbiDexter.grammar.Symbol;
-import nl.cwi.sen1.AmbiDexter.grammar.SymbolString;
 import nl.cwi.sen1.AmbiDexter.grammar.importexport.GrammarExporter;
 import nl.cwi.sen1.AmbiDexter.grammar.importexport.GrammarImporter;
 import nl.cwi.sen1.AmbiDexter.nu2.NoncanonicalUnambiguityTest;
 import nl.cwi.sen1.AmbiDexter.parse.SGLRStub;
 import nl.cwi.sen1.AmbiDexter.parse.SimpleSGLRParser;
-import nl.cwi.sen1.AmbiDexter.test.ScannerlessDerivGenTest;
-import nl.cwi.sen1.AmbiDexter.util.Relation;
 import nl.cwi.sen1.AmbiDexter.util.Util;
 
 public class Main {
@@ -128,7 +122,6 @@ public class Main {
 				if (arg.equals("-anu"))   { config.filterMethod = DetectionMethod.NU; config.alternating = true; continue; }
 				if (arg.equals("-ru"))    { config.filterMethod = DetectionMethod.RU; continue; }
 				if (arg.equals("-pg"))    { config.derivGenMethod = DetectionMethod.PG; continue; }
-				if (arg.equals("-tsdg"))  { config.derivGenMethod = DetectionMethod.TSDG; continue; }
 				
 				// NFA precision
 				if (arg.equals("-lr0"))   { config.precision = AmbiDexterConfig.LR0; continue; }
@@ -258,7 +251,6 @@ public class Main {
 		
 		switch (config.derivGenMethod) {
 			case PG: doDerivationGeneration(config.derivGenMinDepth, null); break;
-			case TSDG: testScannerlessDerivationGeneration(); break;
 		}
 	}
 
@@ -453,31 +445,6 @@ public class Main {
 			dg.setParser(new SGLRStub(parseTableFile));
 		}
 		dg.detectAmbiguities(config.derivGenMethod);
-	}
-
-	private void testScannerlessDerivationGeneration() {
-		config.derivGenMethod = DetectionMethod.PG;
-		
-		if (config.parseTableSGLR == null) {
-			monitor.println("Parse table file(s) not set");
-			return;
-		}
-		
-		for (int depth = 1; depth <= config.derivGenMinDepth; ++depth) {
-			// generate without disambiguation filters and parse with SGLR
-			config.doFollowRestrictions = config.doPriorities = config.doRejects = config.doPreferAvoid = false;
-			doDerivationGeneration(depth, config.parseTableSGLR);
-			Relation<Symbol, SymbolString> sglr = ParallelDerivationGenerator.ambiguities;
-			
-			// generate with disambiguation filters
-			config.doFollowRestrictions = config.doPriorities = config.doRejects = config.doPreferAvoid = true;
-			doDerivationGeneration(depth, null);
-			Relation<Symbol, SymbolString> scan = ParallelDerivationGenerator.ambiguities;
-	
-			if (!sglr.equals(scan)) {
-				ScannerlessDerivGenTest.compareAmbiguities(sglr, scan, depth, monitor);
-			}
-		}
 	}
 
 	private void dumpGrammar(Grammar g, String postfix) {

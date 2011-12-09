@@ -12,7 +12,6 @@ public interface AmbiguityDetector {
 		//HV, // horizontal vertical (ACLA, grambiguity)
 		//BG, // breadth first derivation generator
 		PG, // parallel derivation generator
-		TSDG // test scannerless derivation generator
 	}
 
 	public void setConfig(AmbiDexterConfig config);
