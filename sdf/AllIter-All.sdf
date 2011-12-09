@@ -1,5 +1,0 @@
-module AllIter-All
-imports AllIter
-exports
-context-free start-symbols
-B A S

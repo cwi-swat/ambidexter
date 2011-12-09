@@ -1,6 +1,0 @@
-module sql92
-imports
-  languages/sql92/Main
-
-exports
-  context-free start-symbols Stm
