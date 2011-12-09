@@ -13,9 +13,7 @@ public abstract class GrammarImporter {
 		GrammarImporter importer = null;
 		if (filename.endsWith(".y")) {
 			importer = new YaccImporter();
-		} else if (filename.endsWith(".pt")) {
-			importer = new SDFImporter();
-		} else {
+		}  else {
 			throw new RuntimeException("Unknown extension: " + filename);
 		}
 		
