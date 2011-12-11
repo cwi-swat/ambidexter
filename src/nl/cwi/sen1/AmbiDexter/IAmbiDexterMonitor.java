@@ -13,6 +13,6 @@ public interface IAmbiDexterMonitor {
 
 	public void errPrintln(Object o);
 	
-	public void ambiguousString(SymbolString s, NonTerminal n, String messagePrefix);
+	public void ambiguousString(AmbiDexterConfig cfg, SymbolString s, NonTerminal n, String messagePrefix);
 
 }

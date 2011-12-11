@@ -31,6 +31,11 @@ public class NoncanonicalUnambiguityTest implements AmbiguityDetector {
 	}
 	
 	@Override
+	public AmbiDexterConfig getConfig() {
+		return config;
+	}
+	
+	@Override
 	public void setMonitor(IAmbiDexterMonitor monitor) {
 		this.monitor = monitor;
 	}

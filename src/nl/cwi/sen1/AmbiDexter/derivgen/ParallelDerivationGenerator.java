@@ -57,6 +57,10 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		this.config = config;
 	}
 	
+	public AmbiDexterConfig getConfig() {
+		return config;
+	}
+	
 	@Override
 	public void setMonitor(IAmbiDexterMonitor monitor) {
 		this.monitor = monitor;
@@ -201,10 +205,10 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 						//System.out.println(p.b.top.prettyPrint());
 						reallyAmbiguous = false;
 					} else {
-						monitor.ambiguousString(n.yield(), (NonTerminal) n.getRootSymbol(), "" + workerId + ": ");
+						monitor.ambiguousString(config, n.yield(), (NonTerminal) n.getRootSymbol(), "" + workerId + ": ");
 					}
 				} else {
-					monitor.ambiguousString(s, nt, "" + workerId + ": ");
+					monitor.ambiguousString(config, s, nt, "" + workerId + ": ");
 				}
 				if (reallyAmbiguous) {
 					synchronized(ambiguities) {

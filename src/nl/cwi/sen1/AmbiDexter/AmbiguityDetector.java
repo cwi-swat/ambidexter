@@ -15,6 +15,7 @@ public interface AmbiguityDetector {
 	}
 
 	public void setConfig(AmbiDexterConfig config);
+	public AmbiDexterConfig getConfig();
 	public void setMonitor(IAmbiDexterMonitor monitor);
 	public void build(NFA nfa);
 	public void optimize();

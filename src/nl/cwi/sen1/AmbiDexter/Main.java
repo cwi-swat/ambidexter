@@ -54,6 +54,10 @@ public class Main {
 		config = cfg;
 	}
 	
+	public AmbiDexterConfig getConfig() {
+		return config;
+	}
+	
 	static String usage() {
 		return
 			"AmbiDexter 0.4, April 15th, 2011\n" +
