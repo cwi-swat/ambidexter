@@ -36,13 +36,13 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 	public void build(NFA nfa) {
 		dfa = new ItemPDA();
 		dfa.build(nfa);
-		dfa.printSize("IDFA");
+		dfa.printSize("IDFA", monitor);
 	}
 	
 	@Override
 	public void setDFA(PDA<?> dfa) {
 		this.dfa = dfa;
-		dfa.printSize("IDFA");
+		dfa.printSize("IDFA", monitor);
 	}
 	
 	@Override
@@ -66,6 +66,8 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 	
 	protected class Worker2 extends AbstractWorker  {
 		
+		private int maxdepth;
+		
 		public Worker2(String id) {
 			super(id);
 		}
@@ -77,7 +79,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 			LinkedList<ESet<Symbol>> shiftablesStack = job.shiftablesStack;		
 			Object gss[] = job.gss;
 			int shifted = job.shifted;
-			int maxdepth = job.maxdepth;
+			maxdepth = job.maxdepth;
 			Symbol sentence[] = job.sentence;
 			
 			// split reject and normal stackframes
@@ -309,6 +311,11 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 				Production p = i.production;
 				
 				//System.out.println("Reducing " + p + (l.state.rejects ? " (r)" : ""));
+
+				// check if 'follow' condition can be met
+				if (p.lhs.followRestrictions != null && p.lhs.followRestrictions.mustFollowLength + l.level < maxdepth) {
+					continue;
+				}
 
 				// look back (length of production rule) symbols back
 				StackFrame from = l;

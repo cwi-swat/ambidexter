@@ -204,8 +204,10 @@ public class Main {
 		if (grammar.productions.size() == 0) {
 			monitor.println("Invalid grammar: " + config.filename);
 			return false;
-		}
+		}		
 		
+		grammar.printSize(monitor);
+
 		if (AmbiDexterConfig.outputGraphs) {
 			grammar.dependencyGraphToDot(config.filename + ".deps.dot");
 		}
@@ -274,7 +276,7 @@ public class Main {
 		monitor.println("Injections: " + injections + "\n");			
 		
 		monitor.println("Nonterminal usage (in reachable productions):");
-		grammar.printNonTerminalUsage();
+		grammar.printNonTerminalUsage(monitor);
 		
 		monitor.println("\nProductions:");
 		for (NonTerminal n : grammar.nonTerminals.values()) {
@@ -283,8 +285,8 @@ public class Main {
 			}
 		}
 		
-		grammar.printFirstAndFollow();
-		grammar.printPrioritiesAndFollowRestrictions();
+		grammar.printFirstAndFollow(monitor);
+		grammar.printPrioritiesAndFollowRestrictions(monitor);
 	}		
 	
 	// check nfa for potential ambiguities with pg
@@ -296,20 +298,20 @@ public class Main {
 			case AmbiDexterConfig.SLR1  : nfa = new SLR1NFA(grammar, config); break;
 			case AmbiDexterConfig.LALR1 : nfa = new LALR1NFA(grammar, config); break;
 			case AmbiDexterConfig.LR1   : nfa = new LR1NFA(grammar, config); break;
-			default    : throw new RuntimeException("Unknown precision");
+			default    : throw new RuntimeException("Unknown precision " + config.precision);
 		}
 		nfa.precision = config.precision;
 		
 		monitor.println("");
 
 		nfa.build(includeRejects, unfold ? config : null);
-		nfa.printSize("NFA");
+		nfa.printSize("NFA", monitor);
 		
 		if (propagateFollowRestrictions && grammar.scannerless) {
 			nfa.propagateFollowRestrictions();
-			nfa.printSize("Propagated follow restrictions");
+			nfa.printSize("Propagated follow restrictions", monitor);
 		} else {
-			if (AmbiDexterConfig.writeDFA) {
+			if (AmbiDexterConfig.writeDFA && !nfa.shiftsInSets) {
 				nfa.moveShiftsToSets(); // otherwise minimalstring calc won't work
 			}
 		}
@@ -318,7 +320,7 @@ public class Main {
 		if (AmbiDexterConfig.writeDFA && includeRejects) {
 			nfa.disconnectRejectPart();
 		}
-		nfa.printSize("Optimized");
+		nfa.printSize("Optimized", monitor);
 
 		nfa.finish();
 		if (!AmbiDexterConfig.quick) {
@@ -352,24 +354,23 @@ public class Main {
 		nu.detectAmbiguities(config.filterMethod);
 		
 		if (config.findHarmlessProductions) {
-			if (!AmbiDexterConfig.quick) {
-				monitor.println("\nPotentially Harmful: ");
+			monitor.println("\nHarmless productions: " + nu.harmlessProductions.size() + " / " + grammar.nrReachableProductions);
+			for (Production p : nu.harmlessProductions) {
+				String s = "";
+				if (!p.reachable) {
+					s = "*** ";
+				}
+				monitor.println(s + p);
+			}
+			
+			if (AmbiDexterConfig.verbose) {
+				monitor.println("\nPotentially harmful: ");
 				for (Production p : nu.harmfulProductions) {
 					if (p.reachable) {
 						monitor.println(p.toString());
 					}
 				}
-				monitor.println("\nHarmless:");
-				for (Production p : nu.harmlessProductions) {
-					String s = "";
-					if (!p.reachable) {
-						s = "*** ";
-					}
-					monitor.println(s + p);
-				}
 			}
-			
-			monitor.println("Harmless productions: " + nu.harmlessProductions.size() + " / " + grammar.nrReachableProductions);
 			
 			if (nu.harmfulProductions.size() > 0 && config.outputReconstructedGrammar && !grammar.scannerless) {
 				Grammar g2 = new Grammar(grammar, nu.harmfulProductions, true);
@@ -380,18 +381,18 @@ public class Main {
 		if (AmbiDexterConfig.writeDFA) {			
 			monitor.println();
 			nfa.reconnectRejectPart();
-			if (!config.doFollowRestrictions) {
+			if (!nfa.shiftsInSets) {
 				nfa.moveShiftsToSets();
 			}
 			nfa.reconstruct();
-			nfa.printSize("Reconstructed NFA");
+			nfa.printSize("Reconstructed NFA", monitor);
 
 			NFA snfa = nfa.simplifyWithFollowRestrictions();
-			snfa.printSize("Simplified NFA");
+			snfa.printSize("Simplified NFA", monitor);
 			
 			ItemPDA dfa = new ItemPDA();
 			dfa.build(snfa);
-			dfa.printSize("IDFA");			
+			dfa.printSize("IDFA", monitor);			
 			dfa.serialize(config.filename + "." + config.dfaName + ".idfa");			
 			
 			if (AmbiDexterConfig.outputGraphs) {
@@ -425,7 +426,7 @@ public class Main {
 		} else {
 			NFA nfa;
 			nfa = buildNFA(config.doRejects, false, config.doFollowRestrictions);
-			if (!nfa.followRestrictionsPropagated) {
+			if (!nfa.shiftsInSets) {
 				nfa.moveShiftsToSets();
 			}
 			

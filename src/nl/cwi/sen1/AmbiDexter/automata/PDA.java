@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import nl.cwi.sen1.AmbiDexter.IAmbiDexterMonitor;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.EndItem;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.Item;
 import nl.cwi.sen1.AmbiDexter.automata.NFA.StartItem;
@@ -112,13 +113,13 @@ public abstract class PDA <R> {
 		return s;
 	}
 
-	public void printSize(String prefix) {
+	public void printSize(String prefix, IAmbiDexterMonitor monitor) {
 		int shifts = 0, gotos = 0;
 		for (PDAState s : states) {
 			shifts += s.shifts.size();
 			gotos += s.gotos.size();
 		}
-		System.out.println(prefix + " size: " + states.size() + " nodes, " + shifts + " shifts, " + gotos + " gotos");
+		monitor.println(prefix + " size: " + states.size() + " nodes, " + shifts + " shifts, " + gotos + " gotos");
 	}
 	
 	protected abstract String serializeR(R r);

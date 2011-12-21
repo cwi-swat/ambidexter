@@ -11,6 +11,7 @@ import nl.cwi.sen1.AmbiDexter.util.ShareableHashSet;
 public class NonTerminal extends Symbol {
 	public Set<Production> productions;
 	public FollowRestrictions followRestrictions;
+	public FollowRestrictions precedeRestrictions;
 	public boolean usedForReject = false;
 	public boolean productive = true;
 	public boolean reachable = false;
@@ -42,6 +43,9 @@ public class NonTerminal extends Symbol {
 			followRestrictions = fr;
 		} else {
 			followRestrictions.add(fr);
+			if (followRestrictions.mustFollowLength < fr.mustFollowLength) {
+				followRestrictions.mustFollowLength = fr.mustFollowLength;
+			}
 		}
 	}
 }

@@ -152,8 +152,7 @@ public class LALR1NFA extends SLR1NFA {
 
 		for (ItemSet s : kernels.values()) {
 			for (Item i : s.items) {
-				if (i instanceof LALR1Item) { // also do this for nonreducable
-												// items!!
+				if (i instanceof LALR1Item) { // also do this for nonreducable items!!
 					LALR1Item li = (LALR1Item) i;
 					if (li.propagatedFrom.size() == 0 && !li.spontaneously) {
 						for (Item j : s.items) {
@@ -352,8 +351,7 @@ public class LALR1NFA extends SLR1NFA {
 
 					for (Production p : n.productions) {
 						if (includeRejects || !p.reject) {
-							Pair<Production, Integer> pair = new Pair<Production, Integer>(
-									p, 0);
+							Pair<Production, Integer> pair = new Pair<Production, Integer>(p, 0);
 							Item c = canonicalItems.get(pair);
 							if (c == null) {
 								c = new LALR1Item(p, 0, itemID++);
@@ -363,8 +361,7 @@ public class LALR1NFA extends SLR1NFA {
 							}
 
 							if (i.canDeriveTo(c)) {
-								i.derives
-										.add(new Transition(i, p.derivation, c));
+								i.derives.add(new Transition(i, p.derivation, c));
 							}
 						}
 					}

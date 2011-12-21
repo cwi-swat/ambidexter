@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
+import nl.cwi.sen1.AmbiDexter.IAmbiDexterMonitor;
 import nl.cwi.sen1.AmbiDexter.grammar.CharacterClass;
 import nl.cwi.sen1.AmbiDexter.grammar.Derive;
 import nl.cwi.sen1.AmbiDexter.grammar.FollowRestrictions;
@@ -48,6 +49,7 @@ public abstract class NFA {
 	public int precision;
 	protected boolean includeRejects;
 	public boolean followRestrictionsPropagated;
+	public boolean shiftsInSets = false;
 
 	public static int itemID;
 	public static Queue<Transition> transQueue;
@@ -368,8 +370,8 @@ public abstract class NFA {
 				if (empties && t.source.production != null && t.source.production.isEmpty()) {
 					continue; // do later
 				}
-				if (layout && t.source.production != null && t.source.production.lhs != grammar.layoutOpt
-						   && t.target.production != null && t.target.production.lhs == grammar.layoutOpt) {
+				if (layout && t.source.production != null && !t.source.production.lhs.layout
+						   && t.target.production != null &&  t.target.production.lhs.layout) {
 					toUnfold.add(t);
 				}
 				if (literals && t.target.production != null && t.target.production.lhs.literal) {
@@ -735,7 +737,11 @@ public abstract class NFA {
 	// pre: can only be called after addReduceTransitions and all unfolding functions
 	public void propagateFollowRestrictions() {
 	
-		final Map<Pair<Item, FollowRestrictions>, Item> followProp = new ShareableHashMap<Pair<Item,FollowRestrictions>, Item>();
+		if (!shiftsInSets) {
+			moveShiftsToSets();
+		}
+		
+		final Map<Pair<Item, FollowRestrictions>, Item> followProp = new ShareableHashMap<Pair<Item, FollowRestrictions>, Item>();
 		final Queue<Item> followPropTodo = new Queue<Item>();
 		
 		// save up new items so that we do not mess up existing nfa (needed for FirstKGenerator) 
@@ -745,8 +751,9 @@ public abstract class NFA {
 		newStartItem.unfoldedFrom = startItem;
 		newStartItem.withFollow = true;
 		newEndItem.withFollow = true;
-		final Set<Item> ntShifts = new ShareableHashSet<Item>();
+		final Relation<Item, Transition> ntShifts = new Relation<Item, Transition>();
 		
+		// some inner functions for convenience
 		class A {
 			Item getItemWithFollowRestrictions(Item i, FollowRestrictions f) {		
 				if (i instanceof EndItem) {
@@ -763,6 +770,7 @@ public abstract class NFA {
 					try{
 						j = (Item) i.clone();
 					} catch (CloneNotSupportedException e) {}
+					
 					j.unfoldedFrom = i;
 					j.followRestrictions = f;
 					j.withFollow = true;
@@ -770,10 +778,6 @@ public abstract class NFA {
 					followProp.put(p, j);
 					followPropTodo.add(j);
 					newItems.add(j);
-					
-					if (j.canShift() && j.getNextSymbol() instanceof NonTerminal) {
-						ntShifts.add(j);
-					}
 				}
 				return j;
 			}
@@ -799,7 +803,9 @@ public abstract class NFA {
 		A a = new A();
 		
 		followPropTodo.add(newStartItem);
-		ntShifts.add(newStartItem);
+		for (Transition t : startItem.shifts) {
+			ntShifts.add(newStartItem, t);
+		}
 		
 		transitions = new ShareableHashSet<Transition>();
 		int oldSize = -1;
@@ -821,26 +827,27 @@ public abstract class NFA {
 				}
 				
 				// propagate over terminal or charclass shifts
-				if (old.shift != null) {
+				if (old.shifts != null) {
 					i.shifts = new ShareableHashSet<Transition>();
-					
-					Symbol s = old.shift.label;
-					if (!(s instanceof NonTerminal)) { // character class shifts
-						if (f == null) {
-							Transition nt = addTransition(i, s,	a.getItemWithFollowRestrictions(old.shift.target, null));
-							//if (!i.shifts.contains(nt)) System.out.println("2: " + nt.toStringExt());
-							i.shifts.add(nt);
-						} else if (f.canShift(s)) {
-							Pair<CharacterClass, ShareableHashMap<CharacterClass, FollowRestrictions>> p = f.getShiftPossibilities(s);
-							if (p.a.size() > 0) {
-								Transition nt = addTransition(i, p.a, a.getItemWithFollowRestrictions(old.shift.target, null));
-								//if (!i.shifts.contains(nt)) System.out.println("2: " + nt.toStringExt());
+					for (Transition shift : old.shifts) {
+						Symbol s = shift.label;
+						
+						if (s instanceof NonTerminal) {
+							ntShifts.add(i, shift);
+						} else {// character class shifts
+							if (f == null) {
+								Transition nt = addTransition(i, s,	a.getItemWithFollowRestrictions(shift.target, null));
 								i.shifts.add(nt);
-							}
-							for (Entry<CharacterClass, FollowRestrictions> e : p.b) {
-								Transition nt = addTransition(i, e.getKey(), a.getItemWithFollowRestrictions(old.shift.target, e.getValue()));
-								//if (!i.shifts.contains(nt)) System.out.println("2: " + nt.toStringExt());
-								i.shifts.add(nt);
+							} else if (f.canShift(s)) {
+								Pair<CharacterClass, ShareableHashMap<CharacterClass, FollowRestrictions>> p = f.getShiftPossibilities(s);
+								if (p.a.size() > 0) {
+									Transition nt = addTransition(i, p.a, a.getItemWithFollowRestrictions(shift.target, null));
+									i.shifts.add(nt);
+								}
+								for (Entry<CharacterClass, FollowRestrictions> e : p.b) {
+									Transition nt = addTransition(i, e.getKey(), a.getItemWithFollowRestrictions(shift.target, e.getValue()));
+									i.shifts.add(nt);
+								}
 							}
 						}
 					}
@@ -848,13 +855,15 @@ public abstract class NFA {
 			}
 			
 			// then reconnect reductions
-			for (Item i : ntShifts) {
+			for (Pair<Item, Transition> p : ntShifts) {
+				Item i = p.a;
+				Transition shift = p.b;
+
 				if (followPropTodo.contains(i)) {
 					continue;
 				}
 				
-				Item oldi = i.unfoldedFrom;
-				NonTerminal n = (NonTerminal) i.getNextSymbol();
+				NonTerminal n = (NonTerminal) shift.label;
 				
 				for (Transition derive : i.derives) {
 					Set<Item> ends = derive.target.followShiftSets();
@@ -862,10 +871,10 @@ public abstract class NFA {
 						if (e.production.reject) {
 							// do not let follow restrictions propagate over reduces of reject productions
 							// instead, add reduce transition of reject productions to already existing NT shift targets 
-							for (Transition shift : i.shifts) {
-								Transition reduce = addTransition(e, e.production.reduction, shift.target);
+							for (Transition s : i.shifts) {
+								Transition reduce = addTransition(e, e.production.reduction, s.target);
 								e.reduces.add(reduce);
-								a.linkDeriveShiftReduce(derive, shift, reduce);
+								a.linkDeriveShiftReduce(derive, s, reduce);
 							}
 							continue;
 						}
@@ -876,20 +885,20 @@ public abstract class NFA {
 						} else {
 							f = f.getNextAfterReduce(n);
 						}
-						Item next = a.getItemWithFollowRestrictions(oldi.getNext(), f);
+						Item next = a.getItemWithFollowRestrictions(shift.target, f);
 						
 						Transition reduce = addTransition(e, e.production.reduction, next);
 						e.reduces.add(reduce);
 						
-						Transition shift;
+						Transition s;
 						if (e.production.isEmpty()) {
-							shift = addEmptyTransition(i, n, next);
+							s = addEmptyTransition(i, n, next);
 						} else {
-							shift = addTransition(i, n, next);
+							s = addTransition(i, n, next);
 						}
-						i.shifts.add(shift); // may contain same object already
+						i.shifts.add(s); // may contain same object already
 						
-						a.linkDeriveShiftReduce(derive, shift, reduce);
+						a.linkDeriveShiftReduce(derive, s, reduce);
 					}
 				}
 			}
@@ -1387,6 +1396,7 @@ public abstract class NFA {
 				i.shift = null;
 			}			
 		}
+		shiftsInSets = true;
 	}
 
 	public void reconstruct() {
@@ -1783,8 +1793,8 @@ public abstract class NFA {
 		}
 	}
 
-	public void printSize(String prefix) {
-		System.out.println(prefix + " size: " + (items.size() + 2) + " states, " + transitions.size() + " transitions");
+	public void printSize(String prefix, IAmbiDexterMonitor monitor) {
+		monitor.println(prefix + " size: " + (items.size() + 2) + " states, " + transitions.size() + " transitions");
 		if (AmbiDexterConfig.verbose) {
 			int derives = 0;
 			int shifts = 0;
@@ -1799,7 +1809,7 @@ public abstract class NFA {
 					shifts += i.shifts.size();
 				}
 			}
-			System.out.println("Derives: " + derives + ", shifts: " + shifts + ", reduces: " + reduces);
+			monitor.println("Derives: " + derives + ", shifts: " + shifts + ", reduces: " + reduces);
 		}
 	}
 

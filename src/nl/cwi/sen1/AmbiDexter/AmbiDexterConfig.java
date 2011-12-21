@@ -40,7 +40,7 @@ public class AmbiDexterConfig {
 	
 	// output settings
 	public static boolean verbose = false;
-	public static boolean quick = false;
+	public static boolean quick = true;
 	public static boolean outputGraphs = false;
 	public static boolean outputDistMap = false;
 	public static boolean writeDFA = false; // ???

@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import nl.cwi.sen1.AmbiDexter.AmbiDexterConfig;
+import nl.cwi.sen1.AmbiDexter.IAmbiDexterMonitor;
 import nl.cwi.sen1.AmbiDexter.util.ESet;
 import nl.cwi.sen1.AmbiDexter.util.LinkedList;
 import nl.cwi.sen1.AmbiDexter.util.Pair;
@@ -32,8 +33,6 @@ public class Grammar {
 	public Map<String, Terminal> terminals;
 	public Map<String, NonTerminal> nonTerminals;
 	public Set<Production> productions;
-	public NonTerminal layoutOpt = null;
-	public NonTerminal layout = null;
 
 	private boolean doReject = true;
 	private boolean doFollow = true;
@@ -604,7 +603,7 @@ public class Grammar {
 		return s;
 	}
 	
-	public void printSize() {
+	public void printSize(IAmbiDexterMonitor monitor) {
 		int pos = productions.size();
 		int prios = 0;
 		int restr = 0;
@@ -649,7 +648,7 @@ public class Grammar {
 			}
 		}
 		
-		System.out.println("Grammar size: " + 
+		monitor.println("Grammar size: " + 
 				productions.size() + " productions, " + 
 				nonTerminals.size() + " nonterminals, " + 
 				terminals.size() + " terminals, " + 
@@ -657,53 +656,53 @@ public class Grammar {
 				restr + " follow restrictions, " +
 				reject + " rejects, " +
 				pos + " positions.");
-		System.out.println("Productions: " + reachable + " reachable, " + usedForReject + " usedForReject, " + both + " both, " + unused + " unused.");
-		System.out.println("Nonterminals used for reject: " + usedInReject);
-		System.out.println("Follow restriction lengths: " + followLengths);
+		monitor.println("Productions: " + reachable + " reachable, " + usedForReject + " usedForReject, " + both + " both, " + unused + " unused.");
+		monitor.println("Nonterminals used for reject: " + usedInReject);
+		monitor.println("Follow restriction lengths: " + followLengths);
 	}
 
-	public void printPrioritiesAndFollowRestrictions() {
-		System.out.println("\nPriorities:");
+	public void printPrioritiesAndFollowRestrictions(IAmbiDexterMonitor monitor) {
+		monitor.println("\nPriorities:");
 		for (NonTerminal n : nonTerminals.values()) {
 			for (Production p : n.productions) {
 				for (Entry<Integer, Set<Production>> e : p.deriveRestrictions.m) {
 					for (Production p2 : e.getValue()) {
-						System.out.println("" + p);
-						System.out.println("    <" + e.getKey() +"> > " + p2);
+						monitor.println("" + p);
+						monitor.println("    <" + e.getKey() +"> > " + p2);
 					}
 				}
 			}
 		}		
 		
-		System.out.println("\nFollow restrictions:");
+		monitor.println("\nFollow restrictions:");
 		for (NonTerminal n : nonTerminals.values()) {
 			if (n.followRestrictions != null) {
-				System.out.println("" + n + " -/- " + n.followRestrictions.toString());
+				monitor.println("" + n + " -/- " + n.followRestrictions.toString());
 			}
 		}
 
-		System.out.println("\nRejects:");
+		monitor.println("\nRejects:");
 		for (Production p : productions) {
 			if (p.reject) {
-				System.out.println(p);
+				monitor.println(p);
 			}
 		}
 		
-		System.out.println("\nPrefers:");
+		monitor.println("\nPrefers:");
 		for (Production p : productions) {
 			if (p.prefer) {
-				System.out.println(p);
+				monitor.println(p);
 			}
 		}
 		
-		System.out.println("\nAvoids:");
+		monitor.println("\nAvoids:");
 		for (Production p : productions) {
 			if (p.avoid) {
-				System.out.println(p);
+				monitor.println(p);
 			}
 		}
 		
-		System.out.println();
+		monitor.println();
 	}
 	
 	/* ====================================================================== */
@@ -823,36 +822,36 @@ public class Grammar {
 		return n;
 	}
 	
-	public void printFirstAndFollow() {
-		System.out.println("");
+	public void printFirstAndFollow(IAmbiDexterMonitor monitor) {
+		monitor.println("");
 		for (NonTerminal n : nonTerminals.values()) {
-			System.out.println("FIRST( " + n + " ) = " + first.get(n));
+			monitor.println("FIRST( " + n + " ) = " + first.get(n));
 		}
-		System.out.println("");
+		monitor.println("");
 		for (NonTerminal n : nonTerminals.values()) {
-			System.out.println("EFF( " + n + " ) = " + emptyFreeFirst[n.id]);
+			monitor.println("EFF( " + n + " ) = " + emptyFreeFirst[n.id]);
 		}
-		System.out.println("");
+		monitor.println("");
 		for (NonTerminal n : nonTerminals.values()) {
-			System.out.println("FOLLOW( " + n + " ) = " + follow.get(n));
+			monitor.println("FOLLOW( " + n + " ) = " + follow.get(n));
 		}
-		/*System.out.println("");
+		/*monitor.println("");
 		for (NonTerminal n : nonTerminals.values()) {
-			System.out.println("NULLABLE( " + n + " ) = " + n.isNullable);
+			monitor.println("NULLABLE( " + n + " ) = " + n.isNullable);
 		}*/
 		if (minimalStrings != null) {
-			System.out.println("");
+			monitor.println("");
 			for (NonTerminal n : nonTerminals.values()) {
-				System.out.println("MINSTRING( " + n + " ) = " + minimalStrings.get(n));
+				monitor.println("MINSTRING( " + n + " ) = " + minimalStrings.get(n));
 			}
 		}
-		/*System.out.println("");
+		/*monitor.println("");
 		for (NonTerminal n : nonTerminals.values()) {
-			System.out.println("MINREACH( " + n + " ) = " + minimalReachableLengths.get(n));
+			monitor.println("MINREACH( " + n + " ) = " + minimalReachableLengths.get(n));
 		}
-		System.out.println("");
+		monitor.println("");
 		for (NonTerminal n : nonTerminals.values()) {
-			System.out.println("MINFOLLOW( " + n + " ) = " + minimalFollowLengths.get(n));
+			monitor.println("MINFOLLOW( " + n + " ) = " + minimalFollowLengths.get(n));
 		}*/
 	}
 	
@@ -1652,7 +1651,7 @@ public class Grammar {
 		}
 	}
 
-	public void printNonTerminalUsage() {
+	public void printNonTerminalUsage(IAmbiDexterMonitor monitor) {
 		Map<Symbol, Integer> usage = new ShareableHashMap<Symbol, Integer>();
 		for (Production p : productions) {
 			if (p.reachable) {
@@ -1680,7 +1679,7 @@ public class Grammar {
 		for (int i = nrs.length - 1; i >= 0; i--) {
 			int nr = (Integer) nrs[i];
 			for (Symbol s : inv.get(nr)) {
-				System.out.println("" + s + ": " + nr);
+				monitor.println("" + s + ": " + nr);
 			}
 		}
 	}

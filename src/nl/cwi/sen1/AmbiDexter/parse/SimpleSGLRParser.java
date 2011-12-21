@@ -26,6 +26,7 @@ import nl.cwi.sen1.AmbiDexter.util.ShareableHashSet;
 import nl.cwi.sen1.AmbiDexter.util.Util;
 
 // TODO parse tree construction is buggy, check out grammar 267
+// TODO does not implement precede restrictions yet
 
 public class SimpleSGLRParser implements IParser {
 

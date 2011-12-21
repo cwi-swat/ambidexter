@@ -32,7 +32,6 @@ public abstract class GrammarImporter {
 
 		g.finish();
 		g.verify();
-		g.printSize();
 		
 		return g;
 	}

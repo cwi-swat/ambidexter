@@ -15,12 +15,23 @@ public class FollowRestrictions {
 	CharacterClass fr1 = new CharacterClass();
 	ShareableHashSet<LinkedList<CharacterClass>> frLonger = new ShareableHashSet<LinkedList<CharacterClass>>();
 	
-	public FollowRestrictions() {		
+	// if this set of follow restricions used to simulate the Rascal 'follow' condition,
+	// then this field contains the maximum length of all strings that must follow.
+	public int mustFollowLength = 0;
+	
+	public FollowRestrictions() {
 	}
 	
 	public FollowRestrictions(FollowRestrictions fr) { // copy constructor
 		fr1.add(fr.fr1);
 		frLonger.addAll(fr.frLonger);		
+	}
+	
+	/**
+	 * Returns whether this object represents a restriction or an 'obligation'
+	 */
+	public boolean mustFollow() {
+		return mustFollowLength > 0;
 	}
 	
 	// pre: s is not a NonTerminal

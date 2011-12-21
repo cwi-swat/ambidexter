@@ -81,7 +81,7 @@ public abstract class PairGraph implements IPairGraph {
 			}
 			
 			filter();
-			nfa.printSize("\nNFA " + iteration);
+			nfa.printSize("\nNFA " + iteration, monitor);
 			monitor.println("Used productions: " + nfa.getUsedProductions().size());
 			
 			if (AmbiDexterConfig.outputGraphs) {
