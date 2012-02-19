@@ -1892,6 +1892,71 @@ public abstract class NFA {
 		return i;
 	}
 	
+	// pre: shiftsInSets == true
+	public void reverse() {
+		Map<Transition, Transition> oldNew = new ShareableHashMap<Transition, Transition>(); 
+		Set<Transition> oldTrans = transitions;
+		transitions = new ShareableHashSet<Transition>();
+		
+		// first clear transitions of all items
+		for (Item i : allItems()) {
+			i.derives.clear();
+			i.reduces.clear();
+			if (i.shifts == null) {
+				i.shifts = new ShareableHashSet<Transition>();
+			} else {
+				i.shifts.clear();
+			}
+			
+			// swap follow and precede restrictions
+			FollowRestrictions f = i.followRestrictions;
+			i.followRestrictions = i.precedeRestrictions;
+			i.precedeRestrictions = f;
+		}
+		
+		// then add reversed transitions
+		for (Transition old : oldTrans) {
+			Symbol l = old.label;
+			if (l instanceof Derive) {
+				l = ((Derive) l).production.reduction;
+			} else if (l instanceof Reduce) {
+				l = ((Reduce) l).production.derivation;
+			}			
+			
+			Transition t = addTransition(old.target, l, old.source);
+			t.empty = old.empty;
+			
+			if (l instanceof Derive) {
+				t.source.derives.add(t);
+			} else if (l instanceof Reduce) {
+				t.source.reduces.add(t);
+			} else {
+				t.source.shifts.add(t);
+			}
+			
+			oldNew.put(old, t);
+		}
+		
+		// fill 'reverse' fields of derives and reduces
+		for (Transition old : oldTrans) {
+			Transition n = oldNew.get(old);
+			for (Transition r : old.reverse) {
+				Transition nr = oldNew.get(r);
+				n.reverse.add(nr);
+			}
+		}
+		
+		for (Item i : allItems()) {
+			if (i.atEnd()) {
+				i.shifts = null;
+			}
+		}
+		
+		connectShiftAndReduces();
+	}
+	
+	//-------------------------------------------------------------------------
+	
 	Set<Item> rejectPartItems;
 	Set<Transition> rejectPartTransitions;
 	Set<Transition> rejectPartBridges;	
@@ -1968,6 +2033,7 @@ public abstract class NFA {
 		public Object stackInfo = null;
 		public boolean withFollow = false;
 		public FollowRestrictions followRestrictions = null;
+		public FollowRestrictions precedeRestrictions = null;
 		
 		public int distanceToEnd = 999999999;
 		public boolean canReduce;
