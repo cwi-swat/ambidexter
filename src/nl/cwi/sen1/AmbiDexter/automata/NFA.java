@@ -50,6 +50,7 @@ public abstract class NFA {
 	protected boolean includeRejects;
 	public boolean followRestrictionsPropagated;
 	public boolean shiftsInSets = false;
+	public boolean reversed = false;
 
 	public static int itemID;
 	public static Queue<Transition> transQueue;
@@ -750,6 +751,7 @@ public abstract class NFA {
 		final EndItem newEndItem = new EndItem(itemID++);
 		newStartItem.unfoldedFrom = startItem;
 		newStartItem.withFollow = true;
+		newEndItem.unfoldedFrom = endItem;
 		newEndItem.withFollow = true;
 		final Relation<Item, Transition> ntShifts = new Relation<Item, Transition>();
 		
@@ -760,7 +762,11 @@ public abstract class NFA {
 					return newEndItem;
 				}
 				
-				if (i.atBegin() && i.production.reject) {
+				if (i instanceof StartItem) {
+					return newStartItem;
+				}
+				
+				if ((reversed ? i.atEnd() : i.atBegin()) && i.production.reject) {
 					f = null; // do not propagate into reject parts
 				}
 				
@@ -802,9 +808,16 @@ public abstract class NFA {
 		}
 		A a = new A();
 		
-		followPropTodo.add(newStartItem);
-		for (Transition t : startItem.shifts) {
-			ntShifts.add(newStartItem, t);
+		if (reversed) {
+			followPropTodo.add(newEndItem);
+			for (Transition t : endItem.shifts) {
+				ntShifts.add(newEndItem, t);
+			}
+		} else {
+			followPropTodo.add(newStartItem);
+			for (Transition t : startItem.shifts) {
+				ntShifts.add(newStartItem, t);
+			}			
 		}
 		
 		transitions = new ShareableHashSet<Transition>();
@@ -866,7 +879,7 @@ public abstract class NFA {
 				NonTerminal n = (NonTerminal) shift.label;
 				
 				for (Transition derive : i.derives) {
-					Set<Item> ends = derive.target.followShiftSets();
+					Set<Item> ends = derive.target.followShiftSets(reversed);
 					for (Item e : ends) {
 						if (e.production.reject) {
 							// do not let follow restrictions propagate over reduces of reject productions
@@ -917,7 +930,7 @@ public abstract class NFA {
 
 	public void connectShiftAndReduces() {
 		for (Item i : allItems()) {			
-			if (!(i.getNextSymbol() instanceof NonTerminal)) {
+			if (!((reversed ? i.getPrevSymbol() : i.getNextSymbol()) instanceof NonTerminal)) {
 				continue;
 			}
 			
@@ -1839,7 +1852,7 @@ public abstract class NFA {
 			
 			// edges
 			for (Transition t : transitions) {
-				w.write("" + t.source.id + " -> " + t.target.id + " [label=" + Util.dotId(t.label) + (t.target.production != null && t.target.production.usedForReject ? ", color=red" : "") + "];\n");
+				w.write("" + t.source.id + " -> " + t.target.id + " [label=" + (t.empty?"_":"") + Util.dotId(t.label) + (t.target.production != null && t.target.production.usedForReject ? ", color=red" : "") + "];\n");
 			}
 			
 			w.write("}\n");
@@ -1893,6 +1906,7 @@ public abstract class NFA {
 	}
 	
 	// pre: shiftsInSets == true
+	// does not swap startItem and endItem! 
 	public void reverse() {
 		Map<Transition, Transition> oldNew = new ShareableHashMap<Transition, Transition>(); 
 		Set<Transition> oldTrans = transitions;
@@ -1945,14 +1959,17 @@ public abstract class NFA {
 				n.reverse.add(nr);
 			}
 		}
+
+		reversed = !reversed;
 		
 		for (Item i : allItems()) {
-			if (i.atEnd()) {
+			if (reversed ? i.atBegin() : i.atEnd()) {
 				i.shifts = null;
 			}
 		}
 		
 		connectShiftAndReduces();
+
 	}
 	
 	//-------------------------------------------------------------------------
@@ -2130,7 +2147,11 @@ public abstract class NFA {
 		}
 
 		public Symbol getPrevSymbol() {
-			return production.getSymbolAt(index - 1);
+			if (index > 0) {
+				return production.getSymbolAt(index - 1);
+			} else {
+				return null;
+			}
 		}
 		
 		public Symbol getNextSymbol() {
@@ -2176,7 +2197,7 @@ public abstract class NFA {
 			}
 		}
 		
-		public Set<Item> followShiftSets() {
+		public Set<Item> followShiftSets(boolean reversed) {
 			Set<Item> result = new ShareableHashSet<Item>();
 			Set<Item> s = new ShareableHashSet<Item>();
 			Set<Item> s2;
@@ -2186,7 +2207,7 @@ public abstract class NFA {
 				s2 = new ShareableHashSet<Item>();
 				for (Item i : s) {
 					if (i.shifts == null) {
-						if (i.atEnd()) {
+						if (reversed ? i.atBegin() : i.atEnd()) {
 							result.add(i);
 						}
 					} else {
@@ -2386,6 +2407,16 @@ public abstract class NFA {
 		}
 		
 		@Override
+		public boolean atBegin() {
+			return true;
+		}
+		
+		@Override
+		public boolean atEnd() {
+			return false;
+		}
+		
+		@Override
 		public Symbol getNextSymbol() {
 			return startSymbol;
 		}
@@ -2431,6 +2462,11 @@ public abstract class NFA {
 		@Override
 		public boolean atEnd() {
 			return true;
+		}
+		
+		@Override
+		public boolean atBegin() {
+			return false;
 		}
 		
 		@Override
