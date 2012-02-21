@@ -24,7 +24,8 @@ public class FollowRestrictions {
 	
 	public FollowRestrictions(FollowRestrictions fr) { // copy constructor
 		fr1.add(fr.fr1);
-		frLonger.addAll(fr.frLonger);		
+		frLonger.addAll(fr.frLonger);
+		mustFollowLength = fr.mustFollowLength;
 	}
 	
 	/**
@@ -66,6 +67,9 @@ public class FollowRestrictions {
 			}
 			
 			next.add(l.next);
+		}
+		if (mustFollowLength > 0) {
+			next.mustFollowLength = mustFollowLength - 1;
 		}
 		return next.isEmpty() ? null : next;
 	}
@@ -171,6 +175,8 @@ public class FollowRestrictions {
 	public void add(FollowRestrictions fr) {
 		fr1.add(fr.fr1);
 		frLonger.addAll(fr.frLonger);
+		
+		mustFollowLength = Math.max(mustFollowLength, fr.mustFollowLength);
 	}
 	
 	public boolean isEmpty() {
@@ -212,7 +218,7 @@ public class FollowRestrictions {
 			return false;
 		if (!frLonger.equals(other.frLonger))
 			return false;
-		return true;
+		return mustFollowLength == other.mustFollowLength;
 	}
 
 	public int size() {

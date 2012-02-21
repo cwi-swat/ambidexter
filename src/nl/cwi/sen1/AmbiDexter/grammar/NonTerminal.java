@@ -43,9 +43,14 @@ public class NonTerminal extends Symbol {
 			followRestrictions = fr;
 		} else {
 			followRestrictions.add(fr);
-			if (followRestrictions.mustFollowLength < fr.mustFollowLength) {
-				followRestrictions.mustFollowLength = fr.mustFollowLength;
-			}
+		}
+	}
+
+	public void addPrecedeRestrictions(FollowRestrictions pr) {
+		if (precedeRestrictions == null) {
+			precedeRestrictions = pr;
+		} else {
+			precedeRestrictions.add(pr);
 		}
 	}
 }

@@ -898,6 +898,11 @@ public abstract class NFA {
 						} else {
 							f = f.getNextAfterReduce(n);
 						}
+						
+						if (f != null && f.mustFollow() && (shift.target instanceof StartItem || shift.target instanceof EndItem)) {
+							continue;
+						}
+						
 						Item next = a.getItemWithFollowRestrictions(shift.target, f);
 						
 						Transition reduce = addTransition(e, e.production.reduction, next);
@@ -1852,7 +1857,9 @@ public abstract class NFA {
 			
 			// edges
 			for (Transition t : transitions) {
-				w.write("" + t.source.id + " -> " + t.target.id + " [label=" + (t.empty?"_":"") + Util.dotId(t.label) + (t.target.production != null && t.target.production.usedForReject ? ", color=red" : "") + "];\n");
+				w.write("" + t.source.id + " -> " + t.target.id + " [label=" + Util.dotId(t.label) + 
+						(t.target.production != null && t.target.production.usedForReject ? ", color=red" : "") +
+						(t.empty ? ", color=blue" : "") + "];\n");
 			}
 			
 			w.write("}\n");
