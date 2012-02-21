@@ -313,7 +313,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 				//System.out.println("Reducing " + p + (l.state.rejects ? " (r)" : ""));
 
 				// check if 'follow' condition can be met
-				if (p.lhs.followRestrictions != null && p.lhs.followRestrictions.mustFollowLength + l.level < maxdepth) {
+				if (p.lhs.followRestrictions != null && p.lhs.followRestrictions.mustFollowLength + l.level > maxdepth) {
 					continue;
 				}
 
