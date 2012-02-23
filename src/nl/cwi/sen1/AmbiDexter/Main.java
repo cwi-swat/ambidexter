@@ -310,6 +310,14 @@ public class Main {
 		if (propagateFollowRestrictions && grammar.scannerless) {
 			nfa.propagateFollowRestrictions();
 			nfa.printSize("Propagated follow restrictions", monitor);
+			
+			nfa.reverse();
+			//nfa.printSize("Reversed", monitor);
+			nfa.propagateFollowRestrictions();
+			nfa.printSize("Propagated precede restrictions", monitor);			
+			
+			nfa.reverse();
+			//nfa.printSize("Reversed", monitor);
 		} else {
 			if (AmbiDexterConfig.writeDFA && !nfa.shiftsInSets) {
 				nfa.moveShiftsToSets(); // otherwise minimalstring calc won't work

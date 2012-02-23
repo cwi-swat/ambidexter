@@ -1942,10 +1942,14 @@ public abstract class NFA {
 				l = ((Derive) l).production.reduction;
 			} else if (l instanceof Reduce) {
 				l = ((Reduce) l).production.derivation;
-			}			
+			}
 			
-			Transition t = addTransition(old.target, l, old.source);
-			t.empty = old.empty;
+			Transition t;
+			if (old.empty) {
+				t = addEmptyTransition(old.target, l, old.source);
+			} else {
+				t = addTransition(old.target, l, old.source);
+			}			
 			
 			if (l instanceof Derive) {
 				t.source.derives.add(t);

@@ -266,7 +266,7 @@ public abstract class PDA <R> {
 				
 				// goto edges
 				for (Entry<R, PDAState> e2 : s.gotos.entrySet()) {
-					w.write("" + s.id + " -> " + e2.getValue().id + " [label=" + Util.dotId(e2.getKey()) + "];\n");
+					w.write("" + s.id + " -> " + e2.getValue().id + " [label=" + "R" + s.id /*Util.dotId(e2.getKey())*/ + "];\n");
 				}
 				
 				if (s.rejectState != null) {

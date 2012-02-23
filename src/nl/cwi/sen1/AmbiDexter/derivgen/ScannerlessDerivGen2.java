@@ -294,7 +294,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 //					for (int i = 0; i < shifted; i++) {
 //						s += " " + sentence[i].prettyPrint();
 //					}
-//					System.out.println(s);
+//					monitor.println(s);
 					
 					shiftablesStack = shiftablesStack.next;
 					shifted--;

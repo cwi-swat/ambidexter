@@ -131,7 +131,7 @@ public class CharacterClass extends Symbol implements SymbolSet {
 			add((CharacterClass) o);
 		} else if (o instanceof Terminal && !(o == Grammar.empty || o == Grammar.endmarker)) {
 			throw new UnsupportedOperationException("not implemented");
-		} else {
+		} else { // Chacter
 			add(-o.id, -o.id);
 		}
 		return false;
