@@ -43,6 +43,10 @@ public class FollowRestrictions {
 			return !fr1.contains(s);
 		}
 	}
+	
+	public boolean canShiftEOF() {
+		return !fr1.contains(Grammar.EOF);
+	}
 
 	public FollowRestrictions getNextAfterReduce(NonTerminal n) {
 		if (n.followRestrictions == null) {

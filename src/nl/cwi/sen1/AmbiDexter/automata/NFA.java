@@ -899,8 +899,12 @@ public abstract class NFA {
 							f = f.getNextAfterReduce(n);
 						}
 						
+						// do not reduce to endItem (or startItem if reversed) if characters must follow,
+						// unless EOF must follow
 						if (f != null && f.mustFollow() && (shift.target instanceof StartItem || shift.target instanceof EndItem)) {
-							continue;
+							if (!f.canShiftEOF()) {
+								continue;
+							}
 						}
 						
 						Item next = a.getItemWithFollowRestrictions(shift.target, f);
@@ -1204,7 +1208,7 @@ public abstract class NFA {
 	
 	/*
 	 * Create two special start and end items for a specific nonterminal,
-	 * as were this the start symbol of this nfa's grammar.
+	 * as if this was the start symbol of this nfa's grammar.
 	 * Doesn't change existing structure, so reduces can still point to
 	 * items of productions unreachable from nt.
 	 */

@@ -25,7 +25,7 @@ public class Grammar {
 	
 	public static Terminal empty; 
 	public static Terminal endmarker;
-	public static Character EOF;
+	public static int EOF = Integer.MAX_VALUE;
 	private static Grammar instance;
 
 	public String name;
@@ -70,7 +70,6 @@ public class Grammar {
 		Symbol.resetSymbolCache();
 		empty = new Terminal("empty");
 		endmarker = new Terminal("$");
-		EOF = new Character(Integer.MAX_VALUE);
 	}
 	
 	public Grammar(Grammar original, Set<Production> potentiallyHarmful, boolean terminalizeUnproductive) {  

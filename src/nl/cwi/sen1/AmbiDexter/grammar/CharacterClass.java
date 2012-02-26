@@ -211,7 +211,8 @@ public class CharacterClass extends Symbol implements SymbolSet {
 						// c: <-->
 				
 						// insert new range before i
-						if (ranges.length == size) {
+						insert(i, c1, c2);
+						/*if (ranges.length == size) {
 							grow(size * 2);
 						}
 						
@@ -220,7 +221,7 @@ public class CharacterClass extends Symbol implements SymbolSet {
 						}
 						ranges[i] = c1;
 						ranges[i+1] = c2;
-						size += 2;
+						size += 2;*/
 					}
 				}
 			} else {
@@ -315,7 +316,7 @@ public class CharacterClass extends Symbol implements SymbolSet {
 				throw new UnsupportedOperationException("really?");
 			} else if (o instanceof Terminal && !(o == Grammar.empty || o == Grammar.endmarker)) {
 				throw new UnsupportedOperationException("not implemented");
-			} else {
+			} else { // Character
 				return containsChar(-((Symbol) o).id);
 			}
 		}
@@ -371,23 +372,7 @@ public class CharacterClass extends Symbol implements SymbolSet {
 						ranges[i * 2 + 1] -= 1;
 					} else {
 						// split
-						if (ranges.length == size) {
-							int t[] = new int[size * 2]; // resize
-							for (int j = 0; j <= i * 2 + 1; j++) {
-								t[j] = ranges[j];
-							}
-							for (int j = i * 2; j < size; j++) {
-								t[j + 2] = ranges[j];
-							}
-							ranges = t;
-						} else {
-							for (int j = size - 1; j >= i * 2; j--) { // shift right
-								ranges[j + 2] = ranges[j];
-							}
-						}
-						ranges[i * 2 + 1] = c - 1;
-						ranges[i * 2 + 2] = c + 1;
-						size += 2;
+						insert(i * 2 + 1, c - 1, c + 1);
 					}
 				}
 				return;
@@ -395,6 +380,67 @@ public class CharacterClass extends Symbol implements SymbolSet {
 		}
 	}
 
+	private void remove(int c1, int c2) {
+		for (int i = 0; i < size / 2; i++) {
+			int r1 = ranges[i * 2];
+			int r2 = ranges[i * 2 + 1];
+			if (r1 < c1) {
+				if (r2 < c1) {
+					//   <-->      (r)
+					// -      <--> (c)
+					// continue...					
+				} else {
+					if (r2 > c2) {
+						//   <------> (r)
+						// -   <-->   (c)  
+						// split
+						insert(i * 2 + 1, c1 - 1, c2 + 1);
+						return;
+					} else {
+						//   <--->   (r)
+						// -   <---> (c)
+						ranges[i * 2 + 1] = c1 - 1;						
+					}
+				}
+			} else {
+				if (r1 <= c2) {
+					if (r2 <= c2) {
+						//      <-->   (r)
+						// -  <------> (c)					
+						for (int j = i * 2 + 2; j < size; j++) { // shift left
+							ranges[j - 2] = ranges[j];
+						}
+						size -= 2;
+						i--;					
+					} else {
+						//      <---> (r)
+						// -  <--->   (c)					
+						ranges[i * 2] = c2 + 1;
+						return;
+					}					
+				} else {
+					//         <--> (r)
+					// - <-->       (c)
+					return;
+				}
+			}
+		}
+	}
+
+	private void insert(int at, int c1, int c2) {
+		if (size == ranges.length) {
+			grow(size * 2);
+		}
+		
+		for (int j = size - 1; j >= at; --j) {
+			ranges[j + 2] = ranges[j];
+		}
+		
+		ranges[at] = c1;
+		ranges[at + 1] = c2;
+		size += 2;
+	}
+	
 	public boolean removeAll(Collection<?> c) {
 		throw new UnsupportedOperationException("not implemented");
 	}
@@ -856,13 +902,11 @@ public class CharacterClass extends Symbol implements SymbolSet {
 	}
 
 	public CharacterClass subtract(CharacterClass cc) {
-		// TODO write proper function!!
-		
 		CharacterClass result = new CharacterClass();
 		result.add(this);
 		
-		for (Symbol c : cc) {
-			result.remove(c);
+		for (int i = 0; i < cc.size; i += 2) {
+			result.remove(cc.ranges[i], cc.ranges[i + 1]);
 		}
 		
 		return result;
@@ -871,7 +915,7 @@ public class CharacterClass extends Symbol implements SymbolSet {
 	public CharacterClass invert() {
 		// TODO write proper function!!
 		CharacterClass all = new CharacterClass();
-		all.add(0, 65536);
+		all.add(0, Integer.MAX_VALUE);
 		return all.subtract(this);
 	}
 }

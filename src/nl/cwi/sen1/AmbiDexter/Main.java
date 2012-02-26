@@ -290,10 +290,10 @@ public class Main {
 	}		
 	
 	// check nfa for potential ambiguities with pg
-	NFA buildNFA(boolean includeRejects, boolean unfold, boolean propagateFollowRestrictions) {
+	NFA buildNFA(int precision, boolean includeRejects, boolean unfold, boolean propagateFollowRestrictions) {
 		
 		NFA nfa = null;		
-		switch (config.precision) {
+		switch (precision) {
 			case AmbiDexterConfig.LR0   : nfa = new LR0NFA(grammar); break;
 			case AmbiDexterConfig.SLR1  : nfa = new SLR1NFA(grammar, config); break;
 			case AmbiDexterConfig.LALR1 : nfa = new LALR1NFA(grammar, config); break;
@@ -350,7 +350,7 @@ public class Main {
 	}
 
 	public void doNUtest() {		
-		NFA nfa = buildNFA(AmbiDexterConfig.writeDFA, true, config.doFollowRestrictions);
+		NFA nfa = buildNFA(config.precision, AmbiDexterConfig.writeDFA, true, config.doFollowRestrictions);
 		if (AmbiDexterConfig.outputGraphs) {
 			nfa.toDot(config.filename + "." + AmbiDexterConfig.precisionName[config.precision] + ".nfa.dot");
 		}
@@ -433,7 +433,7 @@ public class Main {
 			dg.setDFA(dfa);
 		} else {
 			NFA nfa;
-			nfa = buildNFA(config.doRejects, false, config.doFollowRestrictions);
+			nfa = buildNFA(config.precision, config.doRejects, false, config.doFollowRestrictions);
 			if (!nfa.shiftsInSets) {
 				nfa.moveShiftsToSets();
 			}
@@ -453,7 +453,7 @@ public class Main {
 		dg.setLength(depth);
 		dg.setIncremental(config.incrementalDerivGen);
 		if (parseTableFile == null) {
-			dg.setParser(new SimpleSGLRParser(buildNFA(config.doRejects, false, false)));
+			dg.setParser(new SimpleSGLRParser(buildNFA(AmbiDexterConfig.LR0, config.doRejects, false, false)));
 		} else {
 			dg.setParser(new SGLRStub(parseTableFile));
 		}

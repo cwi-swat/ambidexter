@@ -255,7 +255,7 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		protected Set<Pair<SymbolString, FollowRestrictions>> generated;		
 
 		public AbstractWorker(String id) {
-			super();
+			super("AmbiDexter worker " + id);
 			this.id = id;
 		}
 		
