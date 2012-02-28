@@ -55,7 +55,7 @@ public abstract class PairGraph implements IPairGraph {
 		extensions.add(e);
 	}
 
-	public void detectAmbiguities() {
+	public boolean detectAmbiguities() {
 		iteration = 0;
 		int maxpairs = 0;
 		int prevSize;
@@ -65,7 +65,10 @@ public abstract class PairGraph implements IPairGraph {
 			++iteration;
 			
 			monitor.println("\nBuilding pair graph:");
-			traverse();
+			if (!traverse()) {
+				// aborted by user
+				return false;
+			}			
 			monitor.println(done.usageStatistics());
 
 			if (maxpairs == 0 ) {
@@ -93,9 +96,10 @@ public abstract class PairGraph implements IPairGraph {
 		} while (size > 3 && size != prevSize); // 3 are always used: startstate, endstate, and shift between the two
 		
 		monitor.println("\nIterations: " + iteration + ", max pairs: " + maxpairs);
+		return true;
 	}
 	
-	protected abstract void traverse();
+	protected abstract boolean traverse();
 	protected abstract Set<Item> getUsedItems();
 	protected abstract void filter();
 	public abstract Set<Production> getUsedProductions();

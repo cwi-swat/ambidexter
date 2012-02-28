@@ -73,7 +73,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 		}
 
 		@SuppressWarnings("unchecked")
-		protected void go(Job job, boolean fresh) {
+		protected boolean go(Job job, boolean fresh) {
 			// don't try to refactor: recursive functions are almost twice as slow as this (i've tried it)
 
 			LinkedList<ESet<Symbol>> shiftablesStack = job.shiftablesStack;		
@@ -287,7 +287,7 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 				
 				if (backTrack) {
 					if (shiftablesStack.next == null) {
-						return; // done
+						return true; // done
 					}
 						
 //					String s = "";
@@ -301,6 +301,10 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 					sentence[shifted] = null; // unnecessary, but for debugging
 
 //					System.out.println("Backtracking to " + shifted);	
+				}
+				
+				if (monitor.canceling()) {
+					return false;
 				}
 			}
 		}

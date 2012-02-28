@@ -235,13 +235,13 @@ public class Main {
 				return true;
 			}
 			
-			checkGrammar(grammar);
+			checkGrammar();
 			monitor.println("");
 		}
 		return true;
 	}
 
-	public void checkGrammar(Grammar grammar) {
+	public void checkGrammar() {
 		if (config.filterMethod == DetectionMethod.NONE && config.derivGenMethod == DetectionMethod.NONE) {
 			monitor.println("Please select a filtering and/or derivation generation setting.");
 			return;
@@ -250,13 +250,23 @@ public class Main {
 		monitor.println("----------------------------------------------------------------");
 		monitor.println("Checking with " + AmbiDexterConfig.precisionName[config.precision] +" ...");
 		
+		boolean success = true;
+		
 		switch (config.filterMethod) {
-			case RU: doNUtest(); break; 
-			case NU: doNUtest(); break;
+			case RU: 
+			case NU:
+				monitor.setTaskName("Filtering Harmless Productions...", 1);
+				success = doNUtest(); 
+				break;
 		}
 		
-		switch (config.derivGenMethod) {
-			case PG: doDerivationGeneration(config.derivGenMinDepth, null); break;
+		if (success) {
+			switch (config.derivGenMethod) {
+				case PG:
+					monitor.setTaskName("Generating Sentences...", config.derivGenMaxDepth - config.derivGenMinDepth + 1);
+					doDerivationGeneration(config.derivGenMinDepth, null);
+					break;
+			}
 		}
 	}
 
@@ -349,7 +359,7 @@ public class Main {
 		return nfa;
 	}
 
-	public void doNUtest() {		
+	public boolean doNUtest() {		
 		NFA nfa = buildNFA(config.precision, AmbiDexterConfig.writeDFA, true, config.doFollowRestrictions);
 		if (AmbiDexterConfig.outputGraphs) {
 			nfa.toDot(config.filename + "." + AmbiDexterConfig.precisionName[config.precision] + ".nfa.dot");
@@ -358,8 +368,10 @@ public class Main {
 		NoncanonicalUnambiguityTest nu = new NoncanonicalUnambiguityTest();
 		nu.setConfig(config);
 		nu.setMonitor(monitor);
-		nu.build(nfa);		
-		nu.detectAmbiguities(config.filterMethod);
+		nu.build(nfa);
+		if (!nu.detectAmbiguities(config.filterMethod)) {
+			return false;
+		}
 		
 		if (config.findHarmlessProductions) {
 			monitor.println("\nHarmless productions: " + nu.harmlessProductions.size() + " / " + grammar.nrReachableProductions);
@@ -409,9 +421,11 @@ public class Main {
 				dfa.toDot(grammar.name + ".dfa.reconstructed.dot");
 			}
 		}
+		
+		return true;
 	}
 
-	public void doDerivationGeneration(int depth, String parseTableFile) {
+	public boolean doDerivationGeneration(int depth, String parseTableFile) {
 		DerivationGenerator dg = null;
 		switch (config.derivGenMethod) {
 		case PG:
@@ -457,7 +471,8 @@ public class Main {
 		} else {
 			dg.setParser(new SGLRStub(parseTableFile));
 		}
-		dg.detectAmbiguities(config.derivGenMethod);
+		
+		return dg.detectAmbiguities(config.derivGenMethod);
 	}
 
 	private void dumpGrammar(Grammar g, String postfix) {

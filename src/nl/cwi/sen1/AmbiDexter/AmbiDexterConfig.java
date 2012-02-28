@@ -43,7 +43,7 @@ public class AmbiDexterConfig {
 	public static boolean quick = true;
 	public static boolean outputGraphs = false;
 	public static boolean outputDistMap = false;
-	public static boolean writeDFA = false; // ???
+	public static boolean writeDFA = false;
 
 	public boolean outputStatistics = false;
 	public boolean outputReconstructedGrammar = false;

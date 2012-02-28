@@ -20,5 +20,5 @@ public interface AmbiguityDetector {
 	public void build(NFA nfa);
 	public void optimize();
 	public void verify();
-	public void detectAmbiguities(DetectionMethod method);
+	public boolean detectAmbiguities(DetectionMethod method);
 }

@@ -95,7 +95,7 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		outputFilePrefix = s;
 	}
 
-	public void detectAmbiguities(DetectionMethod method) {
+	public boolean detectAmbiguities(DetectionMethod method) {
 		ambiguities = new Relation<Symbol, SymbolString>();
 		int maxlen = incremental ? config.derivGenMaxDepth : config.derivGenMinDepth;
 		for (int i = 0; i <= maxlen; i++) {
@@ -103,15 +103,19 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		}
 		
 		if (incremental) {
-			while (length <= config.derivGenMaxDepth) {
+			while (length <= config.derivGenMaxDepth && !monitor.canceling()) {
 				detect();
+				monitor.worked(1);
 				++length;
 				possibleAmbiguities.set(length, new Relation<Symbol, SymbolString>());
 			}
 		} else {
 			detect();
+			monitor.worked(1);
 			outputAmbiguousCores(); // outputs only if outputFilePrefix is set
-		}	
+		}
+		
+		return !monitor.canceling();
 	}
 
 	private void outputAmbiguousCores() {
@@ -147,7 +151,6 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 	
 		monitor.println("Jobs: " + jobs.size());
 	
-		
 		long sentences = 0;
 		if (jobs.size() > 0) {
 			for (int i = 0; i < workers; i++) {
@@ -166,7 +169,12 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 			}
 		}
 		
-		monitor.println("Done");
+		if (monitor.canceling()) {
+			monitor.println("Aborted");
+		} else {
+			monitor.println("Done");
+		}
+		
 		monitor.println("Sentences: " + sentences);
 		int parsed = 0;
 		for (Relation<Symbol, SymbolString> r : possibleAmbiguities) {
@@ -274,11 +282,13 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 						return;
 					}
 				}
-				go(j, false);
+				if (!go(j, false)) {
+					return;
+				}
 			}
 		}
 
-		protected abstract void go(Job job, boolean fresh);
+		protected abstract boolean go(Job job, boolean fresh);
 		
 		@Override
 		public String toString() {

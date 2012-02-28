@@ -15,4 +15,9 @@ public interface IAmbiDexterMonitor {
 	
 	public void ambiguousString(AmbiDexterConfig cfg, SymbolString s, NonTerminal n, String messagePrefix);
 
+	public void setTaskName(String name, int work);
+	
+	public void worked(int work);
+	
+	public boolean canceling();
 }

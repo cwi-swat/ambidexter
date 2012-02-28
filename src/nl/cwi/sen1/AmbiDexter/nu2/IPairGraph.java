@@ -14,7 +14,7 @@ public interface IPairGraph {
 
 	void init(NFA nfa, IAmbiDexterMonitor monitor);
 
-	void detectAmbiguities();
+	boolean detectAmbiguities();
 
 	Set<Production> getUsedProductions();
 

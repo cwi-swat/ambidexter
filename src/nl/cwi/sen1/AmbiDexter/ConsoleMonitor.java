@@ -29,5 +29,20 @@ public class ConsoleMonitor implements IAmbiDexterMonitor {
 	public void ambiguousString(AmbiDexterConfig cfg, SymbolString s, NonTerminal n, String messagePrefix) {
 		println(messagePrefix + "Ambiguous string found for " + n.prettyPrint() + ": " + s.prettyPrint());
 	}
+
+	@Override
+	public void setTaskName(String name, int work) {
+		// ignore
+	}
+	
+	@Override
+	public void worked(int work) {
+		// ignore
+	}
+
+	@Override
+	public boolean canceling() {
+		return false;
+	}
 	
 }

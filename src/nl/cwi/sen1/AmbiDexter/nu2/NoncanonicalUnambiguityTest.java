@@ -41,10 +41,12 @@ public class NoncanonicalUnambiguityTest implements AmbiguityDetector {
 	}
 
 	@Override
-	public void detectAmbiguities(DetectionMethod method) {		
+	public boolean detectAmbiguities(DetectionMethod method) {		
 		IPairGraph pg = createPairGraph(method);			
 		pg.init(nfa, monitor);
-		pg.detectAmbiguities();
+		if (!pg.detectAmbiguities()) {
+			return false;
+		}
 
 		if (!pg.potentiallyAmbiguous()) {
 			if (config.findHarmlessProductions) {
@@ -72,7 +74,8 @@ public class NoncanonicalUnambiguityTest implements AmbiguityDetector {
 				// includes only reachable productions (b/c of Grammar.getItemDerives())
 				harmlessPatterns = pg.getHarmlessPatterns(usedProductions);
 			}
-		}		
+		}
+		return true;
 	}
 	
 	private IPairGraph createPairGraph(DetectionMethod method) {

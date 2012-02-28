@@ -55,7 +55,7 @@ public class DepthFirstTransitionPairGraph extends DepthFirstPairGraph {
 	}
 
 	@Override
-	protected void traverse() {
+	protected boolean traverse() {
 		done = new ItemPairArrayHashSet(NFA.IDedItems);
 		usedItems = null;
 		nfa.setTransitionsUnused();
@@ -261,11 +261,17 @@ public class DepthFirstTransitionPairGraph extends DepthFirstPairGraph {
 						p = null;
 					}
 				}
+				
+				if (monitor.canceling()) {
+					printSize("Aborted: " + (nr - 1) + " -");
+					return false;
+				}
 			}
 		}
 				
 		printSize("Done: " + (nr - 1) + " -");
-		monitor.println("Max call stack size: " + maxCallStackSize + ", max item stack size: " + maxItemStackSize);		
+		monitor.println("Max call stack size: " + maxCallStackSize + ", max item stack size: " + maxItemStackSize);
+		return true;
 	}
 
 	@Override

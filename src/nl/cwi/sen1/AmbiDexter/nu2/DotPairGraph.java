@@ -18,10 +18,10 @@ public class DotPairGraph extends DepthFirstPairGraph {
 	}
 
 	@Override
-	protected void traverse() {
+	protected boolean traverse() {
 		transitions = new ShareableHashSet<PairTransition>();
 		potentialAmbiguities = new ShareableHashSet<PairTransition>();
-		super.traverse();		
+		return super.traverse();		
 	}
 	
 	@Override
