@@ -789,11 +789,8 @@ public abstract class NFA {
 			}
 			
 			private void linkDeriveShiftReduce(Transition derive, Transition shift, Transition reduce) {
-				//System.out.println("3: " + reduce.toStringExt());
 				reduce.reverse.add(derive);
 				derive.reverse.add(reduce);
-				
-				//if (!i.shifts.contains(shift)) System.out.println("4: " + shift.toStringExt());
 				
 				if (shift.derivesReduces == null) {
 					shift.derivesReduces = new ShareableHashSet<Pair<Transition,Transition>>();
@@ -835,7 +832,6 @@ public abstract class NFA {
 				// propagate over derives
 				for (Transition t : old.derives) {
 					Transition nt = addTransition(i, t.label, a.getItemWithFollowRestrictions(t.target, f)); 
-					//if (!i.derives.contains(nt)) System.out.println("1: " + nt.toStringExt());
 					i.derives.add(nt);
 				}
 				
@@ -893,10 +889,18 @@ public abstract class NFA {
 						}
 						
 						FollowRestrictions f = e.followRestrictions;
-						if (f == null) {
-							f = n.followRestrictions;
+						if (reversed) {
+							if (f == null) {
+								f = n.precedeRestrictions;
+							} else {
+								f = f.getNextPrecedeAfterReduce(n);
+							}
 						} else {
-							f = f.getNextAfterReduce(n);
+							if (f == null) {
+								f = n.followRestrictions;
+							} else {
+								f = f.getNextAfterReduce(n);
+							}
 						}
 						
 						// do not reduce to endItem (or startItem if reversed) if characters must follow,
@@ -924,8 +928,6 @@ public abstract class NFA {
 					}
 				}
 			}
-			
-			//System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
 			
 			oldSize = newSize;
 			newSize = transitions.size();

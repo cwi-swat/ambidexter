@@ -57,6 +57,15 @@ public class FollowRestrictions {
 		return next;
 	}
 	
+	public FollowRestrictions getNextPrecedeAfterReduce(NonTerminal n) {
+		if (n.precedeRestrictions == null) {
+			return this;
+		}
+		FollowRestrictions next = new FollowRestrictions(this);
+		next.add(n.precedeRestrictions);
+		return next;
+	}
+	
 	public FollowRestrictions getNextAfterShift(Symbol s) {
 		FollowRestrictions next = new FollowRestrictions();
 		for (LinkedList<CharacterClass> l : frLonger) {
