@@ -1351,13 +1351,13 @@ public class Grammar {
 		}
 			
 		for (Production p : startSymbol.productions) {
-			p.reachable = true;
-			Set<Production> s = tc.get(p);
-			if (s != null) {
-				for (Production p2 : s) {
-					p2.reachable = true;
-				}
-			}
+		  p.reachable = true;
+		  Set<Production> s = tc.get(p);
+		  if (s != null) {
+		    for (Production p2 : s) {
+		      p2.reachable = true;
+		    }
+		  }
 		}
 		
 		// calculate usedForReject flags
@@ -1453,6 +1453,7 @@ public class Grammar {
 			
 			unproductive = getUnproductiveNonterminals();
 		}*/
+		
 		
 		if (unproductive.contains(startSymbol)) {
 			throw new RuntimeException("Unproductive start symbol: " + startSymbol);
