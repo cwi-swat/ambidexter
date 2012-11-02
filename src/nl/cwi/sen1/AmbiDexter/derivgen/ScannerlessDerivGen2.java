@@ -191,6 +191,9 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 								
 								synchronized (jobs) {
 									while (shiftablesStack.elem.size() > 0) {
+									  if (monitor.canceling()) {
+									    return false;
+									  }
 										Symbol s = shiftablesStack.elem.removeOne();
 										Job j2 = new Job(s, gss, sentence, shifted);
 										//print("Handing over " + s + " at " + shifted);
