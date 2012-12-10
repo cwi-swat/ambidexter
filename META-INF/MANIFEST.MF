@@ -1,9 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: CWI
 Bundle-Name: AmbiDexter
 Bundle-SymbolicName: AmbiDexter;singleton:=true
 Bundle-Version: 1.1.0.qualifier
-Bundle-ClassPath: AmbiDexter.jar
+Require-Bundle: org.junit4
 Export-Package: nl.cwi.sen1.AmbiDexter,
  nl.cwi.sen1.AmbiDexter.automata,
  nl.cwi.sen1.AmbiDexter.derivgen,
@@ -13,4 +15,3 @@ Export-Package: nl.cwi.sen1.AmbiDexter,
  nl.cwi.sen1.AmbiDexter.parse,
  nl.cwi.sen1.AmbiDexter.test,
  nl.cwi.sen1.AmbiDexter.util
-
