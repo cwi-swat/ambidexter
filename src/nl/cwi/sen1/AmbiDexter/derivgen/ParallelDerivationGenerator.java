@@ -152,13 +152,13 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		monitor.println("Jobs: " + jobs.size());
 	
 		long sentences = 0;
-		if (jobs.size() > 0) {
+		if (jobs.size() > 0 && !monitor.canceling()) {
 			for (int i = 0; i < workers; i++) {
 				workerPool[i] = newWorker(("" + i));
 				workerPool[i].start();
 			}
 			for (int i = 0; i < workers; i++) {
-				while (workerPool[i].isAlive()) {
+				while (workerPool[i].isAlive() && !monitor.canceling()) {
 					try {
 						workerPool[i].join();
 					} catch (InterruptedException e) {
@@ -261,19 +261,23 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		protected boolean dealer = false;
 		protected long sentences = 0;
 		protected Set<Pair<SymbolString, FollowRestrictions>> generated;		
-
+		protected boolean cancel = false;
+		
 		public AbstractWorker(String id) {
 			super("AmbiDexter worker " + id);
 			this.id = id;
 		}
 		
+		public void cancel() {
+		  this.cancel = true;
+		}
 		void setDealer(boolean dealer) {
 			this.dealer = dealer;
 			generated = new ShareableHashSet<Pair<SymbolString,FollowRestrictions>>();
 		}
 
 		public void run() {
-			while (true) {
+			while (true && !cancel) {
 				Job j = null;
 				synchronized (jobs) {
 					if (jobs.size() > 0) {

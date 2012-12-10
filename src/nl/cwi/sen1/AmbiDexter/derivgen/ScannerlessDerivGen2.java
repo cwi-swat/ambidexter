@@ -97,12 +97,19 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 						}
 					}
 				}
+				
+				if (monitor.canceling()) {
+          return false;
+        }
 			}
 			
 			Symbol[] debugString = null; //{ Symbol.getSymbol(-97), Symbol.getSymbol(-94), Symbol.getSymbol(-97), Symbol.getSymbol(-94), Symbol.getSymbol(-97) };
 			
 			boolean backTrack;
 			while (true) {
+			  if (monitor.canceling()) {
+          return false;
+        }
 				backTrack = false;
 				Queue<StackFrame> top = (Queue<StackFrame>) gss[shifted];
 				Queue<StackFrame> rejectTop = (Queue<StackFrame>) rejectGss[shifted];
@@ -199,6 +206,9 @@ public class ScannerlessDerivGen2 extends ParallelDerivationGenerator {
 										//print("Handing over " + s + " at " + shifted);
 										//print("Handing over " + j2.id); 
 										jobs.add(j2);
+										if (monitor.canceling()) {
+						          return false;
+						        }
 									}
 								}
 							}
