@@ -895,7 +895,6 @@ public final class ShareableHashMap<K, V> implements Map<K, V>, Iterable<Map.Ent
 		}
 	}
 
-	@Override
 	public Iterator<java.util.Map.Entry<K, V>> iterator() {
 		return entryIterator();
 	}

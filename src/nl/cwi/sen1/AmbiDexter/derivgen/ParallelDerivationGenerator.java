@@ -52,7 +52,6 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		workers = threads;
 	}
 	
-	@Override
 	public void setConfig(AmbiDexterConfig config) {
 		this.config = config;
 	}
@@ -61,7 +60,6 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		return config;
 	}
 	
-	@Override
 	public void setMonitor(IAmbiDexterMonitor monitor) {
 		this.monitor = monitor;
 	}
@@ -86,7 +84,6 @@ public abstract class ParallelDerivationGenerator implements DerivationGenerator
 		scannerless = s;
 	}
 	
-	@Override
 	public void setIncremental(boolean i) {
 		incremental = i;
 	}

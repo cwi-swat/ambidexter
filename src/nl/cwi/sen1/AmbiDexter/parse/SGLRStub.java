@@ -19,12 +19,10 @@ public class SGLRStub implements IParser {
 		this.parseTableFile = parseTableFile;
 	}
 	
-	@Override
 	public ParseTree parse(SymbolString s) {
 		return null;
 	}
 
-	@Override
 	public ParseTree parse(SymbolString s, NonTerminal nt) {
 		return null;
 	}

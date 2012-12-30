@@ -25,22 +25,18 @@ public class NoncanonicalUnambiguityTest implements AmbiguityDetector {
 		this.nfa = nfa;
 	}
 	
-	@Override
 	public void setConfig(AmbiDexterConfig config) {
 		this.config = config;
 	}
 	
-	@Override
 	public AmbiDexterConfig getConfig() {
 		return config;
 	}
 	
-	@Override
 	public void setMonitor(IAmbiDexterMonitor monitor) {
 		this.monitor = monitor;
 	}
 
-	@Override
 	public boolean detectAmbiguities(DetectionMethod method) {		
 		IPairGraph pg = createPairGraph(method);			
 		pg.init(nfa, monitor);
