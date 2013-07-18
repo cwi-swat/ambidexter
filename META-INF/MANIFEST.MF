@@ -5,7 +5,7 @@ Bundle-Vendor: CWI
 Bundle-Name: AmbiDexter
 Bundle-SymbolicName: AmbiDexter;singleton:=true
 Bundle-Version: 1.2.0.qualifier
-Require-Bundle: org.junit4
+Require-Bundle: org.junit
 Export-Package: nl.cwi.sen1.AmbiDexter,
  nl.cwi.sen1.AmbiDexter.automata,
  nl.cwi.sen1.AmbiDexter.derivgen,
