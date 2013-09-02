@@ -9,7 +9,7 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>AmbiDexter</artifactId>
+	<artifactId>ambidexter</artifactId>
 	<version>1.2.0.qualifier</version>
 	<packaging>eclipse-plugin</packaging>
 
