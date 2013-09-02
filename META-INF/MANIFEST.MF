@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: CWI
-Bundle-Name: AmbiDexter
+Bundle-Name: ambidexter
 Bundle-SymbolicName: ambidexter;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Require-Bundle: org.junit
