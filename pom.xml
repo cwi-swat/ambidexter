@@ -3,9 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<relativePath>../rascal-master/pom.xml</relativePath>
+		<relativePath>../rascal-pom-parent/pom.xml</relativePath>
 		<groupId>org.rascalmpl</groupId>
-		<artifactId>rascal-master</artifactId>
+		<artifactId>rascal-pom-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
