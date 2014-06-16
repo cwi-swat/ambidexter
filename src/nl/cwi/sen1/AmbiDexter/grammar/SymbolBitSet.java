@@ -5,28 +5,29 @@ import java.util.Collection;
 import java.util.Iterator;
 
 
-@SuppressWarnings("serial")
-public class SymbolBitSet extends BitSet implements SymbolSet {
+public class SymbolBitSet implements SymbolSet {
 
+	private BitSet bitset;
+	
 	public SymbolBitSet() {
-		super(Symbol.getNumberOfSymbols());
+		bitset = new BitSet(Symbol.getNumberOfSymbols());
 	}
 	
 	public boolean add(Symbol s) {
 		if (s instanceof CharacterClass) {
 			CharacterClass cc = (CharacterClass) s;
 			for (int i = 0; i < cc.size / 2; i++) {
-				set(cc.ranges[i * 2], cc.ranges[i * 2 + 1] + 1);
+				bitset.set(cc.ranges[i * 2], cc.ranges[i * 2 + 1] + 1);
 			}
 		} else {
-			set(s.id);
+			bitset.set(s.id);
 		}
 		return false; // just add
 	}
 
 	public boolean addAll(Collection<? extends Symbol> c) {
 		if (c instanceof BitSet) {
-			or((BitSet) c);
+			bitset.or((BitSet) c);
 		} else {
 			for (Symbol s : c) {
 				add(s);
@@ -38,7 +39,7 @@ public class SymbolBitSet extends BitSet implements SymbolSet {
 	// TODO does not work with characterclasses
 	public boolean contains(Object o) {
 		if (o instanceof Symbol) {
-			return get(((Symbol)o).id);
+			return bitset.get(((Symbol)o).id);
 		} else {
 			return false;
 		}
@@ -46,8 +47,8 @@ public class SymbolBitSet extends BitSet implements SymbolSet {
 
 	public boolean containsAll(Collection<?> c) {
 		if (c instanceof SymbolBitSet) {
-			BitSet copy = (BitSet) this.clone();
-			copy.and((SymbolBitSet) c);
+			BitSet copy = (BitSet) bitset.clone();
+			copy.and(((SymbolBitSet) c).bitset);
 			return copy.equals(c);
 		} else {
 			for (Object s : c) {
@@ -64,21 +65,21 @@ public class SymbolBitSet extends BitSet implements SymbolSet {
 	}
 	
 	public Symbol removeOne() {
-		int id = nextSetBit(0);
-		clear(id);
+		int id = bitset.nextSetBit(0);
+		bitset.clear(id);
 		return Symbol.getSymbol(id);
 	}
 
 	public boolean remove(Object o) {
 		if (o instanceof Symbol) {
-			clear(((Symbol) o).id);
+			bitset.clear(((Symbol) o).id);
 		}
 		return false;
 	}
 
 	public boolean removeAll(Collection<?> c) {
 		if (c instanceof SymbolBitSet) {
-			andNot((SymbolBitSet) c);
+			bitset.andNot(((SymbolBitSet) c).bitset);
 		} else {
 			for (Object o : c) {
 				remove(o);
@@ -89,21 +90,21 @@ public class SymbolBitSet extends BitSet implements SymbolSet {
 
 	public boolean retainAll(Collection<?> c) {
 		if (c instanceof SymbolBitSet) {
-			and((SymbolBitSet)c);
+			bitset.and(((SymbolBitSet) c).bitset);
 		} else {
-			SymbolBitSet copy = (SymbolBitSet) this.clone();
-			clear();
+			BitSet newbitset = new BitSet(Symbol.getNumberOfSymbols());
 			for (Object o : c) {
-				if (copy.contains(o)) {
-					set(((Symbol)o).id);
+				if (contains(o)) {
+					newbitset.set(((Symbol) o).id);
 				}
 			}
+			bitset = newbitset;
 		}
 		return false;
 	}
 
 	public int size() {
-		return cardinality();
+		return bitset.cardinality();
 	}
 
 	public Object[] toArray() {
@@ -111,7 +112,7 @@ public class SymbolBitSet extends BitSet implements SymbolSet {
 		Object a[] = new Object[size];
 		int id = 0;
 		for (int i = 0; i < size; i++) {
-			id = nextSetBit(id);
+			id = bitset.nextSetBit(id);
 			a[i] = Symbol.getSymbol(id);
 		}
 		return a;
@@ -128,7 +129,7 @@ public class SymbolBitSet extends BitSet implements SymbolSet {
 	
 	public boolean intersects(SymbolSet set) {
 		if (set instanceof SymbolBitSet) {
-			return intersects((BitSet)set);
+			return bitset.intersects((BitSet)set);
 		} else {
 			throw new UnsupportedOperationException("not implemented");
 			/*for (Symbol s : set) {
@@ -181,7 +182,7 @@ public class SymbolBitSet extends BitSet implements SymbolSet {
 		
 		public SymbolBitSetIterator(SymbolBitSet set) {
 			this.set = set;
-			pos = set.nextSetBit(0);
+			pos = set.bitset.nextSetBit(0);
 		}
 		
 		public boolean hasNext() {
@@ -190,13 +191,13 @@ public class SymbolBitSet extends BitSet implements SymbolSet {
 
 		public Symbol next() {
 			Symbol s = Symbol.getSymbol(pos);
-			pos = set.nextSetBit(pos + 1);
+			pos = set.bitset.nextSetBit(pos + 1);
 			return s;
 		}
 
 		public void remove() {
-			set.clear(pos);
-			pos = set.nextSetBit(pos + 1);
+			set.bitset.clear(pos);
+			pos = set.bitset.nextSetBit(pos + 1);
 		}
 	}
 
@@ -208,12 +209,22 @@ public class SymbolBitSet extends BitSet implements SymbolSet {
 			return 1;
 		}
 		SymbolBitSet that = (SymbolBitSet) other;
-		int i1 = this.nextSetBit(0);
-		int i2 = that.nextSetBit(0);
+		int i1 = this.bitset.nextSetBit(0);
+		int i2 = that.bitset.nextSetBit(0);
 		while (i1 == i2 && i1 != -1) {
-			i1 = this.nextSetBit(i1 + 1);
-			i2 = that.nextSetBit(i2 + 1);
+			i1 = this.bitset.nextSetBit(i1 + 1);
+			i2 = that.bitset.nextSetBit(i2 + 1);
 		}
 		return i1 - i2; // i1 == -1 implies i2 == -1 implies equality
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return bitset.isEmpty();
+	}
+
+	@Override
+	public void clear() {
+		bitset.clear();
 	}
 }
