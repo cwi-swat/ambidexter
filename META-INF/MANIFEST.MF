@@ -4,7 +4,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: CWI
 Bundle-Name: ambidexter
 Bundle-SymbolicName: ambidexter;singleton:=true
-Bundle-Version: 1.2.0.qualifier
+Bundle-Version: 1.2.1.qualifier
 Require-Bundle: org.junit
 Export-Package: nl.cwi.sen1.AmbiDexter,
  nl.cwi.sen1.AmbiDexter.automata,

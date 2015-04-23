@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>ambidexter</artifactId>
-	<version>1.2.0.qualifier</version>
+	<version>1.2.1.qualifier</version>
 	<packaging>eclipse-plugin</packaging>
 
 </project>
